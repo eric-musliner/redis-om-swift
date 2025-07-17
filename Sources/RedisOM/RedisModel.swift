@@ -19,14 +19,18 @@ extension RedisModel {
     public var redisKey: String {
         "\(Self.keyPrefix):\(id ?? UUID().uuidString as! IDType)"
     }
+
+    public func getRedisKey() -> RedisKey {
+        return RedisKey(self.redisKey)
+    }
 }
 
 public protocol JsonModel: RedisModel {}
 
+// MARK: JsonModel
 extension JsonModel {
 
     /// Save model to Redis
-    ///
     public mutating func save(using client: RedisClient) async throws {
         let newId: IDType = id ?? UUID().uuidString as! IDType
         self.id = newId
@@ -49,7 +53,7 @@ extension JsonModel {
         )
     }
 
-    ///
+    /// Get model by id with Redis Client
     public static func get(id: IDType, using client: RedisClient) async throws
         -> EventLoopFuture<Self?>
     {
