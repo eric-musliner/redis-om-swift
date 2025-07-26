@@ -19,12 +19,14 @@ let package = Package(
             name: "RedisOM",
             dependencies: [
                 .product(name: "RediStack", package: "RediStack"),
-                .product(name: "ServiceLifecycle", package: "swift-service-lifecycle")
+                .product(name: "ServiceLifecycle", package: "swift-service-lifecycle"),
             ]
         ),
         .testTarget(
             name: "RedisOMTests",
-            dependencies: ["RedisOM"]
+            dependencies: [
+                .target(name: "RedisOM"),
+            ]
         ),
     ]
 )
