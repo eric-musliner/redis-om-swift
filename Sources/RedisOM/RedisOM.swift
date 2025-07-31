@@ -6,10 +6,10 @@ import ServiceLifecycle
 
 /// Redis OM client for use with Service Lifecycle applications
 /// Creates and manages RedisConnectionPoolService
-public final class RedisOM: Service, @unchecked Sendable {
+public final class RedisOM: @unchecked Sendable {
 
+    internal let logger: Logger
     private let config: RedisConfiguration
-    private let logger: Logger
     public var poolService: RedisConnectionPoolService
 
     /// Default constructor to create RedisOM from environment variable configuration
@@ -51,14 +51,6 @@ public final class RedisOM: Service, @unchecked Sendable {
         self.config = config
         self.logger = logger
         self.poolService = RedisConnectionPoolService(config)
-    }
-
-    @inlinable
-    public func run() async throws {
-        await SharedPoolHelper.set(pool: self.poolService.connectionPool)
-
-        try? await gracefulShutdown()
-        try await self.poolService.close()
     }
 
 }
