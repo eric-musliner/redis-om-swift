@@ -11,7 +11,7 @@ public struct RedisConnectionPoolService: Sendable {
     private let logger: Logger
     private let eventLoopGroup: EventLoopGroup
     public let connectionPool: RedisConnectionPool
-    
+
     /// Create RedisConnectionPoolService
     /// Default pulls url from environment variable `REDIS_URL`
     /// - Returns: RedisConnectionPoolService
