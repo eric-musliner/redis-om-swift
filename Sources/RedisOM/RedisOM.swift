@@ -1,29 +1,64 @@
+import Foundation
+import Logging
+import NIO
 @preconcurrency import RediStack
+import ServiceLifecycle
 
-/// Thread safe singleton reference for shared redis connection pool
-public enum RedisOM {
-    private static let sharedPool = SharedPool()
+/// Redis OM client for use with Service Lifecycle applications
+/// Creates and manages RedisConnectionPoolService
+public final class RedisOM: Service, @unchecked Sendable {
 
-    public static func set(pool: RedisConnectionPool) async {
-        await sharedPool.set(pool)
-    }
+    private let config: RedisConfiguration
+    private let logger: Logger
+    public var poolService: RedisConnectionPoolService
 
-    public static func shared() async -> RedisConnectionPool {
-        await sharedPool.get()
-    }
-}
-
-actor SharedPool {
-    private var pool: RedisConnectionPool?
-
-    func set(_ pool: RedisConnectionPool) {
-        self.pool = pool
-    }
-
-    func get() -> RedisConnectionPool {
-        guard let pool = self.pool else {
-            fatalError("RedisOM not configured.")
+    /// Default constructor to create RedisOM from environment variable configuration
+    /// Pulls configuration from environment variable`REDIS_URL`
+    public convenience init() throws {
+        let urlStr =
+            ProcessInfo.processInfo.environment["REDIS_URL"]
+            ?? "redis://localhost:6379"
+        guard URL(string: urlStr) != nil else {
+            throw RedisError(reason: "Invalid REDIS_URL: \(urlStr)")
         }
-        return pool
+        try self.init(url: urlStr)
     }
+
+    /// Create RedisOM
+    /// - Parameters:
+    ///    - url: Redis connection url
+    /// - Returns: RedisOM
+    public init(
+        url: String,
+        logger: Logger = .init(label: "redis-om-swift.client")
+    ) throws {
+        guard let redisURL = URL(string: url) else {
+            throw RedisError(reason: "Invalid Redis URL: \(url)")
+        }
+        self.config = try RedisConfiguration(url: redisURL)
+        self.logger = logger
+        self.poolService = RedisConnectionPoolService(config)
+    }
+
+    /// Create RedisOM with supplied RedisConfiguration
+    /// - Parameters:
+    ///    - config: RedisConfiguration
+    /// - Returns: RedisOM
+    public init(
+        config: RedisConfiguration,
+        logger: Logger = .init(label: "redis-om-swift.client")
+    ) throws {
+        self.config = config
+        self.logger = logger
+        self.poolService = RedisConnectionPoolService(config)
+    }
+
+    @inlinable
+    public func run() async throws {
+        await SharedPoolHelper.set(pool: self.poolService.connectionPool)
+
+        try? await gracefulShutdown()
+        try await self.poolService.close()
+    }
+
 }

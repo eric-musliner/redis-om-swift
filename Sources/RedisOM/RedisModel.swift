@@ -76,7 +76,7 @@ extension JsonModel {
                 reason: "Unable to serialize data to JSON object."
             )
         }
-        let client = await RedisOM.shared()
+        let client = await SharedPoolHelper.shared()
         _ = try await client.send(
             command: "JSON.SET",
             with: [
@@ -94,7 +94,7 @@ extension JsonModel {
     public static func get(id: IDType) async throws -> Self? {
         let key = "\(keyPrefix):\(id)"
 
-        let client = await RedisOM.shared()
+        let client = await SharedPoolHelper.shared()
         let response = try await client.send(
             command: "JSON.GET",
             with: [.bulkString(ByteBuffer(string: key))]
@@ -126,7 +126,7 @@ extension JsonModel {
     {
         let key = "\(keyPrefix):\(id)"
 
-        let client = await RedisOM.shared()
+        let client = await SharedPoolHelper.shared()
         _ = try await client.send(
             command: "JSON.DEL",
             with: [.bulkString(ByteBuffer(string: key))]

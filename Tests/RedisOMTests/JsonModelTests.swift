@@ -31,13 +31,13 @@ struct Note: JsonModel {
 struct JsonModelTests {
 
     let connectionPool: RedisConnectionPool
-    let redisOMClient: RedisOMClient
+    let redisOM: RedisOM
 
     init() async throws {
         let url = "redis://localhost:6379"
-        self.redisOMClient = try RedisOMClient(url: url)
-        await RedisOM.set(pool: self.redisOMClient.poolService.connectionPool)
-        self.connectionPool = await RedisOM.shared()
+        self.redisOM = try RedisOM(url: url)
+        await SharedPoolHelper.set(pool: self.redisOM.poolService.connectionPool)
+        self.connectionPool = await SharedPoolHelper.shared()
     }
 
 
