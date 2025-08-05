@@ -34,8 +34,7 @@ final class JsonModelTests {
     let redisOM: RedisOM
 
     init() async throws {
-        let url = "redis://localhost:6379"
-        self.redisOM = try RedisOM(url: url)
+        self.redisOM = try RedisOM()
         await SharedPoolHelper.set(
             pool: self.redisOM.poolService.connectionPool
         )
