@@ -4,6 +4,4 @@ services:
     image: redis/redis-stack:7.2.0-v18
     ports:
       - "6379:6379"
-#    volumes:
-#      - ./docker/redis.conf:/redis-stack.conf
 
