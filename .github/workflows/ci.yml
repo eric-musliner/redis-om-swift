@@ -30,8 +30,23 @@ jobs:
         run: |
           apt-get update
           apt-get install -y libjemalloc-dev
+
+      - name: Install zstd (for swiftpm cache compression)
+        run: |
+          apt-get update -y
+          apt-get install -y zstd
+
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Restore .build
+        id: "restore-build-cache"
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: swiftpm-build-${{ matrix.image }}-${{ hashFiles('Package.swift', 'Package.resolved') }}
+          restore-keys: "swiftpm-build-${{ matrix.image }}-"
+
       - name: Test
         run: |
           swift test --enable-code-coverage --no-parallel
