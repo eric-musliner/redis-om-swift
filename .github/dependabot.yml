@@ -1,0 +1,9 @@
+version: 2
+updates:
+  # Enable version updates for Swift
+  - package-ecosystem: "swift"
+    # Look for `Package.wift` and `Package.resolved` files in the `root` directory
+    directory: "./"
+    schedule:
+      interval: "weekly"
+
