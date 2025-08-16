@@ -2,7 +2,7 @@ import Foundation
 import NIOCore
 @preconcurrency import RediStack
 
-// MARK: RedisModel
+// MARK: - RedisModel
 
 /// A protocol representing a persistable model that can be stored and retrieved from Redis.
 ///
@@ -24,7 +24,7 @@ import NIOCore
 /// - `get(id:)`: Fetches a model instance from Redis by ID.
 /// - `delete(using:)`: Removes the model instance from Redis using the provided client.
 public protocol RedisModel: Codable, Sendable {
-    associatedtype IDType: LosslessStringConvertible & Hashable & Sendable
+    associatedtype IDType: LosslessStringConvertible & Hashable & Sendable = String
 
     var id: IDType? { get set }
     static var keyPrefix: String { get }
@@ -47,7 +47,7 @@ extension RedisModel {
 
 public protocol JsonModel: RedisModel {}
 
-// MARK: JsonModel
+// MARK: - JsonModel
 /// `JsonModel`extendsion of RedisModel  behavior using Redis JSON storage.
 ///
 /// Provides a set of convenience methods for saving, retrieving, and deleting models in Redis
@@ -58,16 +58,9 @@ public protocol JsonModel: RedisModel {}
 /// as JSON documents at root path `$`.
 extension JsonModel {
 
-    public mutating func ensureId() {
-        if self.id == nil {
-            self.id = UUID().uuidString as? IDType
-        }
-    }
-
     /// Save model to Redis
     @inlinable
     public mutating func save() async throws {
-        self.ensureId()
 
         let data = try JSONEncoder().encode(self)
 
@@ -176,4 +169,25 @@ extension JsonModel {
         ).get()
     }
 
+}
+
+// MARK: - Property Wrapper
+@propertyWrapper
+public struct AutoID: Codable, Sendable {
+    public var wrappedValue: String?
+
+    public init(wrappedValue: String? = nil) {
+        self.wrappedValue = wrappedValue ?? UUID().uuidString
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let decoded = try? container.decode(String.self)
+        self.wrappedValue = decoded?.isEmpty == false ? decoded! : UUID().uuidString
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(wrappedValue)
+    }
 }
