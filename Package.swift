@@ -1,6 +1,6 @@
+import CompilerPluginSupport
 // swift-tools-version: 6.1
 import PackageDescription
-import CompilerPluginSupport
 
 let package = Package(
     name: "RedisOM",
@@ -24,7 +24,7 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-                "RedisOMCore"
+                "RedisOMCore",
             ]
         ),
         .target(
@@ -46,7 +46,15 @@ let package = Package(
             name: "RedisOMTests",
             dependencies: [
                 .target(name: "RedisOM"),
-                .product(name: "VaporTesting", package: "vapor")
+                .product(name: "VaporTesting", package: "vapor"),
+            ],
+        ),
+        .testTarget(
+            name: "RedisOMMacrosTests",
+            dependencies: [
+                .target(name: "RedisOMMacros"),
+                "RedisOMCore",
+                .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
             ]
         ),
     ]
