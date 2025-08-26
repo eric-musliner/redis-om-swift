@@ -1,0 +1,8 @@
+services:
+
+  format:
+    image: swift:noble
+    command: swift format --recursive --in-place /src
+    volumes:
+      - ./:/src
+
