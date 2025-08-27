@@ -1,8 +1,8 @@
 import Foundation
-import NIOSSL
-import NIOPosix
 import Logging
 import NIOCore
+import NIOPosix
+import NIOSSL
 @preconcurrency import RediStack
 
 /// Configuration for connecting to a Redis instance
@@ -52,17 +52,23 @@ public struct RedisConfiguration: Sendable {
         }
     }
 
-    public init(url string: String, tlsConfiguration: TLSConfiguration? = nil, pool: PoolOptions = .init()) throws {
+    public init(
+        url string: String, tlsConfiguration: TLSConfiguration? = nil, pool: PoolOptions = .init()
+    ) throws {
         guard let url = URL(string: string) else { throw ValidationError.invalidURLString }
         try self.init(url: url, tlsConfiguration: tlsConfiguration, pool: pool)
     }
 
-    public init(url: URL, tlsConfiguration: TLSConfiguration? = nil, pool: PoolOptions = .init()) throws {
+    public init(url: URL, tlsConfiguration: TLSConfiguration? = nil, pool: PoolOptions = .init())
+        throws
+    {
         guard
             let scheme = url.scheme,
             !scheme.isEmpty
         else { throw ValidationError.missingURLScheme }
-        guard scheme == "redis" || scheme == "rediss" else { throw ValidationError.invalidURLScheme }
+        guard scheme == "redis" || scheme == "rediss" else {
+            throw ValidationError.invalidURLScheme
+        }
         guard let host = url.host, !host.isEmpty else { throw ValidationError.missingURLHost }
 
         let defaultTLSConfig: TLSConfiguration?
@@ -146,16 +152,21 @@ public struct RedisConfiguration: Sendable {
 }
 
 extension RedisConnectionPool.Configuration {
-    internal init(_ config: RedisConfiguration, defaultLogger: Logger, customClient: ClientBootstrap?) {
+    internal init(
+        _ config: RedisConfiguration, defaultLogger: Logger, customClient: ClientBootstrap?
+    ) {
         // Handle deferred hostname resolution at pool creation time
         var addresses = config.serverAddresses
 
         if let hostname = config.deferredHostname, let port = config.deferredPort {
             do {
-                let resolvedAddress = try SocketAddress.makeAddressResolvingHost(hostname, port: port)
+                let resolvedAddress = try SocketAddress.makeAddressResolvingHost(
+                    hostname, port: port)
                 addresses = [resolvedAddress]
             } catch {
-                defaultLogger.notice("Hostname '\(hostname)' could not be resolved at pool creation time: \(error). Redis connections will fail until hostname becomes resolvable.")
+                defaultLogger.notice(
+                    "Hostname '\(hostname)' could not be resolved at pool creation time: \(error). Redis connections will fail until hostname becomes resolvable."
+                )
                 // Placeholder address so Redis operations fail gracefully
                 addresses = [try! SocketAddress.makeAddressResolvingHost("0.0.0.0", port: 1)]
             }
