@@ -117,6 +117,7 @@ indirect enum SimpleType {
     case Bool
     case Array(of: SimpleType)
     case Dictionary(key: SimpleType, value: SimpleType)
+    case Coordinate
     case Other(String)
 }
 
@@ -130,6 +131,7 @@ extension SimpleType: CustomStringConvertible {
         case .Bool: return "Bool"
         case .Array(let element): return "[\(element)]"
         case .Dictionary(let key, let value): return "[\(key): \(value)]"
+        case .Coordinate: return "Coordinate"
         case .Other(let name): return name
         }
     }
@@ -147,6 +149,7 @@ func resolveType(_ type: TypeSyntax) -> SimpleType {
         case "Double": return .Double
         case "Float": return .Float
         case "Bool": return .Bool
+        case "Coordinate": return .Coordinate
         default: return .Other(simple.name.text)
         }
     }
@@ -186,13 +189,21 @@ func inferIndexType(_ simple: SimpleType) -> IndexType {
         return .text
     case .Int, .Double, .Float:
         return .numeric
+    case .Bool:
+        return .tag
+    case .Other("Date"), .Other("DateTime"):
+        return .numeric
+    case .Array(of: .Float), .Array(of: .Double):
+        return .vector
     case .Array(let inner):
         // For arrays, fall back on the element type
         return inferIndexType(inner)
     case .Dictionary(_, let value):
         // For dicts, fall back on value type
         return inferIndexType(value)
+    case .Coordinate:
+        return .geo
     default:
-        return .tag
+        return .text
     }
 }

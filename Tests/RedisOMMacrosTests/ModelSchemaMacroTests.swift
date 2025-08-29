@@ -89,7 +89,7 @@ final class RedisOMMacrosTests: XCTestCase {
         )
     }
 
-    func testSchemaExpansionArrayofDoubleIndex() {
+    func testSchemaExpansionVectorDoubleIndex() {
         assertMacroExpansion(
             """
             @ModelSchema
@@ -111,7 +111,37 @@ final class RedisOMMacrosTests: XCTestCase {
                         Field(name: "id", type: "String", indexType: .text),
                         Field(name: "email", type: "String", indexType: .text),
                         Field(name: "age", type: "Int", indexType: .numeric),
-                        Field(name: "scores", type: "[Double]", indexType: .numeric)
+                        Field(name: "scores", type: "[Double]", indexType: .vector)
+                    ]
+                }
+                """,
+            macros: ["ModelSchema": ModelSchemaMacro.self]
+        )
+    }
+
+    func testSchemaExpansionVectorFloatIndex() {
+        assertMacroExpansion(
+            """
+            @ModelSchema
+            struct User {
+                @AutoID var id: String?
+                @Index var email: String
+                @Index var age: Int
+                @Index var scores: [Float]
+            }
+            """,
+            expandedSource: """
+                struct User {
+                    @AutoID var id: String?
+                    @Index var email: String
+                    @Index var age: Int
+                    @Index var scores: [Float]
+
+                    public static let schema: [Field] = [
+                        Field(name: "id", type: "String", indexType: .text),
+                        Field(name: "email", type: "String", indexType: .text),
+                        Field(name: "age", type: "Int", indexType: .numeric),
+                        Field(name: "scores", type: "[Float]", indexType: .vector)
                     ]
                 }
                 """,
@@ -149,6 +179,66 @@ final class RedisOMMacrosTests: XCTestCase {
         )
     }
 
+    func testSchemaExpansionGeoIndex() {
+        assertMacroExpansion(
+            """
+            @ModelSchema
+            struct User {
+                @AutoID var id: String?
+                @Index var email: String
+                @Index var age: Int
+                @Index var location: Coordinate
+            }
+            """,
+            expandedSource: """
+                struct User {
+                    @AutoID var id: String?
+                    @Index var email: String
+                    @Index var age: Int
+                    @Index var location: Coordinate
+
+                    public static let schema: [Field] = [
+                        Field(name: "id", type: "String", indexType: .text),
+                        Field(name: "email", type: "String", indexType: .text),
+                        Field(name: "age", type: "Int", indexType: .numeric),
+                        Field(name: "location", type: "Coordinate", indexType: .geo)
+                    ]
+                }
+                """,
+            macros: ["ModelSchema": ModelSchemaMacro.self]
+        )
+    }
+
+    func testSchemaExpansionDateNumericndex() {
+        assertMacroExpansion(
+            """
+            @ModelSchema
+            struct User {
+                @AutoID var id: String?
+                @Index var email: String
+                @Index var age: Int
+                @Index var birthdate: Date
+            }
+            """,
+            expandedSource: """
+                struct User {
+                    @AutoID var id: String?
+                    @Index var email: String
+                    @Index var age: Int
+                    @Index var birthdate: Date
+
+                    public static let schema: [Field] = [
+                        Field(name: "id", type: "String", indexType: .text),
+                        Field(name: "email", type: "String", indexType: .text),
+                        Field(name: "age", type: "Int", indexType: .numeric),
+                        Field(name: "birthdate", type: "Date", indexType: .numeric)
+                    ]
+                }
+                """,
+            macros: ["ModelSchema": ModelSchemaMacro.self]
+        )
+    }
+
     func testSchemaExpansionArrayNestedModelIndex() {
         assertMacroExpansion(
             """
@@ -179,7 +269,7 @@ final class RedisOMMacrosTests: XCTestCase {
                         Field(name: "id", type: "String", indexType: .text),
                         Field(name: "email", type: "String", indexType: .text),
                         Field(name: "age", type: "Int", indexType: .numeric),
-                        Field(name: "notes", type: "[Note]", indexType: .tag)
+                        Field(name: "notes", type: "[Note]", indexType: .text)
                     ]
                 }
 
@@ -225,7 +315,7 @@ final class RedisOMMacrosTests: XCTestCase {
                         Field(name: "id", type: "String", indexType: .text),
                         Field(name: "email", type: "String", indexType: .text),
                         Field(name: "age", type: "Int", indexType: .numeric),
-                        Field(name: "notes", type: "[String: Note]", indexType: .tag)
+                        Field(name: "notes", type: "[String: Note]", indexType: .text)
                     ]
                 }
 
