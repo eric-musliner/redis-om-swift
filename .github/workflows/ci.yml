@@ -11,9 +11,20 @@ on:
 env:
   REDIS_URL: redis://redis:6379
 jobs:
+  style:
+    runs-on: ubuntu-latest
+    container: swift:noble
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check swift format
+        run: swift format lint --recursive --strict .
+
   unit-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     strategy:
       matrix:
         image: ["swift:6.1", "swiftlang/swift:nightly-6.2-noble"]
