@@ -6,10 +6,11 @@ import Testing
 @testable import RedisOM
 
 // MARK: Test models
+@ModelSchema
 struct User: JsonModel {
     @AutoID var id: String?
-    var name: String
-    var email: String
+    @Index var name: String
+    @Index var email: String
     var aliases: [String]?
     var age: Int?
     var notes: [Note]?
@@ -50,7 +51,7 @@ final class JsonModelTests {
     }
 
     @Test func testSaveWithAutomaticIdAssign() async throws {
-        var user = User(
+        var user: User = User(
             name: "Alice",
             email: "alice@example.com",
             aliases: ["Alicia", "alice"],
@@ -96,8 +97,8 @@ final class JsonModelTests {
 
             static let keyPrefix: String = "user"
         }
-        
-        var user = User(
+
+        var user: User = User(
             id: "12",
             name: "Alice",
             email: "alice@example.com",
@@ -131,7 +132,7 @@ final class JsonModelTests {
     }
 
     @Test func testSaveWithNestedModels() async throws {
-        var user = User(
+        var user: User = User(
             name: "Alice",
             email: "alice@example.com",
             age: 33,
@@ -168,7 +169,7 @@ final class JsonModelTests {
     }
 
     @Test func testGetById() async throws {
-        var user = User(
+        var user: User = User(
             name: "Alice",
             email: "alice@example.com",
             age: 33,
@@ -195,7 +196,7 @@ final class JsonModelTests {
     }
 
     @Test func testDelete() async throws {
-        var user = User(
+        var user: User = User(
             name: "Alice",
             email: "alice@example.com",
             age: 33,
@@ -214,7 +215,7 @@ final class JsonModelTests {
     }
 
     @Test func testDeleteById() async throws {
-        var user = User(
+        var user: User = User(
             name: "Alice",
             email: "alice@example.com",
             age: 33,
@@ -233,7 +234,7 @@ final class JsonModelTests {
     }
 
     @Test func testGetAllKeys() async throws {
-        var user1 = User(
+        var user1: User = User(
             name: "Alice",
             email: "alice@example.com",
             aliases: ["Alicia", "alice"],
@@ -242,7 +243,7 @@ final class JsonModelTests {
         )
         try await user1.save()
 
-        var user2 = User(
+        var user2: User = User(
             name: "Bob",
             email: "bob@example.com",
             age: 18,
