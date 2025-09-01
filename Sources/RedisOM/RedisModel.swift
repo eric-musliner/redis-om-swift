@@ -28,6 +28,7 @@ public protocol RedisModel: Codable, Sendable {
 
     var id: IDType? { get set }
     static var keyPrefix: String { get }
+    static var schema: [Field] { get }
 
     mutating func save() async throws
     static func get(id: IDType) async throws -> Self?
@@ -36,6 +37,8 @@ public protocol RedisModel: Codable, Sendable {
 }
 
 extension RedisModel {
+    static var schema: [Field] { [] }
+
     public var redisKey: String {
         "\(Self.keyPrefix):\(id ?? UUID().uuidString as! IDType)"
     }
