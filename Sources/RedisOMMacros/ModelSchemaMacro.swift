@@ -37,11 +37,14 @@ import SwiftSyntaxMacros
 ///         Field(name: "age", type: "Int", indexType: .numeric),
 ///     ]
 /// }
+///
+/// extension User: _SchemaProvider {
+/// }
 /// ```
 ///
 /// - Note: Only stored properties annotated with ``Index`` or ``AutoID``
 ///   are included in the schema. Other properties are ignored.
-public struct ModelSchemaMacro: MemberMacro {
+public struct ModelSchemaMacro: MemberMacro, ExtensionMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf decl: some DeclGroupSyntax,
@@ -61,8 +64,8 @@ public struct ModelSchemaMacro: MemberMacro {
         conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
-        var fieldEntries: [String] = []
-        // var fields: [(name: String, indexType: String)] = []
+        var scalarFields: [String] = []
+        var nestedSchemas: [String] = []
 
         for member in declaration.memberBlock.members {
             guard let varDecl = member.decl.as(VariableDeclSyntax.self),
@@ -85,43 +88,112 @@ public struct ModelSchemaMacro: MemberMacro {
                 }
                 return false
             }
+            guard hasIndexAttr, let typeSyntax = binding.typeAnnotation?.type else { continue }
 
-            if hasIndexAttr, let typeSyntax = binding.typeAnnotation?.type {
-                let resolved = resolveType(typeSyntax)
-                let indexType = inferIndexType(resolved)
+            let resolved = resolveType(typeSyntax)
+            let indexType = inferIndexType(resolved)
 
-                let entry = """
-                    Field(name: "\(name)", type: "\(resolved)", indexType: .\(indexType))
+            switch resolved {
+            case .Other(let typeName):
+                if typeName == "Date" {
+                    scalarFields.append(
+                        """
+                        Field(name: "\(name)", type: "\(resolved)", indexType: .\(indexType))
+                        """)
+                } else {
+                    nestedSchemas.append(
+                        """
+                        (((\(typeName).self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
+                            Field(name: "\(name).\\(f.name)", type: f.type, indexType: f.indexType)
+                        } ?? [] )
+                        """)
+                }
+            case .Array(of: .Other(let typeName)):
+                // Array of nested models
+                nestedSchemas.append(
                     """
-                fieldEntries.append(entry)
+                    \(typeName).schema.map { f in
+                        Field(name: "\(name).\\(f.name)", type: f.type, indexType: f.indexType)
+                    }
+                    """)
+            case .Dictionary(key: _, value: .Other(let typeName)):
+                // Dictionary where value is a nested JsonModel
+                nestedSchemas.append(
+                    """
+                    (((\(typeName).self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
+                        Field(name: "\(name).\\(f.name)", type: f.type, indexType: f.indexType)
+                    } ?? [
+                        Field(name: "\(name)", type: "[String: \(typeName)]", indexType: .text)
+                    ])
+                    """)
+            case .Dictionary(key: _, value: let valueType):
+                // Dictionary where value is a scalar or non-JsonModel
+                scalarFields.append(
+                    """
+                    Field(name: "\(name)", type: "[String: \(valueType)]", indexType: .text)
+                    """)
+            default:
+                // Normal scalar field
+                scalarFields.append(
+                    """
+                    Field(name: "\(name)", type: "\(resolved)", indexType: .\(indexType))
+                    """)
             }
+
         }
         let schemaDecl: DeclSyntax = """
             public static let schema: [Field] = [
-                \(raw: fieldEntries.joined(separator: ",\n"))
+                \(raw: scalarFields.joined(separator: ",\n"))
             ]
+            \(raw: nestedSchemas.map { "+ \( $0 )" }.joined(separator: "\n"))
             """
 
         return [DeclSyntax(schemaDecl)]
 
     }
+
+
+    // Attach root conformance
+    public static func expansion(
+        of node: AttributeSyntax,
+        attachedTo decl: some DeclGroupSyntax,
+        providingExtensionsOf type: some TypeSyntaxProtocol,
+        conformingTo protocols: [TypeSyntax],
+        in context: some MacroExpansionContext
+    ) throws -> [ExtensionDeclSyntax] {
+        guard let structDecl = decl.as(StructDeclSyntax.self) else {
+            return []
+        }
+        let typeName = structDecl.name.text
+
+        let hasSchemaDecl: DeclSyntax = """
+            extension \(raw: typeName): _SchemaProvider {}
+            """
+
+        guard let extensionDecl = hasSchemaDecl.as(ExtensionDeclSyntax.self) else {
+            return []
+        }
+        return [try ExtensionDeclSyntax(validating: extensionDecl)]
+
+    }
+
 }
 
 /// A simplified representation of the member's "base type"
 // swift-format-ignore
-indirect enum SimpleType {
+indirect enum ResolvedType {
     case String
     case Int
     case Double
     case Float
     case Bool
-    case Array(of: SimpleType)
-    case Dictionary(key: SimpleType, value: SimpleType)
+    case Array(of: ResolvedType)
+    case Dictionary(key: ResolvedType, value: ResolvedType)
     case Coordinate
     case Other(String)
 }
 
-extension SimpleType: CustomStringConvertible {
+extension ResolvedType: CustomStringConvertible {
     var description: String {
         switch self {
         case .String: return "String"
@@ -141,7 +213,7 @@ extension SimpleType: CustomStringConvertible {
 /// - Parameters:
 ///    - type: type to resolve SimpleType from
 /// - Returns: SimpleType
-func resolveType(_ type: TypeSyntax) -> SimpleType {
+func resolveType(_ type: TypeSyntax) -> ResolvedType {
     if let simple = type.as(IdentifierTypeSyntax.self) {
         switch simple.name.text {
         case "String": return .String
@@ -173,17 +245,25 @@ func resolveType(_ type: TypeSyntax) -> SimpleType {
         return .Other(member.description)
     }
 
-    return .Other(
-        type.description.trimmingCharacters(in: .whitespacesAndNewlines)
-    )
+    if let specialize = GenericSpecializationExprSyntax(type),
+        specialize.expression.description.trimmingCharacters(in: .whitespaces) == "Array",
+        let firstArg = specialize.genericArgumentClause.arguments.first
+    {
+        // Correctly unwrap the argument and cast it to TypeSyntax
+        if let genericArgumentType = firstArg.argument.as(TypeSyntax.self) {
+            return .Array(of: resolveType(genericArgumentType))
+        }
+    }
+
+    return .Other(type.description)
 
 }
 
 /// Infer RediSearch IndexType
 /// - Parameters:
-///    - simple: simple type to infer index type from
+///    - simple: resovled type to infer index type from
 /// - Returns: IndexType
-func inferIndexType(_ simple: SimpleType) -> IndexType {
+func inferIndexType(_ simple: ResolvedType) -> IndexType {
     switch simple {
     case .String:
         return .text
