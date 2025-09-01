@@ -152,7 +152,6 @@ public struct ModelSchemaMacro: MemberMacro, ExtensionMacro {
 
     }
 
-
     // Attach root conformance
     public static func expansion(
         of node: AttributeSyntax,
