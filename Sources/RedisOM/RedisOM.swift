@@ -11,6 +11,7 @@ public final class RedisOM: @unchecked Sendable {
     internal let logger: Logger
     private let config: RedisConfiguration
     public var poolService: RedisConnectionPoolService
+    internal var registeredModels: [any RedisModel.Type] = []
 
     /// Default constructor to create RedisOM from environment variable configuration
     /// Pulls configuration from environment variable`REDIS_URL`
@@ -51,6 +52,13 @@ public final class RedisOM: @unchecked Sendable {
         self.config = config
         self.logger = logger
         self.poolService = RedisConnectionPoolService(config)
+    }
+
+    /// Register model to be handled by Migrator to create index for indexed fields
+    /// - Parameters:
+    ///    - model: RedisModel type
+    public func register(_ model: any RedisModel.Type) {
+        registeredModels.append(model)
     }
 
 }
