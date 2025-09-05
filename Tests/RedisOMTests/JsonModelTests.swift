@@ -5,29 +5,7 @@ import Testing
 
 @testable import RedisOM
 
-// MARK: Test models
-@ModelSchema
-struct User: JsonModel {
-    @AutoID var id: String?
-    @Index var name: String
-    @Index var email: String
-    var aliases: [String]?
-    var age: Int?
-    var notes: [Note]?
-    var createdAt: Date?
-
-    static let keyPrefix: String = "user"
-}
-
-struct Note: JsonModel {
-    @AutoID var id: String?
-    var description: String
-    var createdAt: Date?
-
-    static let keyPrefix: String = "note"
-}
-
-// MARK: JsonModelTest Suite
+// MARK: JsonModel Test Suite
 @Suite("JsonModelTests")
 final class JsonModelTests {
 
