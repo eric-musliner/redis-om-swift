@@ -10,7 +10,7 @@ public struct Index<Value: Codable & Sendable>: Codable, Sendable {
         self.indexType = .text
     }
 
-    public init(wrappedValue: Value, _ indexType: IndexType) {
+    public init(wrappedValue: Value, type indexType: IndexType) {
         self.indexType = indexType
         self.wrappedValue = wrappedValue
     }
