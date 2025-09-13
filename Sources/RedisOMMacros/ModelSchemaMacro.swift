@@ -22,18 +22,43 @@ import SwiftSyntaxMacros
 /// struct User: JsonModel {
 ///     @AutoID var id: String
 ///     @Index var email: String
-///     @Index var age: Int
+///     @Index(type: .numeric) var age: Int
 ///     var notes: [String]
+///     var createdAt: Date
+///
+///     static let keyPrefix: String = "user"
 /// }
 /// ```
 ///
 /// Expands to:
 ///
 /// ```swift
-/// extension User {
+/// struct User {
+///     @AutoID var id: String
+///     @Index var email: String
+///     @Index(type: .numeric) var age: Int
+///     var notes: [String]
+///     var createdAt: Date
+///
+///     static let keyPrefix: String = "user"
+///
+///     init(
+///         id: String,
+///         email: String,
+///         age: Int,
+///         notes: [String],
+///         createdAt: Date
+///     ) {
+///         self.id = id = AutoID(wrappedValue: id)
+///         self._email = Index(wrappedValue: name, type: .tag)
+///         self._age = Index(wrappedValue: age, type: .numeric)
+///         self.notes = notes
+///         self.createdAt = createdAt
+///     }
+///
 ///     public static let schema: [Field] = [
 ///         Field(name: "id", type: "String", indexType: .tag),
-///         Field(name: "email", type: "String", indexType: .text),
+///         Field(name: "email", type: "String", indexType: .tag),
 ///         Field(name: "age", type: "Int", indexType: .numeric),
 ///     ]
 /// }
@@ -64,6 +89,10 @@ public struct ModelSchemaMacro: MemberMacro, ExtensionMacro {
         conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
+        guard let structDecl = declaration.as(StructDeclSyntax.self) else {
+            return []
+        }
+
         var scalarFields: [String] = []
         var nestedSchemas: [String] = []
 
@@ -91,14 +120,32 @@ public struct ModelSchemaMacro: MemberMacro, ExtensionMacro {
             guard hasIndexAttr, let typeSyntax = binding.typeAnnotation?.type else { continue }
 
             let resolved = resolveType(typeSyntax)
-            let indexType = inferIndexType(resolved)
+            var indexType = ".tag"
+
+            // Resolve Index type from argument to @Index(...) default to .tag
+            let attrs = varDecl.attributes
+            if let indexAttr =
+                attrs
+                .compactMap({ $0.as(AttributeSyntax.self) })
+                .first(where: { attr in
+                    attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "Index"
+                })
+            {
+                let resolvedIndexType =
+                    indexAttr.arguments?
+                    .description
+                    .trimmingCharacters(in: .whitespacesAndNewlines) ?? "type: .tag"
+
+                indexType = resolvedIndexType.split(separator: ":").last?
+                    .trimmingCharacters(in: .whitespaces) ?? ".tag"
+            }
 
             switch resolved {
             case .Other(let typeName):
                 if typeName == "Date" {
                     scalarFields.append(
                         """
-                        Field(name: "\(name)", type: "\(resolved)", indexType: .\(indexType))
+                        Field(name: "\(name)", type: "\(resolved)", indexType: \(indexType))
                         """)
                 } else {
                     nestedSchemas.append(
@@ -123,27 +170,32 @@ public struct ModelSchemaMacro: MemberMacro, ExtensionMacro {
                     (((\(typeName).self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
                         Field(name: "\(name).\\(f.name)", type: f.type, indexType: f.indexType)
                     } ?? [
-                        Field(name: "\(name)", type: "[String: \(typeName)]", indexType: .text)
+                        Field(name: "\(name)", type: "[String: \(typeName)]", indexType: .tag)
                     ])
                     """)
             case .Dictionary(key: _, value: let valueType):
                 // Dictionary where value is a scalar or non-JsonModel
                 scalarFields.append(
                     """
-                    Field(name: "\(name)", type: "[String: \(valueType)]", indexType: .text)
+                    Field(name: "\(name)", type: "[String: \(valueType)]", indexType: .tag)
                     """)
             default:
                 // Normal scalar field
                 scalarFields.append(
                     """
-                    Field(name: "\(name)", type: "\(resolved)", indexType: .\(indexType))
+                    Field(name: "\(name)", type: "\(resolved)", indexType: \(indexType))
                     """)
             }
 
         }
+
+        let customInit = createInit(structDecl)
+
         let schemaDecl: DeclSyntax = """
+            \(raw: customInit)
+
             public static let schema: [Field] = [
-                \(raw: scalarFields.joined(separator: ",\n"))
+                \(raw: scalarFields.joined(separator: ",\n    "))
             ]
             \(raw: nestedSchemas.map { "+ \( $0 )" }.joined(separator: "\n"))
             """
@@ -152,7 +204,9 @@ public struct ModelSchemaMacro: MemberMacro, ExtensionMacro {
 
     }
 
-    // Attach root conformance
+    /// Attach root conformance for SchemaProvider
+    ///
+    /// Creates extension on base model to adhere to SchemaProvider protocol
     public static func expansion(
         of node: AttributeSyntax,
         attachedTo decl: some DeclGroupSyntax,
@@ -176,6 +230,120 @@ public struct ModelSchemaMacro: MemberMacro, ExtensionMacro {
 
     }
 
+}
+
+/// Creates a public initializer declaration for a struct based on its stored properties.
+///
+/// This function analyzes a struct's member variables and generates an initializer that:
+/// - Includes parameters for all non-static stored properties
+/// - Adds default `nil` values for optional parameters
+/// - Handles special property wrapper assignments for `@Index` and `@AutoID` attributes
+/// - Assigns regular properties directly
+///
+/// - Parameters:
+///    - structDecl: The struct declaration syntax node to analyze
+/// - Returns: A `DeclSyntax` representing the generated public initializer
+///
+/// ## Example
+///
+/// Given this struct:
+/// ```swift
+/// @ModelSchema
+/// struct User: JsonModel {
+///     @AutoID var id: String
+///     @Index var email: String
+///     @Index(type: .numeric) var age: Int
+///     var notes: [String]
+///     var createdAt: Date
+/// 
+///     static let keyPrefix: String = "user"
+/// }
+/// ```
+/// 
+/// Generates this initializer:
+/// ```swift
+/// init(
+///     id: String,
+///     email: String,
+///     age: Int,
+///     notes: [String],
+///     createdAt: Date
+/// ) {
+///     self.id = id = AutoID(wrappedValue: id)
+///     self._email = Index(wrappedValue: name, type: .tag)
+///     self._age = Index(wrappedValue: age, type: .numeric)
+///     self.notes = notes
+///     self.createdAt = createdAt
+/// }
+/// ````
+func createInit(_ structDecl: StructDeclSyntax) -> DeclSyntax {
+    // Build initializer parameter list + body
+    var params: [String] = []
+    var bodyLines: [String] = []
+
+    for member in structDecl.memberBlock.members {
+        guard let varDecl = member.decl.as(VariableDeclSyntax.self),
+            let binding = varDecl.bindings.first,
+            let identPattern = binding.pattern.as(IdentifierPatternSyntax.self)
+        else {
+            continue
+        }
+        let name = identPattern.identifier.text
+
+        // Skip static vars
+        if varDecl.modifiers.contains(where: { $0.name.text == "static" }) == true {
+            continue
+        }
+
+        // Extract type
+        guard let typeAnn = binding.typeAnnotation else { continue }
+        let typeStr = typeAnn.type.description.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Handle default alue (only add = nil for optionals)
+        let defaultVal: String = typeStr.hasSuffix("?") ? " = nil" : ""
+
+        // Add init to signature
+        params.append("\(name): \(typeStr)\(defaultVal)")
+
+        // Handle body assignment
+        let attrs = varDecl.attributes
+
+        if let indexAttr =
+            attrs
+            .compactMap({ $0.as(AttributeSyntax.self) })
+            .first(where: { attr in
+                attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "Index"
+            })
+        {
+            // Grab argument inside @Index(...) defaults to .tag
+            let indexArg =
+                indexAttr.arguments?
+                .description
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? "type: .tag"
+
+            bodyLines.append("self._\(name) = Index(wrappedValue: \(name), \(indexArg))")
+        } else if attrs.contains(where: {
+            $0.as(AttributeSyntax.self)?
+                .attributeName.as(IdentifierTypeSyntax.self)?.name.text == "AutoID"
+        }) {
+
+            bodyLines.append("self._\(name) = AutoID(wrappedValue: \(name))")
+        } else {
+            bodyLines.append("self.\(name) = \(name)")
+        }
+    }
+
+    let paramsJoined: String = params.joined(separator: ",\n    ")
+    let bodyJoined: String = bodyLines.joined(separator: "\n    ")
+
+    let initDecl: DeclSyntax = """
+        public init(
+            \(raw: paramsJoined)
+        ) {
+            \(raw: bodyJoined)
+        }
+        """
+    return initDecl
 }
 
 /// A simplified representation of the member's "base type"
@@ -255,34 +423,4 @@ func resolveType(_ type: TypeSyntax) -> ResolvedType {
     }
 
     return .Other(type.description)
-
-}
-
-/// Infer RediSearch IndexType
-/// - Parameters:
-///    - simple: resovled type to infer index type from
-/// - Returns: IndexType
-func inferIndexType(_ simple: ResolvedType) -> IndexType {
-    switch simple {
-    case .String:
-        return .text
-    case .Int, .Double, .Float:
-        return .numeric
-    case .Bool:
-        return .tag
-    case .Other("Date"), .Other("DateTime"):
-        return .numeric
-    case .Array(of: .Float), .Array(of: .Double):
-        return .vector
-    case .Array(let inner):
-        // For arrays, fall back on the element type
-        return inferIndexType(inner)
-    case .Dictionary(_, let value):
-        // For dicts, fall back on value type
-        return inferIndexType(value)
-    case .Coordinate:
-        return .geo
-    default:
-        return .text
-    }
 }
