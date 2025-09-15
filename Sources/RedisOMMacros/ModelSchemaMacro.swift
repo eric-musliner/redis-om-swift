@@ -10,7 +10,8 @@ import SwiftSyntaxMacros
 /// Apply `@ModelSchema` to a `struct` or `class` that defines stored properties
 /// annotated with property macros such as ``Index`` or ``AutoID``. The macro
 /// will expand the type with a static `schema` definition describing all fields,
-/// their Swift type, and their Redis index configuration.
+/// their Swift type, and their Redis index configuration. Codable conformance is also attached to allow use
+/// of Index property wrapper with no wrappedValue
 ///
 /// The generated schema is used by RedisOM to automatically create indexes
 /// and map Redis data back into your Swift model.
@@ -54,6 +55,34 @@ import SwiftSyntaxMacros
 ///         self._age = Index(wrappedValue: age, type: .numeric)
 ///         self.notes = notes
 ///         self.createdAt = createdAt
+///     }
+///
+///     enum CodingKeys: String, CodingKey {
+///         case id, email, age, notes, createdAt
+///     }
+///
+///     init(from decoder: Decoder) throws {
+///         let c = try decoder.container(keyedBy: CodingKeys.self)
+///         let idDecoded = try c.decode(String.self, forKey: .id)
+///         let emailDecoded = try c.decode(String.self, forKey: .email)
+///         let ageDecoded = try c.decode(Int.self, forKey: .age)
+///         let notesDecoded = try c.decode([String].self, forKey: .notes)
+///         let createdAtDecoded = try c.decode(Date.self, forKey: .createdAt)
+///
+///         self._id = AutoID(wrappedValue: idDecoded)
+///         self._email = Index(wrappedValue: emailDecoded, type: .tag)
+///         self.age = ageDecoded
+///         self.notes = notesDecoded
+///         self.createdAt = createdAtDecoded
+///     }
+///
+///     func encode(to encoder: Encoder) throws {
+///         let c = encoder.container(keyedBy: CodingKeys.self)
+///         try c.encode(id, forKey: .id)
+///         try c.encode(email, forKey: .email)
+///         try c.encode(age, forKey: .age)
+///         try c.encode(notes, forKey: .notes)
+///         try c.encode(createdAt, forKey: .createdAt)
 ///     }
 ///
 ///     public static let schema: [Field] = [
@@ -136,10 +165,12 @@ public struct ModelSchemaMacro: MemberMacro, ExtensionMacro {
                     .description
                     .trimmingCharacters(in: .whitespacesAndNewlines) ?? "type: .tag"
 
-                indexType = resolvedIndexType.split(separator: ":").last?
+                indexType =
+                    resolvedIndexType.split(separator: ":").last?
                     .trimmingCharacters(in: .whitespaces) ?? ".tag"
             }
 
+            // MARK: Schema Fields
             switch resolved {
             case .Other(let typeName):
                 if typeName == "Date" {
@@ -189,10 +220,56 @@ public struct ModelSchemaMacro: MemberMacro, ExtensionMacro {
 
         }
 
-        let customInit = createInit(structDecl)
+        let memberwiseInit = createMemberwiseInit(structDecl)
 
-        let schemaDecl: DeclSyntax = """
-            \(raw: customInit)
+        // Collect stored properties
+        let storedProps = declaration.memberBlock.members.compactMap {
+            member -> (String, TypeSyntax)? in
+            guard
+                let varDecl = member.decl.as(VariableDeclSyntax.self),
+                let binding = varDecl.bindings.first,
+                let ident = binding.pattern.as(IdentifierPatternSyntax.self)
+            else { return nil }
+
+            // Skip static vars
+            if varDecl.modifiers.contains(where: { $0.name.text == "static" }) == true {
+                return nil
+            }
+            let type = binding.typeAnnotation?.type ?? TypeSyntax(stringLiteral: "Any")
+            return (ident.identifier.text, type)
+        }
+
+        // MARK: Codable Conformance
+        // CodingKeys
+        let codingKeys = storedProps.map { (name, _) in
+            "case \(name)"
+        }.joined(separator: "\n    ")
+
+        // init(from:)
+        let decodableInit = createDecodableInit(structDecl, storedProps)
+
+        // encode(to:)
+        let encodeLines = storedProps.map { (name, type) in
+            if type.description.hasSuffix("?") {
+                return "try c.encodeIfPresent(\(name), forKey: .\(name))"
+            } else {
+                return "try c.encode(\(name), forKey: .\(name))"
+            }
+        }.joined(separator: "\n    ")
+
+        let codableAndSchemaDecl: DeclSyntax = """
+            \(raw: memberwiseInit)
+
+            enum CodingKeys: String, CodingKey {
+                \(raw: codingKeys)
+            }
+
+            \(raw: decodableInit)
+
+            public func encode(to encoder: Encoder) throws {
+                var c = encoder.container(keyedBy: CodingKeys.self)
+                \(raw: encodeLines)
+            }
 
             public static let schema: [Field] = [
                 \(raw: scalarFields.joined(separator: ",\n    "))
@@ -200,7 +277,7 @@ public struct ModelSchemaMacro: MemberMacro, ExtensionMacro {
             \(raw: nestedSchemas.map { "+ \( $0 )" }.joined(separator: "\n"))
             """
 
-        return [DeclSyntax(schemaDecl)]
+        return [DeclSyntax(codableAndSchemaDecl)]
 
     }
 
@@ -255,11 +332,11 @@ public struct ModelSchemaMacro: MemberMacro, ExtensionMacro {
 ///     @Index(type: .numeric) var age: Int
 ///     var notes: [String]
 ///     var createdAt: Date
-/// 
+///
 ///     static let keyPrefix: String = "user"
 /// }
 /// ```
-/// 
+///
 /// Generates this initializer:
 /// ```swift
 /// init(
@@ -276,7 +353,7 @@ public struct ModelSchemaMacro: MemberMacro, ExtensionMacro {
 ///     self.createdAt = createdAt
 /// }
 /// ````
-func createInit(_ structDecl: StructDeclSyntax) -> DeclSyntax {
+func createMemberwiseInit(_ structDecl: StructDeclSyntax) -> DeclSyntax {
     // Build initializer parameter list + body
     var params: [String] = []
     var bodyLines: [String] = []
@@ -345,6 +422,136 @@ func createInit(_ structDecl: StructDeclSyntax) -> DeclSyntax {
         """
     return initDecl
 }
+
+/// Creates a initializer declaration for conformance with Decoable - init(from decoder: Decoder)
+///
+/// This function analyzes a struct's member variables and generates an initializer that:
+/// - Includes parameters for all non-static stored properties
+/// - Adds default `nil` values for optional parameters
+/// - Handles special property wrapper assignments for `@Index` and `@AutoID` attributes
+/// - Assigns regular properties directly
+///
+/// - Parameters:
+///    - structDecl: The struct declaration syntax node to analyze
+/// - Returns: A `DeclSyntax` representing the generated public initializer
+///
+/// ## Example
+///
+/// Given this struct:
+/// ```swift
+/// @ModelSchema
+/// struct User: JsonModel {
+///     @AutoID var id: String
+///     @Index var email: String
+///     @Index(type: .numeric) var age: Int
+///     var notes: [String]
+///     var createdAt: Date
+///
+///     static let keyPrefix: String = "user"
+/// }
+/// ```
+///
+/// Generates this initializer:
+/// ```swift
+/// init(from decoder: Decoder) throws {
+///     let c = try decoder.container(keyedBy: CodingKeys.self)
+///     let idDecoded = try c.decode(String.self, forKey: .id)
+///     let emailDecoded = try c.decode(String.self, forKey: .email)
+///     let ageDecoded = try c.decode(Int.self, forKey: .age)
+///     let notesDecoded = try c.decode([String].self, forKey: .notes)
+///     let createdAtDecoded = try c.decode(Date.self, forKey: .createdAt)
+///
+///     self._id = AutoID(wrappedValue: idDecoded)
+///     self._email = Index(wrappedValue: emailDecoded, type: .tag)
+///     self.age = ageDecoded
+///     self.notes = notesDecoded
+///     self.createdAt = createdAtDecoded
+/// }
+///
+/// ```
+func createDecodableInit(_ structDecl: StructDeclSyntax, _ storedProps: [(String, TypeSyntax)])
+    -> DeclSyntax
+{
+    // Build initializer parameter list + body
+    var params: [String] = []
+    var bodyLines: [String] = []
+
+    let decodeLines = storedProps.map { (name, type) in
+        if type.description.hasSuffix("?") {
+            return
+                "let \(name)Decoded = try c.decodeIfPresent(\(type.description.dropLast()).self, forKey: .\(name))"
+        } else {
+            return "let \(name)Decoded = try c.decode(\(type).self, forKey: .\(name))"
+        }
+    }.joined(separator: "\n    ")
+
+    for member in structDecl.memberBlock.members {
+        guard let varDecl = member.decl.as(VariableDeclSyntax.self),
+            let binding = varDecl.bindings.first,
+            let identPattern = binding.pattern.as(IdentifierPatternSyntax.self)
+        else {
+            continue
+        }
+        let name = identPattern.identifier.text
+
+        // Skip static vars
+        if varDecl.modifiers.contains(where: { $0.name.text == "static" }) == true {
+            continue
+        }
+
+        // Extract type
+        guard let typeAnn = binding.typeAnnotation else { continue }
+        let typeStr = typeAnn.type.description.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Handle default alue (only add = nil for optionals)
+        let defaultVal: String = typeStr.hasSuffix("?") ? " = nil" : ""
+
+        // Add init to signature
+        params.append("\(name): \(typeStr)\(defaultVal)")
+
+        // Handle body assignment
+        let attrs = varDecl.attributes
+
+        if let indexAttr =
+            attrs
+            .compactMap({ $0.as(AttributeSyntax.self) })
+            .first(where: { attr in
+                attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "Index"
+            })
+        {
+            // Grab argument inside @Index(...) defaults to .tag
+            let indexArg =
+                indexAttr.arguments?
+                .description
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? "type: .tag"
+
+            bodyLines.append("self._\(name) = Index(wrappedValue: \(name)Decoded, \(indexArg))")
+        } else if attrs.contains(where: {
+            $0.as(AttributeSyntax.self)?
+                .attributeName.as(IdentifierTypeSyntax.self)?.name.text == "AutoID"
+        }) {
+
+            bodyLines.append("self._\(name) = AutoID(wrappedValue: \(name)Decoded)")
+        } else {
+            bodyLines.append("self.\(name) = \(name)Decoded")
+        }
+    }
+
+    //    let paramsJoined: String = params.joined(separator: ",\n    ")
+    let bodyJoined: String = bodyLines.joined(separator: "\n    ")
+
+    let initDecl: DeclSyntax = """
+        public init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            \(raw: decodeLines)
+
+            \(raw: bodyJoined)
+        }
+        """
+    return initDecl
+}
+
+// MARK: Type Resolve
 
 /// A simplified representation of the member's "base type"
 // swift-format-ignore
