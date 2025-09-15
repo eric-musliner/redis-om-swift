@@ -8,7 +8,7 @@ import SwiftSyntaxMacros
 /// A macro that synthesizes a RedisOM schema definition for a model type.
 ///
 /// Apply `@Model` to a `struct` or `class` that defines stored properties
-/// annotated with property macros such as ``Index`` or ``AutoID``. The macro
+/// annotated with property macros such as ``Index`` or ``Id``. The macro
 /// will expand the type with a static `schema` definition describing all fields,
 /// their Swift type, and their Redis index configuration. Codable conformance is also attached to allow use
 /// of Index property wrapper with no wrappedValue
@@ -21,7 +21,7 @@ import SwiftSyntaxMacros
 /// ```swift
 /// @Model
 /// struct User: JsonModel {
-///     @AutoID var id: String
+///     @Id var id: String
 ///     @Index var email: String
 ///     @Index(type: .numeric) var age: Int
 ///     var notes: [String]
@@ -35,7 +35,7 @@ import SwiftSyntaxMacros
 ///
 /// ```swift
 /// struct User {
-///     @AutoID var id: String
+///     @Id var id: String
 ///     @Index var email: String
 ///     @Index(type: .numeric) var age: Int
 ///     var notes: [String]
@@ -50,7 +50,7 @@ import SwiftSyntaxMacros
 ///         notes: [String],
 ///         createdAt: Date
 ///     ) {
-///         self.id = id = AutoID(wrappedValue: id)
+///         self.id = id = Id(wrappedValue: id)
 ///         self._email = Index(wrappedValue: name, type: .tag)
 ///         self._age = Index(wrappedValue: age, type: .numeric)
 ///         self.notes = notes
@@ -69,7 +69,7 @@ import SwiftSyntaxMacros
 ///         let notesDecoded = try c.decode([String].self, forKey: .notes)
 ///         let createdAtDecoded = try c.decode(Date.self, forKey: .createdAt)
 ///
-///         self._id = AutoID(wrappedValue: idDecoded)
+///         self._id = Id(wrappedValue: idDecoded)
 ///         self._email = Index(wrappedValue: emailDecoded, type: .tag)
 ///         self.age = ageDecoded
 ///         self.notes = notesDecoded
@@ -96,7 +96,7 @@ import SwiftSyntaxMacros
 /// }
 /// ```
 ///
-/// - Note: Only stored properties annotated with ``Index`` or ``AutoID``
+/// - Note: Only stored properties annotated with ``Index`` or ``Id``
 ///   are included in the schema. Other properties are ignored.
 public struct ModelMacro: MemberMacro, ExtensionMacro {
     public static func expansion(
@@ -137,12 +137,12 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
 
             let name = identifier.identifier.text
 
-            // Annotated with Index or AutoID wrapper
+            // Annotated with Index or Id wrapper
             let hasIndexAttr = attributes.contains {
                 if let attr = $0.as(AttributeSyntax.self) {
                     let name = attr.attributeName.description
                         .trimmingCharacters(in: .whitespaces)
-                    return name == "Index" || name == "AutoID"
+                    return name == "Index" || name == "Id"
                 }
                 return false
             }
@@ -314,7 +314,7 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
 /// This function analyzes a struct's member variables and generates an initializer that:
 /// - Includes parameters for all non-static stored properties
 /// - Adds default `nil` values for optional parameters
-/// - Handles special property wrapper assignments for `@Index` and `@AutoID` attributes
+/// - Handles special property wrapper assignments for `@Index` and `@Id` attributes
 /// - Assigns regular properties directly
 ///
 /// - Parameters:
@@ -327,7 +327,7 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
 /// ```swift
 /// @Model
 /// struct User: JsonModel {
-///     @AutoID var id: String
+///     @Id var id: String
 ///     @Index var email: String
 ///     @Index(type: .numeric) var age: Int
 ///     var notes: [String]
@@ -346,7 +346,7 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
 ///     notes: [String],
 ///     createdAt: Date
 /// ) {
-///     self.id = id = AutoID(wrappedValue: id)
+///     self.id = id = Id(wrappedValue: id)
 ///     self._email = Index(wrappedValue: name, type: .tag)
 ///     self._age = Index(wrappedValue: age, type: .numeric)
 ///     self.notes = notes
@@ -401,10 +401,10 @@ func createMemberwiseInit(_ structDecl: StructDeclSyntax) -> DeclSyntax {
             bodyLines.append("self._\(name) = Index(wrappedValue: \(name), \(indexArg))")
         } else if attrs.contains(where: {
             $0.as(AttributeSyntax.self)?
-                .attributeName.as(IdentifierTypeSyntax.self)?.name.text == "AutoID"
+                .attributeName.as(IdentifierTypeSyntax.self)?.name.text == "Id"
         }) {
 
-            bodyLines.append("self._\(name) = AutoID(wrappedValue: \(name))")
+            bodyLines.append("self._\(name) = Id(wrappedValue: \(name))")
         } else {
             bodyLines.append("self.\(name) = \(name)")
         }
@@ -428,7 +428,7 @@ func createMemberwiseInit(_ structDecl: StructDeclSyntax) -> DeclSyntax {
 /// This function analyzes a struct's member variables and generates an initializer that:
 /// - Includes parameters for all non-static stored properties
 /// - Adds default `nil` values for optional parameters
-/// - Handles special property wrapper assignments for `@Index` and `@AutoID` attributes
+/// - Handles special property wrapper assignments for `@Index` and `@Id` attributes
 /// - Assigns regular properties directly
 ///
 /// - Parameters:
@@ -441,7 +441,7 @@ func createMemberwiseInit(_ structDecl: StructDeclSyntax) -> DeclSyntax {
 /// ```swift
 /// @Model
 /// struct User: JsonModel {
-///     @AutoID var id: String
+///     @Id var id: String
 ///     @Index var email: String
 ///     @Index(type: .numeric) var age: Int
 ///     var notes: [String]
@@ -461,7 +461,7 @@ func createMemberwiseInit(_ structDecl: StructDeclSyntax) -> DeclSyntax {
 ///     let notesDecoded = try c.decode([String].self, forKey: .notes)
 ///     let createdAtDecoded = try c.decode(Date.self, forKey: .createdAt)
 ///
-///     self._id = AutoID(wrappedValue: idDecoded)
+///     self._id = Id(wrappedValue: idDecoded)
 ///     self._email = Index(wrappedValue: emailDecoded, type: .tag)
 ///     self.age = ageDecoded
 ///     self.notes = notesDecoded
@@ -528,10 +528,10 @@ func createDecodableInit(_ structDecl: StructDeclSyntax, _ storedProps: [(String
             bodyLines.append("self._\(name) = Index(wrappedValue: \(name)Decoded, \(indexArg))")
         } else if attrs.contains(where: {
             $0.as(AttributeSyntax.self)?
-                .attributeName.as(IdentifierTypeSyntax.self)?.name.text == "AutoID"
+                .attributeName.as(IdentifierTypeSyntax.self)?.name.text == "Id"
         }) {
 
-            bodyLines.append("self._\(name) = AutoID(wrappedValue: \(name)Decoded)")
+            bodyLines.append("self._\(name) = Id(wrappedValue: \(name)Decoded)")
         } else {
             bodyLines.append("self.\(name) = \(name)Decoded")
         }
