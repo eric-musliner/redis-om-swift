@@ -36,6 +36,30 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self.age = age
                     }
 
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case email
+                        case age
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let emailDecoded = try c.decode(String.self, forKey: .email)
+                        let ageDecoded = try c.decode(Int.self, forKey: .age)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._email = Index(wrappedValue: emailDecoded, type: .tag)
+                        self.age = ageDecoded
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(email, forKey: .email)
+                        try c.encode(age, forKey: .age)
+                    }
+
                     public static let schema: [Field] = [
                         Field(name: "id", type: "String", indexType: .tag),
                         Field(name: "email", type: "String", indexType: .tag)
@@ -77,6 +101,30 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._id = AutoID(wrappedValue: id)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case email
+                        case age
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let emailDecoded = try c.decode(String.self, forKey: .email)
+                        let ageDecoded = try c.decode(Int.self, forKey: .age)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._email = Index(wrappedValue: emailDecoded, type: .tag)
+                        self._age = Index(wrappedValue: ageDecoded, type: .numeric)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(email, forKey: .email)
+                        try c.encode(age, forKey: .age)
                     }
 
                     public static let schema: [Field] = [
@@ -125,6 +173,34 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
                         self._notes = Index(wrappedValue: notes, type: .text)
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case email
+                        case age
+                        case notes
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let emailDecoded = try c.decode(String.self, forKey: .email)
+                        let ageDecoded = try c.decode(Int.self, forKey: .age)
+                        let notesDecoded = try c.decode([String].self, forKey: .notes)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._email = Index(wrappedValue: emailDecoded, type: .tag)
+                        self._age = Index(wrappedValue: ageDecoded, type: .numeric)
+                        self._notes = Index(wrappedValue: notesDecoded, type: .text)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(email, forKey: .email)
+                        try c.encode(age, forKey: .age)
+                        try c.encode(notes, forKey: .notes)
                     }
 
                     public static let schema: [Field] = [
@@ -182,6 +258,34 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._scores = Index(wrappedValue: scores, type: .vector)
                     }
 
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case email
+                        case age
+                        case scores
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let emailDecoded = try c.decode(String.self, forKey: .email)
+                        let ageDecoded = try c.decode(Int.self, forKey: .age)
+                        let scoresDecoded = try c.decode([Double].self, forKey: .scores)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._email = Index(wrappedValue: emailDecoded, type: .tag)
+                        self._age = Index(wrappedValue: ageDecoded, type: .numeric)
+                        self._scores = Index(wrappedValue: scoresDecoded, type: .vector)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(email, forKey: .email)
+                        try c.encode(age, forKey: .age)
+                        try c.encode(scores, forKey: .scores)
+                    }
+
                     public static let schema: [Field] = [
                         Field(name: "id", type: "String", indexType: .tag),
                         Field(name: "email", type: "String", indexType: .tag),
@@ -231,6 +335,34 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._scores = Index(wrappedValue: scores, type: .vector)
                     }
 
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case email
+                        case age
+                        case scores
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let emailDecoded = try c.decode(String.self, forKey: .email)
+                        let ageDecoded = try c.decode(Int.self, forKey: .age)
+                        let scoresDecoded = try c.decode([Float].self, forKey: .scores)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._email = Index(wrappedValue: emailDecoded, type: .tag)
+                        self._age = Index(wrappedValue: ageDecoded, type: .numeric)
+                        self._scores = Index(wrappedValue: scoresDecoded, type: .vector)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(email, forKey: .email)
+                        try c.encode(age, forKey: .age)
+                        try c.encode(scores, forKey: .scores)
+                    }
+
                     public static let schema: [Field] = [
                         Field(name: "id", type: "String", indexType: .tag),
                         Field(name: "email", type: "String", indexType: .tag),
@@ -278,6 +410,34 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
                         self._preferences = Index(wrappedValue: preferences, type: .tag)
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case email
+                        case age
+                        case preferences
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let emailDecoded = try c.decode(String.self, forKey: .email)
+                        let ageDecoded = try c.decode(Int.self, forKey: .age)
+                        let preferencesDecoded = try c.decode([String: Int].self, forKey: .preferences)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._email = Index(wrappedValue: emailDecoded, type: .tag)
+                        self._age = Index(wrappedValue: ageDecoded, type: .numeric)
+                        self._preferences = Index(wrappedValue: preferencesDecoded, type: .tag)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(email, forKey: .email)
+                        try c.encode(age, forKey: .age)
+                        try c.encode(preferences, forKey: .preferences)
                     }
 
                     public static let schema: [Field] = [
@@ -330,6 +490,34 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._location = Index(wrappedValue: location, type: .geo)
                     }
 
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case email
+                        case age
+                        case location
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let emailDecoded = try c.decode(String.self, forKey: .email)
+                        let ageDecoded = try c.decode(Int.self, forKey: .age)
+                        let locationDecoded = try c.decode(Coordinate.self, forKey: .location)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._email = Index(wrappedValue: emailDecoded, type: .tag)
+                        self._age = Index(wrappedValue: ageDecoded, type: .numeric)
+                        self._location = Index(wrappedValue: locationDecoded, type: .geo)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(email, forKey: .email)
+                        try c.encode(age, forKey: .age)
+                        try c.encode(location, forKey: .location)
+                    }
+
                     public static let schema: [Field] = [
                         Field(name: "id", type: "String", indexType: .tag),
                         Field(name: "email", type: "String", indexType: .tag),
@@ -379,6 +567,34 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
                         self._birthdate = Index(wrappedValue: birthdate, type: .tag)
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case email
+                        case age
+                        case birthdate
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let emailDecoded = try c.decode(String.self, forKey: .email)
+                        let ageDecoded = try c.decode(Int.self, forKey: .age)
+                        let birthdateDecoded = try c.decode(Date.self, forKey: .birthdate)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._email = Index(wrappedValue: emailDecoded, type: .tag)
+                        self._age = Index(wrappedValue: ageDecoded, type: .numeric)
+                        self._birthdate = Index(wrappedValue: birthdateDecoded, type: .tag)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(email, forKey: .email)
+                        try c.encode(age, forKey: .age)
+                        try c.encode(birthdate, forKey: .birthdate)
                     }
 
                     public static let schema: [Field] = [
@@ -440,6 +656,34 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._notes = Index(wrappedValue: notes, type: .tag)
                     }
 
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case email
+                        case age
+                        case notes
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let emailDecoded = try c.decode(String.self, forKey: .email)
+                        let ageDecoded = try c.decode(Int.self, forKey: .age)
+                        let notesDecoded = try c.decode([Note].self, forKey: .notes)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._email = Index(wrappedValue: emailDecoded, type: .tag)
+                        self._age = Index(wrappedValue: ageDecoded, type: .numeric)
+                        self._notes = Index(wrappedValue: notesDecoded, type: .tag)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(email, forKey: .email)
+                        try c.encode(age, forKey: .age)
+                        try c.encode(notes, forKey: .notes)
+                    }
+
                     public static let schema: [Field] = [
                         Field(name: "id", type: "String", indexType: .tag),
                         Field(name: "email", type: "String", indexType: .tag),
@@ -464,6 +708,30 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._id = AutoID(wrappedValue: id)
                         self.description = description
                         self.createdAt = createdAt
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case description
+                        case createdAt
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let descriptionDecoded = try c.decode(String.self, forKey: .description)
+                        let createdAtDecoded = try c.decodeIfPresent(Date.self, forKey: .createdAt)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self.description = descriptionDecoded
+                        self.createdAt = createdAtDecoded
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(description, forKey: .description)
+                        try c.encodeIfPresent(createdAt, forKey: .createdAt)
                     }
 
                     public static let schema: [Field] = [
@@ -524,6 +792,34 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._notes = Index(wrappedValue: notes, type: .tag)
                     }
 
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case email
+                        case age
+                        case notes
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let emailDecoded = try c.decode(String.self, forKey: .email)
+                        let ageDecoded = try c.decode(Int.self, forKey: .age)
+                        let notesDecoded = try c.decode([String: Note].self, forKey: .notes)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._email = Index(wrappedValue: emailDecoded, type: .tag)
+                        self._age = Index(wrappedValue: ageDecoded, type: .numeric)
+                        self._notes = Index(wrappedValue: notesDecoded, type: .tag)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(email, forKey: .email)
+                        try c.encode(age, forKey: .age)
+                        try c.encode(notes, forKey: .notes)
+                    }
+
                     public static let schema: [Field] = [
                         Field(name: "id", type: "String", indexType: .tag),
                         Field(name: "email", type: "String", indexType: .tag),
@@ -550,6 +846,30 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._id = AutoID(wrappedValue: id)
                         self._description = Index(wrappedValue: description, type: .text)
                         self.createdAt = createdAt
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case description
+                        case createdAt
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let descriptionDecoded = try c.decode(String.self, forKey: .description)
+                        let createdAtDecoded = try c.decodeIfPresent(Date.self, forKey: .createdAt)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._description = Index(wrappedValue: descriptionDecoded, type: .text)
+                        self.createdAt = createdAtDecoded
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(description, forKey: .description)
+                        try c.encodeIfPresent(createdAt, forKey: .createdAt)
                     }
 
                     public static let schema: [Field] = [
@@ -634,6 +954,58 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self.createdAt = createdAt
                     }
 
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case model
+                        case brand
+                        case price
+                        case type
+                        case specs
+                        case description
+                        case addons
+                        case helmetIncluded
+                        case createdAt
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let modelDecoded = try c.decode(String.self, forKey: .model)
+                        let brandDecoded = try c.decode(String.self, forKey: .brand)
+                        let priceDecoded = try c.decode(Int.self, forKey: .price)
+                        let typeDecoded = try c.decode(String.self, forKey: .type)
+                        let specsDecoded = try c.decode(Spec.self, forKey: .specs)
+                        let descriptionDecoded = try c.decodeIfPresent(String.self, forKey: .description)
+                        let addonsDecoded = try c.decodeIfPresent([String].self, forKey: .addons)
+                        let helmetIncludedDecoded = try c.decode(Bool.self, forKey: .helmetIncluded)
+                        let createdAtDecoded = try c.decodeIfPresent(Date.self, forKey: .createdAt)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._model = Index(wrappedValue: modelDecoded, type: .tag)
+                        self._brand = Index(wrappedValue: brandDecoded, type: .tag)
+                        self._price = Index(wrappedValue: priceDecoded, type: .numeric)
+                        self._type = Index(wrappedValue: typeDecoded, type: .tag)
+                        self._specs = Index(wrappedValue: specsDecoded, type: .tag)
+                        self._description = Index(wrappedValue: descriptionDecoded, type: .tag)
+                        self.addons = addonsDecoded
+                        self._helmetIncluded = Index(wrappedValue: helmetIncludedDecoded, type: .tag)
+                        self.createdAt = createdAtDecoded
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(model, forKey: .model)
+                        try c.encode(brand, forKey: .brand)
+                        try c.encode(price, forKey: .price)
+                        try c.encode(type, forKey: .type)
+                        try c.encode(specs, forKey: .specs)
+                        try c.encodeIfPresent(description, forKey: .description)
+                        try c.encodeIfPresent(addons, forKey: .addons)
+                        try c.encode(helmetIncluded, forKey: .helmetIncluded)
+                        try c.encodeIfPresent(createdAt, forKey: .createdAt)
+                    }
+
                     public static let schema: [Field] = [
                         Field(name: "id", type: "String", indexType: .tag),
                         Field(name: "model", type: "String", indexType: .tag),
@@ -659,6 +1031,26 @@ final class ModelSchemaMacroTests: XCTestCase {
                     ) {
                         self._material = Index(wrappedValue: material, type: .tag)
                         self._weight = Index(wrappedValue: weight, type: .numeric)
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case material
+                        case weight
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let materialDecoded = try c.decode(String.self, forKey: .material)
+                        let weightDecoded = try c.decode(Int.self, forKey: .weight)
+
+                        self._material = Index(wrappedValue: materialDecoded, type: .tag)
+                        self._weight = Index(wrappedValue: weightDecoded, type: .numeric)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encode(material, forKey: .material)
+                        try c.encode(weight, forKey: .weight)
                     }
 
                     public static let schema: [Field] = [
@@ -711,6 +1103,26 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._specs = Index(wrappedValue: specs, type: .tag)
                     }
 
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case specs
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let specsDecoded = try c.decode(Spec.self, forKey: .specs)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._specs = Index(wrappedValue: specsDecoded, type: .tag)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(specs, forKey: .specs)
+                    }
+
                     public static let schema: [Field] = [
                         Field(name: "id", type: "String", indexType: .tag)
                     ]
@@ -730,6 +1142,26 @@ final class ModelSchemaMacroTests: XCTestCase {
                     ) {
                         self._material = Index(wrappedValue: material, type: .tag)
                         self._weight = Index(wrappedValue: weight, type: .numeric)
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case material
+                        case weight
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let materialDecoded = try c.decode(String.self, forKey: .material)
+                        let weightDecoded = try c.decode(Int.self, forKey: .weight)
+
+                        self._material = Index(wrappedValue: materialDecoded, type: .tag)
+                        self._weight = Index(wrappedValue: weightDecoded, type: .numeric)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encode(material, forKey: .material)
+                        try c.encode(weight, forKey: .weight)
                     }
 
                     public static let schema: [Field] = [
@@ -809,6 +1241,38 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._address = Index(wrappedValue: address, type: .tag)
                     }
 
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case email
+                        case age
+                        case notes
+                        case address
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let emailDecoded = try c.decode(String.self, forKey: .email)
+                        let ageDecoded = try c.decode(Int.self, forKey: .age)
+                        let notesDecoded = try c.decode([String: Note].self, forKey: .notes)
+                        let addressDecoded = try c.decode(Address.self, forKey: .address)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._email = Index(wrappedValue: emailDecoded, type: .tag)
+                        self._age = Index(wrappedValue: ageDecoded, type: .numeric)
+                        self._notes = Index(wrappedValue: notesDecoded, type: .text)
+                        self._address = Index(wrappedValue: addressDecoded, type: .tag)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(email, forKey: .email)
+                        try c.encode(age, forKey: .age)
+                        try c.encode(notes, forKey: .notes)
+                        try c.encode(address, forKey: .address)
+                    }
+
                     public static let schema: [Field] = [
                         Field(name: "id", type: "String", indexType: .tag),
                         Field(name: "email", type: "String", indexType: .tag),
@@ -855,6 +1319,50 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self.note = note
                     }
 
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case addressLine1
+                        case addressLine2
+                        case city
+                        case state
+                        case country
+                        case postalCode
+                        case note
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let addressLine1Decoded = try c.decode(String.self, forKey: .addressLine1)
+                        let addressLine2Decoded = try c.decode(String? .self, forKey: .addressLine2)
+                        let cityDecoded = try c.decode(String.self, forKey: .city)
+                        let stateDecoded = try c.decode(String.self, forKey: .state)
+                        let countryDecoded = try c.decode(String.self, forKey: .country)
+                        let postalCodeDecoded = try c.decode(String.self, forKey: .postalCode)
+                        let noteDecoded = try c.decode(Note? .self, forKey: .note)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self.addressLine1 = addressLine1Decoded
+                        self.addressLine2 = addressLine2Decoded
+                        self._city = Index(wrappedValue: cityDecoded, type: .tag)
+                        self.state = stateDecoded
+                        self.country = countryDecoded
+                        self._postalCode = Index(wrappedValue: postalCodeDecoded, type: .tag)
+                        self.note = noteDecoded
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(addressLine1, forKey: .addressLine1)
+                        try c.encode(addressLine2, forKey: .addressLine2)
+                        try c.encode(city, forKey: .city)
+                        try c.encode(state, forKey: .state)
+                        try c.encode(country, forKey: .country)
+                        try c.encode(postalCode, forKey: .postalCode)
+                        try c.encode(note, forKey: .note)
+                    }
+
                     public static let schema: [Field] = [
                         Field(name: "id", type: "String", indexType: .tag),
                         Field(name: "city", type: "String", indexType: .tag),
@@ -876,6 +1384,30 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._id = AutoID(wrappedValue: id)
                         self._description = Index(wrappedValue: description, type: .text)
                         self.createdAt = createdAt
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case description
+                        case createdAt
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let descriptionDecoded = try c.decode(String.self, forKey: .description)
+                        let createdAtDecoded = try c.decodeIfPresent(Date.self, forKey: .createdAt)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._description = Index(wrappedValue: descriptionDecoded, type: .text)
+                        self.createdAt = createdAtDecoded
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(description, forKey: .description)
+                        try c.encodeIfPresent(createdAt, forKey: .createdAt)
                     }
 
                     public static let schema: [Field] = [
@@ -957,6 +1489,38 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self._address = Index(wrappedValue: address, type: .tag)
                     }
 
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case email
+                        case age
+                        case notes
+                        case address
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let emailDecoded = try c.decode(String.self, forKey: .email)
+                        let ageDecoded = try c.decode(Int.self, forKey: .age)
+                        let notesDecoded = try c.decode([String: Note].self, forKey: .notes)
+                        let addressDecoded = try c.decode(Address.self, forKey: .address)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._email = Index(wrappedValue: emailDecoded, type: .tag)
+                        self._age = Index(wrappedValue: ageDecoded, type: .numeric)
+                        self._notes = Index(wrappedValue: notesDecoded, type: .tag)
+                        self._address = Index(wrappedValue: addressDecoded, type: .tag)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(email, forKey: .email)
+                        try c.encode(age, forKey: .age)
+                        try c.encode(notes, forKey: .notes)
+                        try c.encode(address, forKey: .address)
+                    }
+
                     public static let schema: [Field] = [
                         Field(name: "id", type: "String", indexType: .tag),
                         Field(name: "email", type: "String", indexType: .tag),
@@ -1001,6 +1565,50 @@ final class ModelSchemaMacroTests: XCTestCase {
                         self.country = country
                         self._postalCode = Index(wrappedValue: postalCode, type: .tag)
                         self.note = note
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case addressLine1
+                        case addressLine2
+                        case city
+                        case state
+                        case country
+                        case postalCode
+                        case note
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let addressLine1Decoded = try c.decode(String.self, forKey: .addressLine1)
+                        let addressLine2Decoded = try c.decode(String? .self, forKey: .addressLine2)
+                        let cityDecoded = try c.decode(String.self, forKey: .city)
+                        let stateDecoded = try c.decode(String.self, forKey: .state)
+                        let countryDecoded = try c.decode(String.self, forKey: .country)
+                        let postalCodeDecoded = try c.decode(String.self, forKey: .postalCode)
+                        let noteDecoded = try c.decode(Note? .self, forKey: .note)
+
+                        self._id = AutoID(wrappedValue: idDecoded)
+                        self.addressLine1 = addressLine1Decoded
+                        self.addressLine2 = addressLine2Decoded
+                        self._city = Index(wrappedValue: cityDecoded, type: .tag)
+                        self.state = stateDecoded
+                        self.country = countryDecoded
+                        self._postalCode = Index(wrappedValue: postalCodeDecoded, type: .tag)
+                        self.note = noteDecoded
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(addressLine1, forKey: .addressLine1)
+                        try c.encode(addressLine2, forKey: .addressLine2)
+                        try c.encode(city, forKey: .city)
+                        try c.encode(state, forKey: .state)
+                        try c.encode(country, forKey: .country)
+                        try c.encode(postalCode, forKey: .postalCode)
+                        try c.encode(note, forKey: .note)
                     }
 
                     public static let schema: [Field] = [
