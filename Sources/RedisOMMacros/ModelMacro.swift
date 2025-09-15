@@ -7,7 +7,7 @@ import SwiftSyntaxMacros
 
 /// A macro that synthesizes a RedisOM schema definition for a model type.
 ///
-/// Apply `@ModelSchema` to a `struct` or `class` that defines stored properties
+/// Apply `@Model` to a `struct` or `class` that defines stored properties
 /// annotated with property macros such as ``Index`` or ``AutoID``. The macro
 /// will expand the type with a static `schema` definition describing all fields,
 /// their Swift type, and their Redis index configuration. Codable conformance is also attached to allow use
@@ -19,7 +19,7 @@ import SwiftSyntaxMacros
 /// Example:
 ///
 /// ```swift
-/// @ModelSchema
+/// @Model
 /// struct User: JsonModel {
 ///     @AutoID var id: String
 ///     @Index var email: String
@@ -98,7 +98,7 @@ import SwiftSyntaxMacros
 ///
 /// - Note: Only stored properties annotated with ``Index`` or ``AutoID``
 ///   are included in the schema. Other properties are ignored.
-public struct ModelSchemaMacro: MemberMacro, ExtensionMacro {
+public struct ModelMacro: MemberMacro, ExtensionMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf decl: some DeclGroupSyntax,
@@ -325,7 +325,7 @@ public struct ModelSchemaMacro: MemberMacro, ExtensionMacro {
 ///
 /// Given this struct:
 /// ```swift
-/// @ModelSchema
+/// @Model
 /// struct User: JsonModel {
 ///     @AutoID var id: String
 ///     @Index var email: String
@@ -439,7 +439,7 @@ func createMemberwiseInit(_ structDecl: StructDeclSyntax) -> DeclSyntax {
 ///
 /// Given this struct:
 /// ```swift
-/// @ModelSchema
+/// @Model
 /// struct User: JsonModel {
 ///     @AutoID var id: String
 ///     @Index var email: String

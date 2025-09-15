@@ -3,7 +3,7 @@ import Foundation
 @testable import RedisOM
 
 // MARK: Test Models
-@ModelSchema
+@Model
 struct User: JsonModel {
     @AutoID var id: String?
     @Index(type: .text) var name: String
@@ -17,7 +17,7 @@ struct User: JsonModel {
     static let keyPrefix: String = "user"
 }
 
-@ModelSchema
+@Model
 struct Author: JsonModel {
     @AutoID var id: String?
     @Index var name: String
@@ -30,7 +30,7 @@ struct Author: JsonModel {
     static let keyPrefix: String = "author"
 }
 
-@ModelSchema
+@Model
 struct Note: JsonModel {
     @AutoID var id: String?
     @Index(type: .text) var description: String
@@ -39,7 +39,7 @@ struct Note: JsonModel {
     static let keyPrefix: String = "note"
 }
 
-@ModelSchema
+@Model
 struct Node: JsonModel {
     @AutoID var id: String?
     var term: String
@@ -57,7 +57,7 @@ struct Edge: JsonModel {
     static let keyPrefix: String = "misc"
 }
 
-@ModelSchema
+@Model
 struct Address: JsonModel {
     @AutoID var id: String?
     var addressLine1: String
@@ -71,7 +71,7 @@ struct Address: JsonModel {
     static let keyPrefix: String = "address"
 }
 
-@ModelSchema
+@Model
 struct Person: JsonModel {
     @AutoID var id: String?
     @Index var name: String
@@ -84,7 +84,7 @@ struct Person: JsonModel {
     static let keyPrefix: String = "person"
 }
 
-@ModelSchema
+@Model
 struct Bike: JsonModel {
     @AutoID var id: String?
     @Index var model: String
@@ -100,7 +100,7 @@ struct Bike: JsonModel {
     static let keyPrefix: String = "bike"
 }
 
-@ModelSchema
+@Model
 struct Spec: JsonModel {
     var id: String?
     @Index var material: String
@@ -109,7 +109,7 @@ struct Spec: JsonModel {
     static let keyPrefix: String = "spec"
 }
 
-@ModelSchema
+@Model
 struct Item: JsonModel {
     @AutoID var id: String?
     var price: Double
@@ -118,7 +118,7 @@ struct Item: JsonModel {
     static let keyPrefix: String = "item"
 }
 
-@ModelSchema
+@Model
 struct Order: JsonModel {
     @AutoID var id: String?
     @Index var items: [Item]

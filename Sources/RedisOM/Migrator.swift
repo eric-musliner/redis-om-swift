@@ -5,7 +5,7 @@ import NIOCore
 /// The `Migrator` is responsible for managing Redis Search indexes that correspond
 /// to your `JsonModel` types.
 ///
-/// It uses the `schema` definitions emitted by the `@ModelSchema` macro to:
+/// It uses the `schema` definitions emitted by the `@Model` macro to:
 ///   - Generate Redis Search field mappings (`FT.CREATE`) from model fields
 ///   - Flatten nested models into dot-notation (e.g., `notes.id`)
 ///   - Resolve JSONPath selectors based on container type:
