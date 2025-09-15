@@ -60,4 +60,5 @@ jobs:
 
       - name: Test
         run: |
-          swift test --enable-code-coverage --no-parallel
+          swift test --enable-code-coverage --no-parallel --enable-experimental-prebuilts
+
