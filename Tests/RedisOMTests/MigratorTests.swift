@@ -174,6 +174,47 @@ final class MigratorTests {
         }
     }
 
+    @Test func testMigrateMultipleModels() async throws {
+        try await self.migrator.migrate(models: [Person.self, User.self])
+
+        // Assert index exists
+        let listResponse = try await self.connectionPool.send(command: "FT._LIST").get()
+        let indexNames = listResponse.array?.compactMap({ $0.string })
+        #expect(indexNames!.contains("idx:Person"))
+        #expect(indexNames!.contains("idx:User"))
+
+        // Assert Person Index
+        var fields: [(String, String)] = try await inspectIndex(name: "idx:Person")
+
+        // Assert expected indexes for Person schema
+        var expected: [(String, String)] = [
+            ("id", "TAG"),
+            ("name", "TAG"),
+            ("email", "TAG"),
+        ]
+        for (field, fieldType) in expected {
+            #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))
+        }
+        // Assert User Index
+        fields = try await inspectIndex(name: "idx:User")
+
+        // Assert expected indexes for User schema
+        expected = [
+            ("id", "TAG"),
+            ("name", "TEXT"),
+            ("email", "TAG"),
+            ("notes.id", "TAG"),
+            ("address.id", "TAG"),
+            ("address.city", "TAG"),
+            ("address.postalCode", "TAG"),
+            ("address.note.id", "TAG"),
+            ("address.note.description", "TEXT"),
+        ]
+        for (field, fieldType) in expected {
+            #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))
+        }
+    }
+
     /// Helper to inspect Index by name
     func inspectIndex(name: String) async throws -> [(String, String)] {
         let infoResponse = try await self.connectionPool.send(
