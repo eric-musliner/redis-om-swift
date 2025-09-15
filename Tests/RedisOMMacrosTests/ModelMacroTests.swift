@@ -4,12 +4,12 @@ import XCTest
 
 @testable import RedisOMMacros
 
-final class ModelSchemaMacroTests: XCTestCase {
+final class ModelMacroTests: XCTestCase {
 
     func testSchemaExpansionSingleTextIndex() {
         assertMacroExpansion(
             """
-            @ModelSchema
+            @Model
             struct User {
                 @AutoID var id: String?
                 @Index var email: String
@@ -69,14 +69,14 @@ final class ModelSchemaMacroTests: XCTestCase {
                 extension User: _SchemaProvider {
                 }
                 """,
-            macros: ["ModelSchema": ModelSchemaMacro.self]
+            macros: ["Model": ModelMacro.self]
         )
     }
 
     func testSchemaExpansionNumericIndex() {
         assertMacroExpansion(
             """
-            @ModelSchema
+            @Model
             struct User {
                 @AutoID var id: String?
                 @Index var email: String
@@ -137,14 +137,14 @@ final class ModelSchemaMacroTests: XCTestCase {
                 extension User: _SchemaProvider {
                 }
                 """,
-            macros: ["ModelSchema": ModelSchemaMacro.self]
+            macros: ["Model": ModelMacro.self]
         )
     }
 
     func testSchemaExpansionArrayofStringIndex() {
         assertMacroExpansion(
             """
-            @ModelSchema
+            @Model
             struct User {
                 @AutoID var id: String?
                 @Index(type: .tag) var email: String
@@ -214,14 +214,14 @@ final class ModelSchemaMacroTests: XCTestCase {
                 extension User: _SchemaProvider {
                 }
                 """,
-            macros: ["ModelSchema": ModelSchemaMacro.self]
+            macros: ["Model": ModelMacro.self]
         )
     }
 
     func testSchemaExpansionVectorDoubleIndex() {
         assertMacroExpansion(
             """
-            @ModelSchema
+            @Model
             struct User {
                 @AutoID var id: String?
                 @Index(type: .tag)
@@ -297,14 +297,14 @@ final class ModelSchemaMacroTests: XCTestCase {
                 extension User: _SchemaProvider {
                 }
                 """,
-            macros: ["ModelSchema": ModelSchemaMacro.self]
+            macros: ["Model": ModelMacro.self]
         )
     }
 
     func testSchemaExpansionVectorFloatIndex() {
         assertMacroExpansion(
             """
-            @ModelSchema
+            @Model
             struct User {
                 @AutoID var id: String?
                 @Index(type: .tag) var email: String
@@ -374,14 +374,14 @@ final class ModelSchemaMacroTests: XCTestCase {
                 extension User: _SchemaProvider {
                 }
                 """,
-            macros: ["ModelSchema": ModelSchemaMacro.self]
+            macros: ["Model": ModelMacro.self]
         )
     }
 
     func testSchemaExpansionDictOfStringIntIndex() {
         assertMacroExpansion(
             """
-            @ModelSchema
+            @Model
             struct User {
                 @AutoID var id: String?
                 @Index var email: String
@@ -451,14 +451,14 @@ final class ModelSchemaMacroTests: XCTestCase {
                 extension User: _SchemaProvider {
                 }
                 """,
-            macros: ["ModelSchema": ModelSchemaMacro.self]
+            macros: ["Model": ModelMacro.self]
         )
     }
 
     func testSchemaExpansionGeoIndex() {
         assertMacroExpansion(
             """
-            @ModelSchema
+            @Model
             struct User {
                 @AutoID var id: String?
                 @Index var email: String
@@ -530,14 +530,14 @@ final class ModelSchemaMacroTests: XCTestCase {
                 extension User: _SchemaProvider {
                 }
                 """,
-            macros: ["ModelSchema": ModelSchemaMacro.self]
+            macros: ["Model": ModelMacro.self]
         )
     }
 
     func testSchemaExpansionDateNumericIndex() {
         assertMacroExpansion(
             """
-            @ModelSchema
+            @Model
             struct User {
                 @AutoID var id: String?
                 @Index var email: String
@@ -609,14 +609,14 @@ final class ModelSchemaMacroTests: XCTestCase {
                 extension User: _SchemaProvider {
                 }
                 """,
-            macros: ["ModelSchema": ModelSchemaMacro.self]
+            macros: ["Model": ModelMacro.self]
         )
     }
 
     func testSchemaExpansionArrayNestedModelIndex() {
         assertMacroExpansion(
             """
-            @ModelSchema
+            @Model
             struct User {
                 @AutoID var id: String?
                 @Index var email: String
@@ -626,7 +626,7 @@ final class ModelSchemaMacroTests: XCTestCase {
                 static let keyPrefix: String = "user"
             }
 
-            @ModelSchema
+            @Model
             struct Note {
                 @AutoID var id: String?
                 var description: String
@@ -745,14 +745,14 @@ final class ModelSchemaMacroTests: XCTestCase {
                 extension Note: _SchemaProvider {
                 }
                 """,
-            macros: ["ModelSchema": ModelSchemaMacro.self]
+            macros: ["Model": ModelMacro.self]
         )
     }
 
     func testSchemaExpansionDictNestedModelIndex() {
         assertMacroExpansion(
             """
-            @ModelSchema
+            @Model
             struct User {
                 @AutoID var id: String?
                 @Index var email: String
@@ -762,7 +762,7 @@ final class ModelSchemaMacroTests: XCTestCase {
                 static let keyPrefix: String = "user"
             }
 
-            @ModelSchema
+            @Model
             struct Note: JsonModel {
                 @AutoID var id: String?
                 @Index(type: .text) var description: String
@@ -884,14 +884,14 @@ final class ModelSchemaMacroTests: XCTestCase {
                 extension Note: _SchemaProvider {
                 }
                 """,
-            macros: ["ModelSchema": ModelSchemaMacro.self]
+            macros: ["Model": ModelMacro.self]
         )
     }
 
     func testSchemaExpansionNested() {
         assertMacroExpansion(
             """
-            @ModelSchema
+            @Model
             struct Bike: JsonModel {
                 @AutoID var id: String?
                 @Index var model: String
@@ -907,7 +907,7 @@ final class ModelSchemaMacroTests: XCTestCase {
                 static let keyPrefix: String = "bike"
             }
 
-            @ModelSchema
+            @Model
             struct Spec: JsonModel {
                 @Index var material: String
                 @Index(type: .numeric) var weight: Int
@@ -1065,14 +1065,14 @@ final class ModelSchemaMacroTests: XCTestCase {
                 extension Spec: _SchemaProvider {
                 }
                 """,
-            macros: ["ModelSchema": ModelSchemaMacro.self]
+            macros: ["Model": ModelMacro.self]
         )
     }
 
     func testSchemaExpansionNestedModel() {
         assertMacroExpansion(
             """
-            @ModelSchema
+            @Model
             struct Bike: JsonModel {
                 @AutoID var id: String?
                 @Index var specs: Spec
@@ -1080,7 +1080,7 @@ final class ModelSchemaMacroTests: XCTestCase {
                 static let keyPrefix: String = "bike"
             }
 
-            @ModelSchema
+            @Model
             struct Spec: JsonModel {
                 @Index var material: String
                 @Index(type: .numeric) var weight: Int
@@ -1176,14 +1176,14 @@ final class ModelSchemaMacroTests: XCTestCase {
                 extension Spec: _SchemaProvider {
                 }
                 """,
-            macros: ["ModelSchema": ModelSchemaMacro.self]
+            macros: ["Model": ModelMacro.self]
         )
     }
 
     func testSchemaExpansionDeepNestedModelIndex() {
         assertMacroExpansion(
             """
-            @ModelSchema
+            @Model
             struct User {
                 @AutoID var id: String?
                 @Index var email: String
@@ -1194,7 +1194,7 @@ final class ModelSchemaMacroTests: XCTestCase {
                 static let keyPrefix: String = "user"
             }
 
-            @ModelSchema
+            @Model
             struct Address: JsonModel {
                 @AutoID var id: String?
                 var addressLine1: String
@@ -1208,7 +1208,7 @@ final class ModelSchemaMacroTests: XCTestCase {
                 static let keyPrefix: String = "address"
             }
 
-            @ModelSchema
+            @Model
             struct Note: JsonModel {
                 @AutoID var id: String?
                 @Index(type: .text) var description: String
@@ -1425,14 +1425,14 @@ final class ModelSchemaMacroTests: XCTestCase {
                 extension Note: _SchemaProvider {
                 }
                 """,
-            macros: ["ModelSchema": ModelSchemaMacro.self]
+            macros: ["Model": ModelMacro.self]
         )
     }
 
     func testSchemaExpansionDeepNestedModelMissingSchemaAttrIndex() {
         assertMacroExpansion(
             """
-            @ModelSchema
+            @Model
             struct User {
                 @AutoID var id: String?
                 @Index var email: String
@@ -1443,7 +1443,7 @@ final class ModelSchemaMacroTests: XCTestCase {
                 static let keyPrefix: String = "user"
             }
 
-            @ModelSchema
+            @Model
             struct Address: JsonModel {
                 @AutoID var id: String?
                 var addressLine1: String
@@ -1632,7 +1632,7 @@ final class ModelSchemaMacroTests: XCTestCase {
                 extension Address: _SchemaProvider {
                 }
                 """,
-            macros: ["ModelSchema": ModelSchemaMacro.self]
+            macros: ["Model": ModelMacro.self]
         )
     }
 
