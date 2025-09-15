@@ -43,9 +43,9 @@ final class MigratorTests {
 
         // Assert expected indexes for schema
         let expected: [(String, String)] = [
-            ("id", "TEXT"),
-            ("name", "TEXT"),
-            ("email", "TEXT"),
+            ("id", "TAG"),
+            ("name", "TAG"),
+            ("email", "TAG"),
         ]
         for (field, fieldType) in expected {
             #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))
@@ -55,7 +55,6 @@ final class MigratorTests {
     @Test func testMigrateArrayNestedModelIndexes() async throws {
         try await self.migrator.migrate(models: [User.self])
 
-        // Assert index exists (FT.INFO idx:Bike)
         let listResponse = try await self.connectionPool.send(command: "FT._LIST").get()
         let indexNames = listResponse.array?.compactMap({ $0.string })
         #expect(indexNames!.contains("idx:User"))
@@ -65,14 +64,14 @@ final class MigratorTests {
 
         // Assert expected indexes for schema
         let expected: [(String, String)] = [
-            ("id", "TEXT"),
+            ("id", "TAG"),
             ("name", "TEXT"),
-            ("email", "TEXT"),
-            ("notes.id", "TEXT"),
-            ("address.id", "TEXT"),
-            ("address.city", "TEXT"),
-            ("address.postalCode", "TEXT"),
-            ("address.note.id", "TEXT"),
+            ("email", "TAG"),
+            ("notes.id", "TAG"),
+            ("address.id", "TAG"),
+            ("address.city", "TAG"),
+            ("address.postalCode", "TAG"),
+            ("address.note.id", "TAG"),
             ("address.note.description", "TEXT"),
         ]
         for (field, fieldType) in expected {
@@ -93,7 +92,7 @@ final class MigratorTests {
 
         // Assert expected indexes for schema
         let expected: [(String, String)] = [
-            ("id", "TEXT")
+            ("id", "TAG")
 
         ]
         for (field, fieldType) in expected {
@@ -114,10 +113,10 @@ final class MigratorTests {
 
         // Assert expected indexes for schema
         let expected: [(String, String)] = [
-            ("id", "TEXT"),
-            ("name", "TEXT"),
-            ("email", "TEXT"),
-            ("notes.id", "TEXT"),
+            ("id", "TAG"),
+            ("name", "TAG"),
+            ("email", "TAG"),
+            ("notes.id", "TAG"),
             ("notes.description", "TEXT"),
         ]
         for (field, fieldType) in expected {
@@ -138,14 +137,14 @@ final class MigratorTests {
 
         // Assert expected indexes for schema
         let expected: [(String, String)] = [
-            ("id", "TEXT"),
-            ("model", "TEXT"),
-            ("brand", "TEXT"),
+            ("id", "TAG"),
+            ("model", "TAG"),
+            ("brand", "TAG"),
             ("price", "NUMERIC"),
-            ("type", "TEXT"),
+            ("type", "TAG"),
             ("description", "TEXT"),
             ("helmetIncluded", "TAG"),
-            ("specs.material", "TEXT"),
+            ("specs.material", "TAG"),
             ("specs.weight", "NUMERIC"),
         ]
         for (field, fieldType) in expected {
@@ -166,9 +165,9 @@ final class MigratorTests {
 
         // Assert expected indexes for schema
         let expected: [(String, String)] = [
-            ("id", "TEXT"),
-            ("items.id", "TEXT"),
-            ("items.name", "TEXT"),
+            ("id", "TAG"),
+            ("items.id", "TAG"),
+            ("items.name", "TAG"),
         ]
         for (field, fieldType) in expected {
             #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))

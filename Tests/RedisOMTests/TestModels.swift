@@ -6,7 +6,7 @@ import Foundation
 @ModelSchema
 struct User: JsonModel {
     @AutoID var id: String?
-    @Index var name: String
+    @Index(type: .text) var name: String
     @Index var email: String
     var aliases: [String]?
     var age: Int?
@@ -33,7 +33,7 @@ struct Author: JsonModel {
 @ModelSchema
 struct Note: JsonModel {
     @AutoID var id: String?
-    @Index var description: String
+    @Index(type: .text) var description: String
     var createdAt: Date?
 
     static let keyPrefix: String = "note"
@@ -89,10 +89,10 @@ struct Bike: JsonModel {
     @AutoID var id: String?
     @Index var model: String
     @Index var brand: String
-    @Index var price: Int
+    @Index(type: .numeric) var price: Int
     @Index var type: String
     @Index var specs: Spec
-    @Index var description: String?
+    @Index(type: .text) var description: String?
     var addons: [String]?
     @Index var helmetIncluded: Bool
     var createdAt: Date?
@@ -104,7 +104,7 @@ struct Bike: JsonModel {
 struct Spec: JsonModel {
     var id: String?
     @Index var material: String
-    @Index var weight: Int
+    @Index(type: .numeric) var weight: Int
 
     static let keyPrefix: String = "spec"
 }
