@@ -5,7 +5,7 @@ import Foundation
 // MARK: Test Models
 @Model
 struct User: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     @Index(type: .text) var name: String
     @Index var email: String
     var aliases: [String]?
@@ -19,7 +19,7 @@ struct User: JsonModel {
 
 @Model
 struct Author: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     @Index var name: String
     @Index var email: String
     var aliases: [String]?
@@ -32,7 +32,7 @@ struct Author: JsonModel {
 
 @Model
 struct Note: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     @Index(type: .text) var description: String
     var createdAt: Date?
 
@@ -41,7 +41,7 @@ struct Note: JsonModel {
 
 @Model
 struct Node: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     var term: String
     var type: String
     var edges: [Edge]
@@ -50,7 +50,7 @@ struct Node: JsonModel {
 }
 
 struct Edge: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     var from: String
     var to: String
 
@@ -59,7 +59,7 @@ struct Edge: JsonModel {
 
 @Model
 struct Address: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     var addressLine1: String
     var addressLine2: String? = nil
     @Index var city: String
@@ -73,7 +73,7 @@ struct Address: JsonModel {
 
 @Model
 struct Person: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     @Index var name: String
     @Index var email: String
     var aliases: [String]?
@@ -86,7 +86,7 @@ struct Person: JsonModel {
 
 @Model
 struct Bike: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     @Index var model: String
     @Index var brand: String
     @Index(type: .numeric) var price: Int
@@ -111,7 +111,7 @@ struct Spec: JsonModel {
 
 @Model
 struct Item: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     var price: Double
     @Index var name: String
 
@@ -120,7 +120,7 @@ struct Item: JsonModel {
 
 @Model
 struct Order: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     @Index var items: [Item]
     var createdOn: Date
 

@@ -11,7 +11,7 @@ final class ModelMacroTests: XCTestCase {
             """
             @Model
             struct User {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index var email: String
                 var age: Int
 
@@ -20,7 +20,7 @@ final class ModelMacroTests: XCTestCase {
             """,
             expandedSource: """
                 struct User {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index var email: String
                     var age: Int
 
@@ -31,7 +31,7 @@ final class ModelMacroTests: XCTestCase {
                         email: String,
                         age: Int
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self.age = age
                     }
@@ -48,7 +48,7 @@ final class ModelMacroTests: XCTestCase {
                         let emailDecoded = try c.decode(String.self, forKey: .email)
                         let ageDecoded = try c.decode(Int.self, forKey: .age)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._email = Index(wrappedValue: emailDecoded, type: .tag)
                         self.age = ageDecoded
                     }
@@ -78,7 +78,7 @@ final class ModelMacroTests: XCTestCase {
             """
             @Model
             struct User {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
 
@@ -87,7 +87,7 @@ final class ModelMacroTests: XCTestCase {
             """,
             expandedSource: """
                 struct User {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
 
@@ -98,7 +98,7 @@ final class ModelMacroTests: XCTestCase {
                         email: String,
                         age: Int
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
                     }
@@ -115,7 +115,7 @@ final class ModelMacroTests: XCTestCase {
                         let emailDecoded = try c.decode(String.self, forKey: .email)
                         let ageDecoded = try c.decode(Int.self, forKey: .age)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._email = Index(wrappedValue: emailDecoded, type: .tag)
                         self._age = Index(wrappedValue: ageDecoded, type: .numeric)
                     }
@@ -146,7 +146,7 @@ final class ModelMacroTests: XCTestCase {
             """
             @Model
             struct User {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index(type: .tag) var email: String
                 @Index(type: .numeric) var age: Int
                 @Index(type: .text) var notes: [String]
@@ -156,7 +156,7 @@ final class ModelMacroTests: XCTestCase {
             """,
             expandedSource: """
                 struct User {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index(type: .tag) var email: String
                     @Index(type: .numeric) var age: Int
                     @Index(type: .text) var notes: [String]
@@ -169,7 +169,7 @@ final class ModelMacroTests: XCTestCase {
                         age: Int,
                         notes: [String]
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
                         self._notes = Index(wrappedValue: notes, type: .text)
@@ -189,7 +189,7 @@ final class ModelMacroTests: XCTestCase {
                         let ageDecoded = try c.decode(Int.self, forKey: .age)
                         let notesDecoded = try c.decode([String].self, forKey: .notes)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._email = Index(wrappedValue: emailDecoded, type: .tag)
                         self._age = Index(wrappedValue: ageDecoded, type: .numeric)
                         self._notes = Index(wrappedValue: notesDecoded, type: .text)
@@ -223,7 +223,7 @@ final class ModelMacroTests: XCTestCase {
             """
             @Model
             struct User {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index(type: .tag)
                 var email: String
                 @Index(type: .numeric)
@@ -236,7 +236,7 @@ final class ModelMacroTests: XCTestCase {
             """,
             expandedSource: """
                 struct User {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index(type: .tag)
                     var email: String
                     @Index(type: .numeric)
@@ -252,7 +252,7 @@ final class ModelMacroTests: XCTestCase {
                         age: Int,
                         scores: [Double]
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
                         self._scores = Index(wrappedValue: scores, type: .vector)
@@ -272,7 +272,7 @@ final class ModelMacroTests: XCTestCase {
                         let ageDecoded = try c.decode(Int.self, forKey: .age)
                         let scoresDecoded = try c.decode([Double].self, forKey: .scores)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._email = Index(wrappedValue: emailDecoded, type: .tag)
                         self._age = Index(wrappedValue: ageDecoded, type: .numeric)
                         self._scores = Index(wrappedValue: scoresDecoded, type: .vector)
@@ -306,7 +306,7 @@ final class ModelMacroTests: XCTestCase {
             """
             @Model
             struct User {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index(type: .tag) var email: String
                 @Index(type: .numeric) var age: Int
                 @Index(type: .vector) var scores: [Float]
@@ -316,7 +316,7 @@ final class ModelMacroTests: XCTestCase {
             """,
             expandedSource: """
                 struct User {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index(type: .tag) var email: String
                     @Index(type: .numeric) var age: Int
                     @Index(type: .vector) var scores: [Float]
@@ -329,7 +329,7 @@ final class ModelMacroTests: XCTestCase {
                         age: Int,
                         scores: [Float]
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
                         self._scores = Index(wrappedValue: scores, type: .vector)
@@ -349,7 +349,7 @@ final class ModelMacroTests: XCTestCase {
                         let ageDecoded = try c.decode(Int.self, forKey: .age)
                         let scoresDecoded = try c.decode([Float].self, forKey: .scores)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._email = Index(wrappedValue: emailDecoded, type: .tag)
                         self._age = Index(wrappedValue: ageDecoded, type: .numeric)
                         self._scores = Index(wrappedValue: scoresDecoded, type: .vector)
@@ -383,7 +383,7 @@ final class ModelMacroTests: XCTestCase {
             """
             @Model
             struct User {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
                 @Index var preferences: [String: Int]
@@ -393,7 +393,7 @@ final class ModelMacroTests: XCTestCase {
             """,
             expandedSource: """
                 struct User {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
                     @Index var preferences: [String: Int]
@@ -406,7 +406,7 @@ final class ModelMacroTests: XCTestCase {
                         age: Int,
                         preferences: [String: Int]
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
                         self._preferences = Index(wrappedValue: preferences, type: .tag)
@@ -426,7 +426,7 @@ final class ModelMacroTests: XCTestCase {
                         let ageDecoded = try c.decode(Int.self, forKey: .age)
                         let preferencesDecoded = try c.decode([String: Int].self, forKey: .preferences)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._email = Index(wrappedValue: emailDecoded, type: .tag)
                         self._age = Index(wrappedValue: ageDecoded, type: .numeric)
                         self._preferences = Index(wrappedValue: preferencesDecoded, type: .tag)
@@ -460,7 +460,7 @@ final class ModelMacroTests: XCTestCase {
             """
             @Model
             struct User {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
                 @Index(type: .geo) var location: Coordinate
@@ -471,7 +471,7 @@ final class ModelMacroTests: XCTestCase {
             """,
             expandedSource: """
                 struct User {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
                     @Index(type: .geo) var location: Coordinate
@@ -484,7 +484,7 @@ final class ModelMacroTests: XCTestCase {
                         age: Int,
                         location: Coordinate
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
                         self._location = Index(wrappedValue: location, type: .geo)
@@ -504,7 +504,7 @@ final class ModelMacroTests: XCTestCase {
                         let ageDecoded = try c.decode(Int.self, forKey: .age)
                         let locationDecoded = try c.decode(Coordinate.self, forKey: .location)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._email = Index(wrappedValue: emailDecoded, type: .tag)
                         self._age = Index(wrappedValue: ageDecoded, type: .numeric)
                         self._location = Index(wrappedValue: locationDecoded, type: .geo)
@@ -539,7 +539,7 @@ final class ModelMacroTests: XCTestCase {
             """
             @Model
             struct User {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
                 @Index var birthdate: Date
@@ -550,7 +550,7 @@ final class ModelMacroTests: XCTestCase {
             """,
             expandedSource: """
                 struct User {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
                     @Index var birthdate: Date
@@ -563,7 +563,7 @@ final class ModelMacroTests: XCTestCase {
                         age: Int,
                         birthdate: Date
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
                         self._birthdate = Index(wrappedValue: birthdate, type: .tag)
@@ -583,7 +583,7 @@ final class ModelMacroTests: XCTestCase {
                         let ageDecoded = try c.decode(Int.self, forKey: .age)
                         let birthdateDecoded = try c.decode(Date.self, forKey: .birthdate)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._email = Index(wrappedValue: emailDecoded, type: .tag)
                         self._age = Index(wrappedValue: ageDecoded, type: .numeric)
                         self._birthdate = Index(wrappedValue: birthdateDecoded, type: .tag)
@@ -618,7 +618,7 @@ final class ModelMacroTests: XCTestCase {
             """
             @Model
             struct User {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
                 @Index var notes: [Note]
@@ -628,7 +628,7 @@ final class ModelMacroTests: XCTestCase {
 
             @Model
             struct Note {
-                @AutoID var id: String?
+                @Id var id: String?
                 var description: String
                 var createdAt: Date?
 
@@ -637,7 +637,7 @@ final class ModelMacroTests: XCTestCase {
             """,
             expandedSource: """
                 struct User {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
                     @Index var notes: [Note]
@@ -650,7 +650,7 @@ final class ModelMacroTests: XCTestCase {
                         age: Int,
                         notes: [Note]
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
                         self._notes = Index(wrappedValue: notes, type: .tag)
@@ -670,7 +670,7 @@ final class ModelMacroTests: XCTestCase {
                         let ageDecoded = try c.decode(Int.self, forKey: .age)
                         let notesDecoded = try c.decode([Note].self, forKey: .notes)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._email = Index(wrappedValue: emailDecoded, type: .tag)
                         self._age = Index(wrappedValue: ageDecoded, type: .numeric)
                         self._notes = Index(wrappedValue: notesDecoded, type: .tag)
@@ -694,7 +694,7 @@ final class ModelMacroTests: XCTestCase {
                     }
                 }
                 struct Note {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     var description: String
                     var createdAt: Date?
 
@@ -705,7 +705,7 @@ final class ModelMacroTests: XCTestCase {
                         description: String,
                         createdAt: Date? = nil
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self.description = description
                         self.createdAt = createdAt
                     }
@@ -722,7 +722,7 @@ final class ModelMacroTests: XCTestCase {
                         let descriptionDecoded = try c.decode(String.self, forKey: .description)
                         let createdAtDecoded = try c.decodeIfPresent(Date.self, forKey: .createdAt)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self.description = descriptionDecoded
                         self.createdAt = createdAtDecoded
                     }
@@ -754,7 +754,7 @@ final class ModelMacroTests: XCTestCase {
             """
             @Model
             struct User {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
                 @Index var notes: [String: Note]
@@ -764,7 +764,7 @@ final class ModelMacroTests: XCTestCase {
 
             @Model
             struct Note: JsonModel {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index(type: .text) var description: String
                 var createdAt: Date?
 
@@ -773,7 +773,7 @@ final class ModelMacroTests: XCTestCase {
             """,
             expandedSource: """
                 struct User {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
                     @Index var notes: [String: Note]
@@ -786,7 +786,7 @@ final class ModelMacroTests: XCTestCase {
                         age: Int,
                         notes: [String: Note]
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
                         self._notes = Index(wrappedValue: notes, type: .tag)
@@ -806,7 +806,7 @@ final class ModelMacroTests: XCTestCase {
                         let ageDecoded = try c.decode(Int.self, forKey: .age)
                         let notesDecoded = try c.decode([String: Note].self, forKey: .notes)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._email = Index(wrappedValue: emailDecoded, type: .tag)
                         self._age = Index(wrappedValue: ageDecoded, type: .numeric)
                         self._notes = Index(wrappedValue: notesDecoded, type: .tag)
@@ -832,7 +832,7 @@ final class ModelMacroTests: XCTestCase {
                     ])
                 }
                 struct Note: JsonModel {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index(type: .text) var description: String
                     var createdAt: Date?
 
@@ -843,7 +843,7 @@ final class ModelMacroTests: XCTestCase {
                         description: String,
                         createdAt: Date? = nil
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._description = Index(wrappedValue: description, type: .text)
                         self.createdAt = createdAt
                     }
@@ -860,7 +860,7 @@ final class ModelMacroTests: XCTestCase {
                         let descriptionDecoded = try c.decode(String.self, forKey: .description)
                         let createdAtDecoded = try c.decodeIfPresent(Date.self, forKey: .createdAt)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._description = Index(wrappedValue: descriptionDecoded, type: .text)
                         self.createdAt = createdAtDecoded
                     }
@@ -893,7 +893,7 @@ final class ModelMacroTests: XCTestCase {
             """
             @Model
             struct Bike: JsonModel {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index var model: String
                 @Index var brand: String
                 @Index(type: .numeric) var price: Int
@@ -917,7 +917,7 @@ final class ModelMacroTests: XCTestCase {
             """,
             expandedSource: """
                 struct Bike: JsonModel {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index var model: String
                     @Index var brand: String
                     @Index(type: .numeric) var price: Int
@@ -942,7 +942,7 @@ final class ModelMacroTests: XCTestCase {
                         helmetIncluded: Bool,
                         createdAt: Date? = nil
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._model = Index(wrappedValue: model, type: .tag)
                         self._brand = Index(wrappedValue: brand, type: .tag)
                         self._price = Index(wrappedValue: price, type: .numeric)
@@ -980,7 +980,7 @@ final class ModelMacroTests: XCTestCase {
                         let helmetIncludedDecoded = try c.decode(Bool.self, forKey: .helmetIncluded)
                         let createdAtDecoded = try c.decodeIfPresent(Date.self, forKey: .createdAt)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._model = Index(wrappedValue: modelDecoded, type: .tag)
                         self._brand = Index(wrappedValue: brandDecoded, type: .tag)
                         self._price = Index(wrappedValue: priceDecoded, type: .numeric)
@@ -1074,7 +1074,7 @@ final class ModelMacroTests: XCTestCase {
             """
             @Model
             struct Bike: JsonModel {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index var specs: Spec
 
                 static let keyPrefix: String = "bike"
@@ -1090,7 +1090,7 @@ final class ModelMacroTests: XCTestCase {
             """,
             expandedSource: """
                 struct Bike: JsonModel {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index var specs: Spec
 
                     static let keyPrefix: String = "bike"
@@ -1099,7 +1099,7 @@ final class ModelMacroTests: XCTestCase {
                         id: String? = nil,
                         specs: Spec
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._specs = Index(wrappedValue: specs, type: .tag)
                     }
 
@@ -1113,7 +1113,7 @@ final class ModelMacroTests: XCTestCase {
                         let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
                         let specsDecoded = try c.decode(Spec.self, forKey: .specs)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._specs = Index(wrappedValue: specsDecoded, type: .tag)
                     }
 
@@ -1185,7 +1185,7 @@ final class ModelMacroTests: XCTestCase {
             """
             @Model
             struct User {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
                 @Index(type: .text) var notes: [String: Note]
@@ -1196,7 +1196,7 @@ final class ModelMacroTests: XCTestCase {
 
             @Model
             struct Address: JsonModel {
-                @AutoID var id: String?
+                @Id var id: String?
                 var addressLine1: String
                 var addressLine2: String? = nil
                 @Index var city: String
@@ -1210,7 +1210,7 @@ final class ModelMacroTests: XCTestCase {
 
             @Model
             struct Note: JsonModel {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index(type: .text) var description: String
                 var createdAt: Date?
 
@@ -1219,7 +1219,7 @@ final class ModelMacroTests: XCTestCase {
             """,
             expandedSource: """
                 struct User {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
                     @Index(type: .text) var notes: [String: Note]
@@ -1234,7 +1234,7 @@ final class ModelMacroTests: XCTestCase {
                         notes: [String: Note],
                         address: Address
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
                         self._notes = Index(wrappedValue: notes, type: .text)
@@ -1257,7 +1257,7 @@ final class ModelMacroTests: XCTestCase {
                         let notesDecoded = try c.decode([String: Note].self, forKey: .notes)
                         let addressDecoded = try c.decode(Address.self, forKey: .address)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._email = Index(wrappedValue: emailDecoded, type: .tag)
                         self._age = Index(wrappedValue: ageDecoded, type: .numeric)
                         self._notes = Index(wrappedValue: notesDecoded, type: .text)
@@ -1288,7 +1288,7 @@ final class ModelMacroTests: XCTestCase {
                     } ?? [] )
                 }
                 struct Address: JsonModel {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     var addressLine1: String
                     var addressLine2: String? = nil
                     @Index var city: String
@@ -1309,7 +1309,7 @@ final class ModelMacroTests: XCTestCase {
                         postalCode: String,
                         note: Note? = nil
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self.addressLine1 = addressLine1
                         self.addressLine2 = addressLine2
                         self._city = Index(wrappedValue: city, type: .tag)
@@ -1341,7 +1341,7 @@ final class ModelMacroTests: XCTestCase {
                         let postalCodeDecoded = try c.decode(String.self, forKey: .postalCode)
                         let noteDecoded = try c.decode(Note? .self, forKey: .note)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self.addressLine1 = addressLine1Decoded
                         self.addressLine2 = addressLine2Decoded
                         self._city = Index(wrappedValue: cityDecoded, type: .tag)
@@ -1370,7 +1370,7 @@ final class ModelMacroTests: XCTestCase {
                     ]
                 }
                 struct Note: JsonModel {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index(type: .text) var description: String
                     var createdAt: Date?
 
@@ -1381,7 +1381,7 @@ final class ModelMacroTests: XCTestCase {
                         description: String,
                         createdAt: Date? = nil
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._description = Index(wrappedValue: description, type: .text)
                         self.createdAt = createdAt
                     }
@@ -1398,7 +1398,7 @@ final class ModelMacroTests: XCTestCase {
                         let descriptionDecoded = try c.decode(String.self, forKey: .description)
                         let createdAtDecoded = try c.decodeIfPresent(Date.self, forKey: .createdAt)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._description = Index(wrappedValue: descriptionDecoded, type: .text)
                         self.createdAt = createdAtDecoded
                     }
@@ -1434,7 +1434,7 @@ final class ModelMacroTests: XCTestCase {
             """
             @Model
             struct User {
-                @AutoID var id: String?
+                @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
                 @Index var notes: [String: Note]
@@ -1445,7 +1445,7 @@ final class ModelMacroTests: XCTestCase {
 
             @Model
             struct Address: JsonModel {
-                @AutoID var id: String?
+                @Id var id: String?
                 var addressLine1: String
                 var addressLine2: String? = nil
                 @Index var city: String
@@ -1458,7 +1458,7 @@ final class ModelMacroTests: XCTestCase {
             }
 
             struct Note: JsonModel {
-                @AutoID var id: String?
+                @Id var id: String?
                 var description: String
                 var createdAt: Date?
 
@@ -1467,7 +1467,7 @@ final class ModelMacroTests: XCTestCase {
             """,
             expandedSource: """
                 struct User {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
                     @Index var notes: [String: Note]
@@ -1482,7 +1482,7 @@ final class ModelMacroTests: XCTestCase {
                         notes: [String: Note],
                         address: Address
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
                         self._notes = Index(wrappedValue: notes, type: .tag)
@@ -1505,7 +1505,7 @@ final class ModelMacroTests: XCTestCase {
                         let notesDecoded = try c.decode([String: Note].self, forKey: .notes)
                         let addressDecoded = try c.decode(Address.self, forKey: .address)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self._email = Index(wrappedValue: emailDecoded, type: .tag)
                         self._age = Index(wrappedValue: ageDecoded, type: .numeric)
                         self._notes = Index(wrappedValue: notesDecoded, type: .tag)
@@ -1536,7 +1536,7 @@ final class ModelMacroTests: XCTestCase {
                     } ?? [] )
                 }
                 struct Address: JsonModel {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     var addressLine1: String
                     var addressLine2: String? = nil
                     @Index var city: String
@@ -1557,7 +1557,7 @@ final class ModelMacroTests: XCTestCase {
                         postalCode: String,
                         note: Note? = nil
                     ) {
-                        self._id = AutoID(wrappedValue: id)
+                        self._id = Id(wrappedValue: id)
                         self.addressLine1 = addressLine1
                         self.addressLine2 = addressLine2
                         self._city = Index(wrappedValue: city, type: .tag)
@@ -1589,7 +1589,7 @@ final class ModelMacroTests: XCTestCase {
                         let postalCodeDecoded = try c.decode(String.self, forKey: .postalCode)
                         let noteDecoded = try c.decode(Note? .self, forKey: .note)
 
-                        self._id = AutoID(wrappedValue: idDecoded)
+                        self._id = Id(wrappedValue: idDecoded)
                         self.addressLine1 = addressLine1Decoded
                         self.addressLine2 = addressLine2Decoded
                         self._city = Index(wrappedValue: cityDecoded, type: .tag)
@@ -1619,7 +1619,7 @@ final class ModelMacroTests: XCTestCase {
                 }
 
                 struct Note: JsonModel {
-                    @AutoID var id: String?
+                    @Id var id: String?
                     var description: String
                     var createdAt: Date?
 
