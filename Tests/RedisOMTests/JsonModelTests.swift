@@ -34,7 +34,7 @@ final class JsonModelTests {
             email: "alice@example.com",
             aliases: ["Alicia", "alice"],
             age: 33,
-            createdAt: Date(),
+            createdAt: Date()
         )
         try await user.save()
 
@@ -81,7 +81,7 @@ final class JsonModelTests {
             name: "Alice",
             email: "alice@example.com",
             age: 33,
-            createdAt: Date(),
+            createdAt: Date()
         )
         try await user.save()
 
@@ -115,7 +115,7 @@ final class JsonModelTests {
             email: "alice@example.com",
             age: 33,
             notes: [.init(description: "Applied to ACME")],
-            createdAt: Date(),
+            createdAt: Date()
         )
         try await user.save()
 
@@ -152,7 +152,7 @@ final class JsonModelTests {
             email: "alice@example.com",
             age: 33,
             notes: [.init(description: "Applied to ACME")],
-            createdAt: Date(),
+            createdAt: Date()
         )
         try await user.save()
 
@@ -179,7 +179,7 @@ final class JsonModelTests {
             email: "alice@example.com",
             age: 33,
             notes: [.init(description: "Applied to ACME")],
-            createdAt: Date(),
+            createdAt: Date()
         )
         try await user.save()
 
@@ -198,7 +198,7 @@ final class JsonModelTests {
             email: "alice@example.com",
             age: 33,
             notes: [.init(description: "Applied to ACME")],
-            createdAt: Date(),
+            createdAt: Date()
         )
         try await user.save()
 
@@ -217,7 +217,7 @@ final class JsonModelTests {
             email: "alice@example.com",
             aliases: ["Alicia", "alice"],
             age: 33,
-            createdAt: Date(),
+            createdAt: Date()
         )
         try await user1.save()
 
@@ -225,7 +225,7 @@ final class JsonModelTests {
             name: "Bob",
             email: "bob@example.com",
             age: 18,
-            createdAt: Date(),
+            createdAt: Date()
         )
         try await user2.save()
 
@@ -241,7 +241,7 @@ final class JsonModelTests {
                 name: "User \(i)",
                 email: "user-\(i)@example.com",
                 age: Int.random(in: 1..<100),
-                createdAt: Date(),
+                createdAt: Date()
             )
             try await user.save()
         }
