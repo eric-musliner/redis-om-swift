@@ -15,7 +15,7 @@ let package = Package(
         .package(url: "https://github.com/swift-server/RediStack.git", from: "1.4.1"),
         .package(url: "https://github.com/swift-server/swift-service-lifecycle.git", from: "2.8.0"),
         .package(url: "https://github.com/vapor/vapor.git", from: "4.115.0"),
-        .package(url: "https://github.com/apple/swift-syntax.git", from: "601.0.1"),
+        .package(url: "https://github.com/apple/swift-syntax.git", from: "602.0.0"),
 
     ],
     targets: [
