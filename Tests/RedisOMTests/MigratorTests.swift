@@ -30,6 +30,28 @@ final class MigratorTests {
         }
     }
 
+    @Test func testMigrateNoModelsProvided() async throws {
+        try await self.migrator.migrate(models: [])
+
+        let listResponse = try await self.connectionPool.send(command: "FT._LIST").get()
+        let indexNames = listResponse.array?.compactMap({ $0.string })
+        #expect(indexNames!.isEmpty)
+    }
+
+    @Test func testMigrateModelNoSchemaAttribute() async throws {
+        struct InvalidModel: JsonModel {
+            @Id var id: String?
+            var name: String
+            static let keyPrefix: String = "invalid"
+        }
+
+        try await self.migrator.migrate(models: [InvalidModel.self])
+
+        let listResponse = try await self.connectionPool.send(command: "FT._LIST").get()
+        let indexNames = listResponse.array?.compactMap({ $0.string })
+        #expect(indexNames!.isEmpty)
+    }
+
     @Test func testMigratePersonIndexes() async throws {
         try await self.migrator.migrate(models: [Person.self])
 
