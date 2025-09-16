@@ -10,7 +10,7 @@ final class ModelMacroTests: XCTestCase {
         assertMacroExpansion(
             """
             @Model
-            struct User {
+            struct User: JsonModel {
                 @Id var id: String?
                 @Index var email: String
                 var age: Int
@@ -19,7 +19,7 @@ final class ModelMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-                struct User {
+                struct User: JsonModel {
                     @Id var id: String?
                     @Index var email: String
                     var age: Int
@@ -77,7 +77,7 @@ final class ModelMacroTests: XCTestCase {
         assertMacroExpansion(
             """
             @Model
-            struct User {
+            struct User: JsonModel {
                 @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
@@ -86,7 +86,7 @@ final class ModelMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-                struct User {
+                struct User: JsonModel {
                     @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
@@ -145,7 +145,7 @@ final class ModelMacroTests: XCTestCase {
         assertMacroExpansion(
             """
             @Model
-            struct User {
+            struct User: JsonModel {
                 @Id var id: String?
                 @Index(type: .tag) var email: String
                 @Index(type: .numeric) var age: Int
@@ -155,7 +155,7 @@ final class ModelMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-                struct User {
+                struct User: JsonModel {
                     @Id var id: String?
                     @Index(type: .tag) var email: String
                     @Index(type: .numeric) var age: Int
@@ -222,7 +222,7 @@ final class ModelMacroTests: XCTestCase {
         assertMacroExpansion(
             """
             @Model
-            struct User {
+            struct User: JsonModel {
                 @Id var id: String?
                 @Index(type: .tag)
                 var email: String
@@ -235,7 +235,7 @@ final class ModelMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-                struct User {
+                struct User: JsonModel {
                     @Id var id: String?
                     @Index(type: .tag)
                     var email: String
@@ -305,7 +305,7 @@ final class ModelMacroTests: XCTestCase {
         assertMacroExpansion(
             """
             @Model
-            struct User {
+            struct User: JsonModel {
                 @Id var id: String?
                 @Index(type: .tag) var email: String
                 @Index(type: .numeric) var age: Int
@@ -315,7 +315,7 @@ final class ModelMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-                struct User {
+                struct User: JsonModel {
                     @Id var id: String?
                     @Index(type: .tag) var email: String
                     @Index(type: .numeric) var age: Int
@@ -382,7 +382,7 @@ final class ModelMacroTests: XCTestCase {
         assertMacroExpansion(
             """
             @Model
-            struct User {
+            struct User: JsonModel {
                 @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
@@ -392,7 +392,7 @@ final class ModelMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-                struct User {
+                struct User: JsonModel {
                     @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
@@ -459,7 +459,7 @@ final class ModelMacroTests: XCTestCase {
         assertMacroExpansion(
             """
             @Model
-            struct User {
+            struct User: JsonModel {
                 @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
@@ -470,7 +470,7 @@ final class ModelMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-                struct User {
+                struct User: JsonModel {
                     @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
@@ -538,7 +538,7 @@ final class ModelMacroTests: XCTestCase {
         assertMacroExpansion(
             """
             @Model
-            struct User {
+            struct User: JsonModel {
                 @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
@@ -549,7 +549,7 @@ final class ModelMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-                struct User {
+                struct User: JsonModel {
                     @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
@@ -617,7 +617,7 @@ final class ModelMacroTests: XCTestCase {
         assertMacroExpansion(
             """
             @Model
-            struct User {
+            struct User: JsonModel {
                 @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
@@ -627,7 +627,7 @@ final class ModelMacroTests: XCTestCase {
             }
 
             @Model
-            struct Note {
+            struct Note: JsonModel {
                 @Id var id: String?
                 var description: String
                 var createdAt: Date?
@@ -636,7 +636,7 @@ final class ModelMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-                struct User {
+                struct User: JsonModel {
                     @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
@@ -693,7 +693,7 @@ final class ModelMacroTests: XCTestCase {
                         Field(name: "notes.\\(f.name)", type: f.type, indexType: f.indexType)
                     }
                 }
-                struct Note {
+                struct Note: JsonModel {
                     @Id var id: String?
                     var description: String
                     var createdAt: Date?
@@ -753,7 +753,7 @@ final class ModelMacroTests: XCTestCase {
         assertMacroExpansion(
             """
             @Model
-            struct User {
+            struct User: JsonModel {
                 @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
@@ -772,7 +772,7 @@ final class ModelMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-                struct User {
+                struct User: JsonModel {
                     @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
@@ -1184,7 +1184,7 @@ final class ModelMacroTests: XCTestCase {
         assertMacroExpansion(
             """
             @Model
-            struct User {
+            struct User: JsonModel {
                 @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
@@ -1218,7 +1218,7 @@ final class ModelMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-                struct User {
+                struct User: JsonModel {
                     @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
@@ -1433,7 +1433,7 @@ final class ModelMacroTests: XCTestCase {
         assertMacroExpansion(
             """
             @Model
-            struct User {
+            struct User: JsonModel {
                 @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
@@ -1466,7 +1466,7 @@ final class ModelMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-                struct User {
+                struct User: JsonModel {
                     @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
