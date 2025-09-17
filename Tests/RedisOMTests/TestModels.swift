@@ -3,10 +3,10 @@ import Foundation
 @testable import RedisOM
 
 // MARK: Test Models
-@ModelSchema
+@Model
 struct User: JsonModel {
-    @AutoID var id: String?
-    @Index var name: String
+    @Id var id: String?
+    @Index(type: .text) var name: String
     @Index var email: String
     var aliases: [String]?
     var age: Int?
@@ -17,9 +17,9 @@ struct User: JsonModel {
     static let keyPrefix: String = "user"
 }
 
-@ModelSchema
+@Model
 struct Author: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     @Index var name: String
     @Index var email: String
     var aliases: [String]?
@@ -30,18 +30,18 @@ struct Author: JsonModel {
     static let keyPrefix: String = "author"
 }
 
-@ModelSchema
+@Model
 struct Note: JsonModel {
-    @AutoID var id: String?
-    @Index var description: String
+    @Id var id: String?
+    @Index(type: .text) var description: String
     var createdAt: Date?
 
     static let keyPrefix: String = "note"
 }
 
-@ModelSchema
+@Model
 struct Node: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     var term: String
     var type: String
     var edges: [Edge]
@@ -50,16 +50,16 @@ struct Node: JsonModel {
 }
 
 struct Edge: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     var from: String
     var to: String
 
     static let keyPrefix: String = "misc"
 }
 
-@ModelSchema
+@Model
 struct Address: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     var addressLine1: String
     var addressLine2: String? = nil
     @Index var city: String
@@ -71,9 +71,9 @@ struct Address: JsonModel {
     static let keyPrefix: String = "address"
 }
 
-@ModelSchema
+@Model
 struct Person: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     @Index var name: String
     @Index var email: String
     var aliases: [String]?
@@ -84,15 +84,15 @@ struct Person: JsonModel {
     static let keyPrefix: String = "person"
 }
 
-@ModelSchema
+@Model
 struct Bike: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     @Index var model: String
     @Index var brand: String
-    @Index var price: Int
+    @Index(type: .numeric) var price: Int
     @Index var type: String
     @Index var specs: Spec
-    @Index var description: String?
+    @Index(type: .text) var description: String?
     var addons: [String]?
     @Index var helmetIncluded: Bool
     var createdAt: Date?
@@ -100,27 +100,27 @@ struct Bike: JsonModel {
     static let keyPrefix: String = "bike"
 }
 
-@ModelSchema
+@Model
 struct Spec: JsonModel {
     var id: String?
     @Index var material: String
-    @Index var weight: Int
+    @Index(type: .numeric) var weight: Int
 
     static let keyPrefix: String = "spec"
 }
 
-@ModelSchema
+@Model
 struct Item: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     var price: Double
     @Index var name: String
 
     static let keyPrefix: String = "item"
 }
 
-@ModelSchema
+@Model
 struct Order: JsonModel {
-    @AutoID var id: String?
+    @Id var id: String?
     @Index var items: [Item]
     var createdOn: Date
 
