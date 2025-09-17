@@ -1,7 +1,7 @@
 import Foundation
 
 @propertyWrapper
-public struct AutoID: Codable, Sendable {
+public struct Id: Codable, Sendable {
     public var wrappedValue: String?
 
     public init(wrappedValue: String? = nil) {

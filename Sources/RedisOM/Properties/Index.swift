@@ -10,9 +10,22 @@ public struct Index<Value: Codable & Sendable>: Codable, Sendable {
         self.indexType = .text
     }
 
-    public init(wrappedValue: Value, _ indexType: IndexType) {
+    public init(wrappedValue: Value, type indexType: IndexType = .tag) {
         self.indexType = indexType
         self.wrappedValue = wrappedValue
+    }
+
+    // Metadata-only initializer
+    public init(type indexType: IndexType) {
+        self.indexType = indexType
+        if let empty = [] as? Value {
+            self.wrappedValue = empty
+        } else if let empty = "" as? Value {
+            self.wrappedValue = empty
+        } else {
+            fatalError(
+                "Metadata-only initializer called at runtime for non-emptyable type \(Value.self)")
+        }
     }
 
     // MARK: - Codable
