@@ -32,7 +32,7 @@ jobs:
       image: ${{ matrix.image }}
     services:
       redis:
-        image: redis/redis-stack:7.2.0-v18
+        image: redis:8.2
         ports:
           - 6379:6379
 
