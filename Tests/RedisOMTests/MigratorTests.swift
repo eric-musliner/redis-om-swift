@@ -68,6 +68,7 @@ final class MigratorTests {
             ("id", "TAG"),
             ("name", "TAG"),
             ("email", "TAG"),
+            ("createdAt", "NUMERIC"),
         ]
         for (field, fieldType) in expected {
             #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))
@@ -89,6 +90,7 @@ final class MigratorTests {
             ("id", "TAG"),
             ("name", "TEXT"),
             ("email", "TAG"),
+            ("age", "NUMERIC"),
             ("notes.id", "TAG"),
             ("address.id", "TAG"),
             ("address.city", "TAG"),
@@ -213,6 +215,7 @@ final class MigratorTests {
             ("id", "TAG"),
             ("name", "TAG"),
             ("email", "TAG"),
+            ("createdAt", "NUMERIC"),
         ]
         for (field, fieldType) in expected {
             #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))
@@ -225,6 +228,7 @@ final class MigratorTests {
             ("id", "TAG"),
             ("name", "TEXT"),
             ("email", "TAG"),
+            ("age", "NUMERIC"),
             ("notes.id", "TAG"),
             ("address.id", "TAG"),
             ("address.city", "TAG"),
