@@ -2,36 +2,43 @@ import RedisOMCore
 
 @propertyWrapper
 public struct Index<Value: Codable & Sendable>: Codable, Sendable {
-    public var wrappedValue: Value
+    private var storage: Value?
     public var indexType: IndexType
 
+    // Access wrappedValue through storage
+    public var wrappedValue: Value {
+        get {
+            guard let value = storage else {
+                fatalError("Index<\(Value.self)> wrappedValue accessed before initialization")
+            }
+            return value
+        }
+        set {
+            storage = newValue
+        }
+    }
+
+    // MARK: - Initializers
     public init(wrappedValue: Value) {
-        self.wrappedValue = wrappedValue
         self.indexType = .text
+        self.storage = wrappedValue
     }
 
     public init(wrappedValue: Value, type indexType: IndexType = .tag) {
         self.indexType = indexType
-        self.wrappedValue = wrappedValue
+        self.storage = wrappedValue
     }
 
-    // Metadata-only initializer
+    /// Metadata-only initializer (no wrapped value set)
     public init(type indexType: IndexType) {
         self.indexType = indexType
-        if let empty = [] as? Value {
-            self.wrappedValue = empty
-        } else if let empty = "" as? Value {
-            self.wrappedValue = empty
-        } else {
-            fatalError(
-                "Metadata-only initializer called at runtime for non-emptyable type \(Value.self)")
-        }
+        self.storage = nil
     }
 
     // MARK: - Codable
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        self.wrappedValue = try container.decode(Value.self)
+        self.storage = try container.decode(Value.self)
         self.indexType = .text
     }
 
