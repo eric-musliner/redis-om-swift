@@ -9,7 +9,7 @@ struct User: JsonModel {
     @Index(type: .text) var name: String
     @Index var email: String
     var aliases: [String]?
-    var age: Int?
+    @Index(type: .numeric) var age: Int?
     @Index var notes: [Note]?
     @Index var address: [Address]?
     var createdAt: Date?
@@ -24,7 +24,7 @@ struct Author: JsonModel {
     @Index var email: String
     var aliases: [String]?
     var age: Int?
-    @Index var notes: [String: Note]
+    @Index(type: .text) var notes: [String: Note]
     var createdAt: Date?
 
     static let keyPrefix: String = "author"
@@ -79,7 +79,7 @@ struct Person: JsonModel {
     var aliases: [String]?
     var age: Int?
     var notes: [Note]?
-    var createdAt: Date?
+    @Index(type: .numeric) var createdAt: Date?
 
     static let keyPrefix: String = "person"
 }

@@ -27,12 +27,12 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        image: ["swift:6.1", "swiftlang/swift:nightly-6.2-noble"]
+        image: ["swift:6.1-noble", "swift:6.2-noble"]
     container:
       image: ${{ matrix.image }}
     services:
       redis:
-        image: redis/redis-stack:7.2.0-v18
+        image: redis:8.2
         ports:
           - 6379:6379
 
