@@ -176,13 +176,13 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
                 if typeName == "Date" {
                     scalarFields.append(
                         """
-                        Field(name: "\(name)", type: "\(resolved)", indexType: \(indexType))
+                        Field(name: "\(name)", type: "\(resolved)", indexType: \(indexType), keyPath: \\Self.\(name))
                         """)
                 } else {
                     nestedSchemas.append(
                         """
                         (((\(typeName).self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                            Field(name: "\(name).\\(f.name)", type: f.type, indexType: f.indexType)
+                            Field(name: "\(name).\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
                         } ?? [] )
                         """)
                 }
@@ -191,7 +191,7 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
                 nestedSchemas.append(
                     """
                     \(typeName).schema.map { f in
-                        Field(name: "\(name).\\(f.name)", type: f.type, indexType: f.indexType)
+                        Field(name: "\(name).\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
                     }
                     """)
             case .Dictionary(key: _, value: .Other(let typeName)):
@@ -199,22 +199,22 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
                 nestedSchemas.append(
                     """
                     (((\(typeName).self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "\(name).\\(f.name)", type: f.type, indexType: f.indexType)
+                        Field(name: "\(name).\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
                     } ?? [
-                        Field(name: "\(name)", type: "[String: \(typeName)]", indexType: .tag)
+                        Field(name: "\(name)", type: "[String: \(typeName)]", indexType: .tag, keyPath: \\Self.\(name))
                     ])
                     """)
             case .Dictionary(key: _, value: let valueType):
                 // Dictionary where value is a scalar or non-JsonModel
                 scalarFields.append(
                     """
-                    Field(name: "\(name)", type: "[String: \(valueType)]", indexType: .tag)
+                    Field(name: "\(name)", type: "[String: \(valueType)]", indexType: .tag, keyPath: \\Self.\(name))
                     """)
             default:
                 // Normal scalar field
                 scalarFields.append(
                     """
-                    Field(name: "\(name)", type: "\(resolved)", indexType: \(indexType))
+                    Field(name: "\(name)", type: "\(resolved)", indexType: \(indexType), keyPath: \\Self.\(name))
                     """)
             }
 

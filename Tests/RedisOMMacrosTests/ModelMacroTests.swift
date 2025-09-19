@@ -61,8 +61,8 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "email", type: "String", indexType: .tag)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email)
                     ]
                 }
 
@@ -128,9 +128,9 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "email", type: "String", indexType: .tag),
-                        Field(name: "age", type: "Int", indexType: .numeric)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
+                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
                     ]
                 }
 
@@ -204,10 +204,10 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "email", type: "String", indexType: .tag),
-                        Field(name: "age", type: "Int", indexType: .numeric),
-                        Field(name: "notes", type: "[String]", indexType: .text)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
+                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age),
+                        Field(name: "notes", type: "[String]", indexType: .text, keyPath: \\Self.notes)
                     ]
                 }
 
@@ -287,10 +287,10 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "email", type: "String", indexType: .tag),
-                        Field(name: "age", type: "Int", indexType: .numeric),
-                        Field(name: "scores", type: "[Double]", indexType: .vector)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
+                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age),
+                        Field(name: "scores", type: "[Double]", indexType: .vector, keyPath: \\Self.scores)
                     ]
                 }
 
@@ -364,10 +364,10 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "email", type: "String", indexType: .tag),
-                        Field(name: "age", type: "Int", indexType: .numeric),
-                        Field(name: "scores", type: "[Float]", indexType: .vector)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
+                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age),
+                        Field(name: "scores", type: "[Float]", indexType: .vector, keyPath: \\Self.scores)
                     ]
                 }
 
@@ -441,10 +441,10 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "email", type: "String", indexType: .tag),
-                        Field(name: "age", type: "Int", indexType: .numeric),
-                        Field(name: "preferences", type: "[String: Int]", indexType: .tag)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
+                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age),
+                        Field(name: "preferences", type: "[String: Int]", indexType: .tag, keyPath: \\Self.preferences)
                     ]
                 }
 
@@ -519,10 +519,10 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "email", type: "String", indexType: .tag),
-                        Field(name: "age", type: "Int", indexType: .numeric),
-                        Field(name: "location", type: "Coordinate", indexType: .geo)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
+                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age),
+                        Field(name: "location", type: "Coordinate", indexType: .geo, keyPath: \\Self.location)
                     ]
 
                 }
@@ -598,10 +598,10 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "email", type: "String", indexType: .tag),
-                        Field(name: "age", type: "Int", indexType: .numeric),
-                        Field(name: "birthdate", type: "Date", indexType: .tag)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
+                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age),
+                        Field(name: "birthdate", type: "Date", indexType: .tag, keyPath: \\Self.birthdate)
                     ]
 
                 }
@@ -685,12 +685,12 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "email", type: "String", indexType: .tag),
-                        Field(name: "age", type: "Int", indexType: .numeric)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
+                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
                     ]
                     + Note.schema.map { f in
-                        Field(name: "notes.\\(f.name)", type: f.type, indexType: f.indexType)
+                        Field(name: "notes.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
                     }
                 }
                 struct Note: JsonModel {
@@ -735,7 +735,7 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id)
                     ]
                 }
 
@@ -821,14 +821,14 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "email", type: "String", indexType: .tag),
-                        Field(name: "age", type: "Int", indexType: .numeric)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
+                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
                     ]
                     + (((Note.self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "notes.\\(f.name)", type: f.type, indexType: f.indexType)
+                        Field(name: "notes.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
                     } ?? [
-                        Field(name: "notes", type: "[String: Note]", indexType: .tag)
+                        Field(name: "notes", type: "[String: Note]", indexType: .tag, keyPath: \\Self.notes)
                     ])
                 }
                 struct Note: JsonModel {
@@ -873,8 +873,8 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "description", type: "String", indexType: .text)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "description", type: "String", indexType: .text, keyPath: \\Self.description)
                     ]
                 }
 
@@ -1007,16 +1007,16 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "model", type: "String", indexType: .tag),
-                        Field(name: "brand", type: "String", indexType: .tag),
-                        Field(name: "price", type: "Int", indexType: .numeric),
-                        Field(name: "type", type: "String", indexType: .tag),
-                        Field(name: "description", type: "String", indexType: .tag),
-                        Field(name: "helmetIncluded", type: "Bool", indexType: .tag)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "model", type: "String", indexType: .tag, keyPath: \\Self.model),
+                        Field(name: "brand", type: "String", indexType: .tag, keyPath: \\Self.brand),
+                        Field(name: "price", type: "Int", indexType: .numeric, keyPath: \\Self.price),
+                        Field(name: "type", type: "String", indexType: .tag, keyPath: \\Self.type),
+                        Field(name: "description", type: "String", indexType: .tag, keyPath: \\Self.description),
+                        Field(name: "helmetIncluded", type: "Bool", indexType: .tag, keyPath: \\Self.helmetIncluded)
                     ]
                     + (((Spec.self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "specs.\\(f.name)", type: f.type, indexType: f.indexType)
+                        Field(name: "specs.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
                     } ?? [] )
                 }
                 struct Spec: JsonModel {
@@ -1054,8 +1054,8 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "material", type: "String", indexType: .tag),
-                        Field(name: "weight", type: "Int", indexType: .numeric)
+                        Field(name: "material", type: "String", indexType: .tag, keyPath: \\Self.material),
+                        Field(name: "weight", type: "Int", indexType: .numeric, keyPath: \\Self.weight)
                     ]
                 }
 
@@ -1124,10 +1124,10 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id)
                     ]
                     + (((Spec.self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "specs.\\(f.name)", type: f.type, indexType: f.indexType)
+                        Field(name: "specs.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
                     } ?? [] )
                 }
                 struct Spec: JsonModel {
@@ -1165,8 +1165,8 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "material", type: "String", indexType: .tag),
-                        Field(name: "weight", type: "Int", indexType: .numeric)
+                        Field(name: "material", type: "String", indexType: .tag, keyPath: \\Self.material),
+                        Field(name: "weight", type: "Int", indexType: .numeric, keyPath: \\Self.weight)
                     ]
                 }
 
@@ -1274,17 +1274,17 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "email", type: "String", indexType: .tag),
-                        Field(name: "age", type: "Int", indexType: .numeric)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
+                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
                     ]
                     + (((Note.self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "notes.\\(f.name)", type: f.type, indexType: f.indexType)
+                        Field(name: "notes.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
                     } ?? [
-                        Field(name: "notes", type: "[String: Note]", indexType: .tag)
+                        Field(name: "notes", type: "[String: Note]", indexType: .tag, keyPath: \\Self.notes)
                     ])
                     + (((Address.self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "address.\\(f.name)", type: f.type, indexType: f.indexType)
+                        Field(name: "address.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
                     } ?? [] )
                 }
                 struct Address: JsonModel {
@@ -1364,9 +1364,9 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "city", type: "String", indexType: .tag),
-                        Field(name: "postalCode", type: "String", indexType: .tag)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "city", type: "String", indexType: .tag, keyPath: \\Self.city),
+                        Field(name: "postalCode", type: "String", indexType: .tag, keyPath: \\Self.postalCode)
                     ]
                 }
                 struct Note: JsonModel {
@@ -1411,8 +1411,8 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "description", type: "String", indexType: .text)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "description", type: "String", indexType: .text, keyPath: \\Self.description)
                     ]
                 }
 
@@ -1522,17 +1522,17 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "email", type: "String", indexType: .tag),
-                        Field(name: "age", type: "Int", indexType: .numeric)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
+                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
                     ]
                     + (((Note.self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "notes.\\(f.name)", type: f.type, indexType: f.indexType)
+                        Field(name: "notes.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
                     } ?? [
-                        Field(name: "notes", type: "[String: Note]", indexType: .tag)
+                        Field(name: "notes", type: "[String: Note]", indexType: .tag, keyPath: \\Self.notes)
                     ])
                     + (((Address.self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "address.\\(f.name)", type: f.type, indexType: f.indexType)
+                        Field(name: "address.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
                     } ?? [] )
                 }
                 struct Address: JsonModel {
@@ -1612,9 +1612,9 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag),
-                        Field(name: "city", type: "String", indexType: .tag),
-                        Field(name: "postalCode", type: "String", indexType: .tag)
+                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
+                        Field(name: "city", type: "String", indexType: .tag, keyPath: \\Self.city),
+                        Field(name: "postalCode", type: "String", indexType: .tag, keyPath: \\Self.postalCode)
                     ]
                 }
 
