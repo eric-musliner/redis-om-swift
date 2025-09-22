@@ -7,4 +7,5 @@ public struct Field: Sendable {
     public let keyPath: AnyKeyPath
 }
 
+// swift-format-ignore
 extension AnyKeyPath: @unchecked @retroactive Sendable {}
