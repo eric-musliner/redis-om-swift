@@ -97,6 +97,7 @@ final class MigratorTests {
             ("address.postalCode", "TAG"),
             ("address.note.id", "TAG"),
             ("address.note.description", "TEXT"),
+            ("createdAt", "NUMERIC"),
         ]
         for (field, fieldType) in expected {
             #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))
@@ -191,6 +192,7 @@ final class MigratorTests {
         let expected: [(String, String)] = [
             ("id", "TAG"),
             ("items.id", "TAG"),
+            ("items.price", "NUMERIC"),
             ("items.name", "TAG"),
         ]
         for (field, fieldType) in expected {
