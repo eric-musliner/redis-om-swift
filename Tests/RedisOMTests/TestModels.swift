@@ -12,7 +12,7 @@ struct User: JsonModel {
     @Index(type: .numeric) var age: Int?
     @Index var notes: [Note]?
     @Index var address: [Address]?
-    var createdAt: Date?
+    @Index(type: .numeric) var createdAt: Date?
 
     static let keyPrefix: String = "user"
 }
@@ -25,7 +25,7 @@ struct Author: JsonModel {
     var aliases: [String]?
     var age: Int?
     @Index(type: .text) var notes: [String: Note]
-    var createdAt: Date?
+    @Index var createdAt: Date?
 
     static let keyPrefix: String = "author"
 }
@@ -112,7 +112,7 @@ struct Spec: JsonModel {
 @Model
 struct Item: JsonModel {
     @Id var id: String?
-    var price: Double
+    @Index(type: .numeric) var price: Double
     @Index var name: String
 
     static let keyPrefix: String = "item"
