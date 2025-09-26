@@ -14,6 +14,9 @@ final class MigratorTests {
     let migrator: Migrator
 
     init() async throws {
+        // Silence log output during tests
+        #expect(isLoggingConfigured)
+
         self.redisOM = try RedisOM()
         await SharedPoolHelper.set(
             pool: self.redisOM.poolService.connectionPool
