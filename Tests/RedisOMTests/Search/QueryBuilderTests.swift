@@ -55,6 +55,29 @@ final class QueryBuilderTests {
     }
 
     @Test
+    func testFindSingleWherePredicateTextStringNeq() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: Date(),
+        )
+        try await user.save()
+
+        // FT.SEARCH 'idx:User' '-@name:(Alice)'
+        let users: [User] = try await User.find().where(\.name != "Bill").execute()
+        try #require(!users.isEmpty)
+        #expect(users.count == 1)
+        #expect(users[0].name == "Alice")
+        #expect(users[0].email == "alice@example.com")
+        #expect(users[0].aliases == ["Alicia", "alice"])
+        #expect(users[0].age == 33)
+    }
+
+    @Test
     func testFindSingleWherePredicateTextStringPartialEq() async throws {
         try await self.migrator.migrate(models: [User.self])
 
@@ -100,9 +123,49 @@ final class QueryBuilderTests {
         try await user2.save()
 
         // FT.SEARCH idx:User '(@email:{alice\@example\.com}) (@name:{Alice})'
-        let users: [User] = try await User.find().where(\.name == "Alice").execute()
+        let users: [User] = try await User.find().where(\.name == "Alice").and(
+            \.email == "alice@example.com"
+        ).execute()
         try #require(!users.isEmpty)
-        #expect(users.count == 2)
+        #expect(users.count == 1)
+        #expect(users[0].name == "Alice")
+        #expect(users[0].email == "alice@example.com")
+        #expect(users[0].aliases == ["Alicia", "alice"])
+        #expect(users[0].age == 33)
+    }
+
+    @Test
+    func testFindMultipleAndPredicateStrEqNeq() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: Date(),
+        )
+        try await user.save()
+
+        var user2: User = User(
+            name: "Alice",
+            email: "alice.wonder@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: Date(),
+        )
+        try await user2.save()
+
+        // FT.SEARCH idx:User '(@email:{alice\@example\.com}) (@name:{Alice})'
+        let users: [User] = try await User.find().where(\.name == "Alice").and(
+            \.email != "alice@example.com"
+        ).execute()
+        try #require(!users.isEmpty)
+        #expect(users.count == 1)
+        #expect(users[0].name == "Alice")
+        #expect(users[0].email == "alice.wonder@example.com")
+        #expect(users[0].aliases == ["Alicia", "alice"])
+        #expect(users[0].age == 33)
     }
 
     @Test
@@ -198,7 +261,6 @@ final class QueryBuilderTests {
         try await self.migrator.migrate(models: [User.self])
 
         let now = Date()
-        print(now)
         var user: User = User(
             name: "Alice",
             email: "alice@example.com",
@@ -215,6 +277,388 @@ final class QueryBuilderTests {
         #expect(users[0].email == "alice@example.com")
         #expect(users[0].aliases == ["Alicia", "alice"])
         #expect(users[0].age == 33)
+    }
+
+    @Test
+    func testFindSingleWherePredicateNumericGt() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        let now = Date()
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: now,
+        )
+        try await user.save()
+
+        var user2: User = User(
+            name: "Bill",
+            email: "bill@example.com",
+            aliases: ["Robert", "Billy"],
+            age: 55,
+            createdAt: now,
+        )
+        try await user2.save()
+        // FT.SEARCH 'idx:User' '(@createdAt:[1758570669.819691 1758570669.819691])'
+        let users: [User] = try await User.find().where(\.age > 50).execute()
+        try #require(!users.isEmpty)
+        #expect(users.count == 1)
+        #expect(users[0].name == "Bill")
+        #expect(users[0].email == "bill@example.com")
+        #expect(users[0].aliases == ["Robert", "Billy"])
+        #expect(users[0].age == 55)
+    }
+
+    @Test
+    func testFindSingleWherePredicateNumericLt() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        let now = Date()
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: now,
+        )
+        try await user.save()
+
+        var user2: User = User(
+            name: "Bill",
+            email: "bill@example.com",
+            aliases: ["Robert", "Billy"],
+            age: 55,
+            createdAt: now,
+        )
+        try await user2.save()
+        // FT.SEARCH 'idx:User' '(@createdAt:[1758570669.819691 1758570669.819691])'
+        let users: [User] = try await User.find().where(\.age < 50).execute()
+        try #require(!users.isEmpty)
+        #expect(users.count == 1)
+        #expect(users[0].name == "Alice")
+        #expect(users[0].email == "alice@example.com")
+        #expect(users[0].aliases == ["Alicia", "alice"])
+        #expect(users[0].age == 33)
+    }
+
+    @Test
+    func testFindAndWherePredicateNumericLt() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        let now = Date()
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: now,
+        )
+        try await user.save()
+
+        var user2: User = User(
+            name: "Bill",
+            email: "bill@example.com",
+            aliases: ["Robert", "Billy"],
+            age: 55,
+            createdAt: now,
+        )
+        try await user2.save()
+        // FT.SEARCH 'idx:User' '(@createdAt:[1758570669.819691 1758570669.819691])'
+        let users: [User] = try await User.find().where(\.name == "Bill").and(\.age < 60).execute()
+        try #require(!users.isEmpty)
+        #expect(users.count == 1)
+        #expect(users[0].name == "Bill")
+        #expect(users[0].email == "bill@example.com")
+        #expect(users[0].aliases == ["Robert", "Billy"])
+        #expect(users[0].age == 55)
+    }
+
+    @Test
+    func testFindSingleWherePredicateNumericLte() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        let now = Date()
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: now,
+        )
+        try await user.save()
+
+        var user2: User = User(
+            name: "Bill",
+            email: "bill@example.com",
+            aliases: ["Robert", "Billy"],
+            age: 55,
+            createdAt: now,
+        )
+        try await user2.save()
+        // FT.SEARCH 'idx:User' '@age:[-inf 33]'
+        let users: [User] = try await User.find().where(\.age <= 33).execute()
+        try #require(!users.isEmpty)
+        #expect(users.count == 1)
+        #expect(users[0].name == "Alice")
+        #expect(users[0].email == "alice@example.com")
+        #expect(users[0].aliases == ["Alicia", "alice"])
+        #expect(users[0].age == 33)
+    }
+
+    @Test
+    func testFindAndWherePredicateNumericLte() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        let now = Date()
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: now,
+        )
+        try await user.save()
+
+        var user2: User = User(
+            name: "Bill",
+            email: "bill@example.com",
+            aliases: ["Robert", "Billy"],
+            age: 55,
+            createdAt: now,
+        )
+        try await user2.save()
+        // FT.SEARCH 'idx:User' '(@age:[-inf 55] @name:(Alice))'
+        let users: [User] = try await User.find().where(\.age <= 55).and(\.name == "Alice")
+            .execute()
+        try #require(!users.isEmpty)
+        #expect(users.count == 1)
+        #expect(users[0].name == "Alice")
+        #expect(users[0].email == "alice@example.com")
+        #expect(users[0].aliases == ["Alicia", "alice"])
+        #expect(users[0].age == 33)
+    }
+
+    @Test
+    func testFindSingleWherePredicateNumericGte() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        let now = Date()
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: now,
+        )
+        try await user.save()
+
+        var user2: User = User(
+            name: "Bill",
+            email: "bill@example.com",
+            aliases: ["Robert", "Billy"],
+            age: 55,
+            createdAt: now,
+        )
+        try await user2.save()
+        // FT.SEARCH 'idx:User' '@age:[33 +inf]'
+        let users: [User] = try await User.find().where(\.age >= 33).execute()
+        try #require(!users.isEmpty)
+        #expect(users.count == 2)
+        for user in users {
+            if user.name == "Alice" {
+                #expect(user.name == "Alice")
+                #expect(user.email == "alice@example.com")
+                #expect(user.aliases == ["Alicia", "alice"])
+                #expect(user.age == 33)
+            } else if user.name == "Bill" {
+                #expect(user.name == "Bill")
+                #expect(user.email == "bill@example.com")
+                #expect(user.aliases == ["Robert", "Billy"])
+                #expect(user.age == 55)
+            }
+        }
+    }
+
+    @Test
+    func testFindAndWherePredicateNumericGte() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        let now = Date()
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: now,
+        )
+        try await user.save()
+
+        var user2: User = User(
+            name: "Bill",
+            email: "bill@example.com",
+            aliases: ["Robert", "Billy"],
+            age: 55,
+            createdAt: now,
+        )
+        try await user2.save()
+        // FT.SEARCH 'idx:User' '(@age:[10 +inf] @name:(Alice))'
+        let users: [User] = try await User.find().where(\.age >= 10).and(\.name == "Alice")
+            .execute()
+        try #require(!users.isEmpty)
+        #expect(users.count == 1)
+        #expect(users[0].name == "Alice")
+        #expect(users[0].email == "alice@example.com")
+        #expect(users[0].aliases == ["Alicia", "alice"])
+        #expect(users[0].age == 33)
+    }
+
+    @Test
+    func testFindAndWherePredicateNumericBetween() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        let now = Date()
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: now,
+        )
+        try await user.save()
+
+        var user2: User = User(
+            name: "Bill",
+            email: "bill@example.com",
+            aliases: ["Robert", "Billy"],
+            age: 55,
+            createdAt: now,
+        )
+        try await user2.save()
+
+        var user3: User = User(
+            name: "Bill",
+            email: "billy@mail.com",
+            aliases: ["Robert", "Billy"],
+            age: 70,
+            createdAt: now,
+        )
+        try await user3.save()
+        // FT.SEARCH 'idx:User' '(@age:[34 60] @name:(Bill))'
+        let users: [User] = try await User.find().where(\.age...(34, 60)).and(\.name == "Bill")
+            .execute()
+        try #require(!users.isEmpty)
+        #expect(users.count == 1)
+        #expect(users[0].name == "Bill")
+        #expect(users[0].email == "bill@example.com")
+        #expect(users[0].aliases == ["Robert", "Billy"])
+        #expect(users[0].age == 55)
+    }
+
+    @Test
+    func testFindAndWherePredicateNumericBetweenDouble() async throws {
+        try await self.migrator.migrate(models: [Item.self])
+
+        var item: Item = Item(
+            price: 24.99,
+            name: "Gloves"
+        )
+        try await item.save()
+
+        var item2: Item = Item(
+            price: 50.99,
+            name: "Helmet"
+        )
+        try await item2.save()
+
+        var item3: Item = Item(
+            price: 65.99,
+            name: "Helmet NIPS"
+        )
+        try await item3.save()
+
+        // FT.SEARCH 'idx:Item' '@price:[33.0 60.0]'
+        let items: [Item] = try await Item.find().where(\.price...(33.0, 60.0)).execute()
+        try #require(!items.isEmpty)
+        #expect(items.count == 1)
+        #expect(items[0].name == "Helmet")
+        #expect(items[0].price == 50.99)
+    }
+
+    @Test
+    func testFindAndWherePredicateNumericIn() async throws {
+        try await self.migrator.migrate(models: [Item.self])
+
+        var item: Item = Item(
+            price: 24.99,
+            name: "Gloves"
+        )
+        try await item.save()
+
+        var item2: Item = Item(
+            price: 50.99,
+            name: "Helmet"
+        )
+        try await item2.save()
+
+        var item3: Item = Item(
+            price: 65.99,
+            name: "Helmet NIPS"
+        )
+        try await item3.save()
+
+        // FT.SEARCH 'idx:Item' '(@price:[24.99 24.99] | @price:[50.99 50.99])'
+        let items: [Item] = try await Item.find().where(\.price ~= [24.99, 50.99]).execute()
+        try #require(!items.isEmpty)
+        #expect(items.count == 2)
+        for item in items {
+            if item.name == "Gloves" {
+                #expect(item.name == "Gloves")
+                #expect(item.price == 24.99)
+            } else if item.name == "Helmet" {
+                #expect(item.name == "Helmet")
+                #expect(item.price == 50.99)
+            }
+        }
+    }
+
+    @Test
+    func testFindAndWherePredicateStringIn() async throws {
+        try await self.migrator.migrate(models: [Item.self])
+
+        var item: Item = Item(
+            price: 24.99,
+            name: "Gloves"
+        )
+        try await item.save()
+
+        var item2: Item = Item(
+            price: 50.99,
+            name: "Helmet"
+        )
+        try await item2.save()
+
+        var item3: Item = Item(
+            price: 65.99,
+            name: "Helmet NIPS"
+        )
+        try await item3.save()
+
+        // FT.SEARCH 'idx:Item' '@name:{Gloves|Helmet}'
+        let items: [Item] = try await Item.find().where(\.name ~= ["Gloves", "Helmet"]).execute()
+        try #require(!items.isEmpty)
+        #expect(items.count == 2)
+        for item in items {
+            if item.name == "Gloves" {
+                #expect(item.name == "Gloves")
+                #expect(item.price == 24.99)
+            } else if item.name == "Helmet" {
+                #expect(item.name == "Helmet")
+                #expect(item.price == 50.99)
+            }
+        }
+
     }
 
     //    @Test
@@ -377,6 +821,124 @@ final class QueryBuilderTests {
                 #expect(user.email == "bob.smith@example.com")
                 #expect(user.aliases == ["Bill", "Robert"])
                 #expect(user.age == 22)
+            }
+        }
+    }
+
+    @Test
+    func testFindMultipleSeparateOrPredicateStrNeq() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: Date(),
+        )
+        try await user.save()
+
+        var user2: User = User(
+            name: "Sally",
+            email: "sally@example.com",
+            aliases: [],
+            age: 60,
+            createdAt: Date(),
+        )
+        try await user2.save()
+
+        var user3: User = User(
+            name: "Bob",
+            email: "bob.smith@example.com",
+            aliases: ["Bill", "Robert"],
+            age: 22,
+            createdAt: Date(),
+        )
+        try await user3.save()
+
+        // FT.SEARCH idx:User '(@email:{alice\@example\.com}) (@name:{Alice})'
+        let users: [User] = try await User.find().where(\.name == "Alice").or(\.name == "Bob").or(
+            \.name != "Charlie"
+        )
+        .execute()
+
+        try #require(!users.isEmpty)
+        #expect(users.count == 3)
+        for user in users {
+            if user.name == "Alice" {
+                #expect(user.name == "Alice")
+                #expect(user.email == "alice@example.com")
+                #expect(user.aliases == ["Alicia", "alice"])
+                #expect(user.age == 33)
+            } else if user.name == "Bob" {
+                #expect(user.name == "Bob")
+                #expect(user.email == "bob.smith@example.com")
+                #expect(user.aliases == ["Bill", "Robert"])
+                #expect(user.age == 22)
+            } else if user.name == "Sally" {
+                #expect(user.name == "Sally")
+                #expect(user.email == "sally@example.com")
+                #expect(user.aliases == [])
+                #expect(user.age == 60)
+            }
+        }
+    }
+
+    @Test
+    func testFindMultipleSeparateOrPredicateStrEq() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: Date(),
+        )
+        try await user.save()
+
+        var user2: User = User(
+            name: "Sally",
+            email: "sally@example.com",
+            aliases: [],
+            age: 60,
+            createdAt: Date(),
+        )
+        try await user2.save()
+
+        var user3: User = User(
+            name: "Bob",
+            email: "bob.smith@example.com",
+            aliases: ["Bill", "Robert"],
+            age: 22,
+            createdAt: Date(),
+        )
+        try await user3.save()
+
+        // FT.SEARCH idx:User '(@email:{alice\@example\.com}) (@name:{Alice})'
+        let users: [User] = try await User.find().where(\.name == "Alice").or(\.name == "Bob").or(
+            \.name == "Sally"
+        )
+        .execute()
+
+        try #require(!users.isEmpty)
+        #expect(users.count == 3)
+        for user in users {
+            if user.name == "Alice" {
+                #expect(user.name == "Alice")
+                #expect(user.email == "alice@example.com")
+                #expect(user.aliases == ["Alicia", "alice"])
+                #expect(user.age == 33)
+            } else if user.name == "Bob" {
+                #expect(user.name == "Bob")
+                #expect(user.email == "bob.smith@example.com")
+                #expect(user.aliases == ["Bill", "Robert"])
+                #expect(user.age == 22)
+            } else if user.name == "Sally" {
+                #expect(user.name == "Sally")
+                #expect(user.email == "sally@example.com")
+                #expect(user.aliases == [])
+                #expect(user.age == 60)
             }
         }
     }
