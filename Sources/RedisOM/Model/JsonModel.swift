@@ -1,10 +1,12 @@
 import Foundation
 import NIOCore
 @preconcurrency import RediStack
+import RedisOMCore
 
 public protocol JsonModel: RedisModel {}
 
 // MARK: - JsonModel
+
 /// `JsonModel`extendsion of RedisModel  behavior using Redis JSON storage.
 ///
 /// Provides a set of convenience methods for saving, retrieving, and deleting models in Redis
@@ -15,7 +17,64 @@ public protocol JsonModel: RedisModel {}
 /// as JSON documents at root path `$`.
 extension JsonModel {
 
-    /// Save model to Redis
+    /// Returns a new `QueryBuilder` for this model type.
+    ///
+    /// Use this method to begin building a query to find instances
+    /// of this model in Redis. You can chain additional query methods
+    /// on the returned `QueryBuilder`.
+    ///
+    /// Example:
+    /// ```swift
+    /// let users = try User.find()
+    ///     .where(\.age > 18)
+    ///     .all()
+    /// ```
+    public static func find() -> QueryBuilder<Self> {
+        QueryBuilder<Self>()
+    }
+
+    /// Returns the schema field name associated with the given key path.
+    ///
+    /// This function maps a Swift `KeyPath` of the model to the
+    /// corresponding field name in the Redis schema. If the key path
+    /// does not exist in the schema, it returns `"unknown"`.
+    ///
+    /// - Parameter kp: A key path to a property on the model.
+    /// - Returns: The name of the field in the Redis schema as a `String`.
+    static func key<T>(for kp: KeyPath<Self, T>) -> String {
+        // Walk schema to find the field name
+        schema.first { $0.keyPath == kp }?.name ?? "unknown"
+    }
+
+    /// Returns the index type for the given key path, if any.
+    ///
+    /// This function looks up the index type configured for a
+    /// specific model property in the Redis schema. It returns
+    /// `nil` if the property is not indexed.
+    ///
+    /// - Parameter kp: A key path to a property on the model.
+    /// - Returns: An optional `IndexType` describing how the field is indexed.
+    static func indexType<T>(for kp: KeyPath<Self, T>) -> IndexType? {
+        schema.first { $0.keyPath == kp }?.indexType
+    }
+
+    /// Persists the current model instance to Redis as JSON.
+    ///
+    /// This method encodes the model into a JSON string and stores it
+    /// under the model's Redis key using the `JSON.SET` command.
+    /// It updates the existing entry if it already exists.
+    ///
+    /// This function is `async` and may throw an error if encoding fails
+    /// or if there is an issue communicating with Redis.
+    ///
+    /// Example:
+    /// ```swift
+    /// var user = User(name: "Alice", age: 30)
+    /// try await user.save()
+    /// ```
+    ///
+    /// - Throws: `RedisError` if the model cannot be encoded to JSON
+    ///           or if the Redis command fails.
     @inlinable
     public mutating func save() async throws {
 
@@ -37,9 +96,14 @@ extension JsonModel {
         ).get()
     }
 
-    /// Get list of Primary Keys for model in Redis
-    /// - Returns:
-    ///    - [IDType]: list of primary keys
+    //// Returns a list of all primary keys for this model in Redis.
+    ///
+    /// This method scans Redis keys matching the model's key prefix
+    /// and extracts the primary key portion of each key. Useful
+    /// for enumerating all stored instances.
+    ///
+    /// - Returns: An array of `IDType` representing all primary keys.
+    /// - Throws: `RedisError` if the SCAN command fails or returns an unexpected structure.
     @inlinable
     public static func allKeys() async throws -> [IDType] {
         let client = await SharedPoolHelper.shared()
@@ -80,9 +144,11 @@ extension JsonModel {
         return allKeys
     }
 
-    /// Get model by primary key
-    /// - Parameters:
-    ///    - id: primary key of saved model in Redis
+    /// Retrieves a model instance from Redis by its primary key.
+    ///
+    /// - Parameter id: The primary key of the model to fetch.
+    /// - Returns: The model instance if found, or `nil` if no such key exists.
+    /// - Throws: `RedisError` if the key exists but cannot be decoded from JSON.
     @inlinable
     public static func get(id: IDType) async throws -> Self? {
         let key = "\(keyPrefix):\(id)"
@@ -104,15 +170,18 @@ extension JsonModel {
         return try JSONDecoder().decode(Self.self, from: data)
     }
 
-    /// Delete model from Redis
+    /// Deletes this model instance from Redis.
+    ///
+    /// - Throws: `RedisError` if the deletion command fails.
     @inlinable
     public func delete() async throws {
         try await Self.delete(id: self.id!)
     }
 
-    /// Delete model from Redis by primary key
-    /// - Parameters:
-    ///    - id: primary key of the model to delete from Redis
+    /// Deletes a model from Redis by primary key.
+    ///
+    /// - Parameter id: The primary key of the model to delete.
+    /// - Throws: `RedisError` if the deletion command fails.
     @inlinable
     public static func delete(id: IDType)
         async throws

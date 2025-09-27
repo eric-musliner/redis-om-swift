@@ -40,7 +40,7 @@ public struct Migrator {
     ///    - models: array of RedisModels
     func migrate(models: [any RedisModel.Type]) async throws {
         for model in models {
-            let indexName = "idx:\(String(describing: model))"
+            let indexName = model.indexName
 
             // Always drop index if it exists. Keep existing documents
             let listResposne = try await client.send(command: "FT._LIST").get()

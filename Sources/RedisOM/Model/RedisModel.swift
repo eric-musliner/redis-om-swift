@@ -43,6 +43,10 @@ extension RedisModel {
         "\(Self.keyPrefix):\(id ?? UUID().uuidString as! IDType)"
     }
 
+    public static var indexName: String {
+        "idx:\(String(describing: self))"
+    }
+
     public func getRedisKey() -> RedisKey {
         return RedisKey(self.redisKey)
     }
