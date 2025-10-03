@@ -55,7 +55,7 @@ final class MigratorTests {
         #expect(indexNames!.isEmpty)
     }
 
-    @Test func testMigratePersonIndexes() async throws {
+    @Test func testMigrateNestedModelIndexes() async throws {
         try await self.migrator.migrate(models: [Person.self])
 
         // Assert index exists (FT.INFO idx:Person)
@@ -64,21 +64,27 @@ final class MigratorTests {
         #expect(indexNames!.contains("idx:Person"))
 
         // Get index details
-        let fields: [(String, String)] = try await inspectIndex(name: "idx:Person")
+        let fields: [(String, String, String)] = try await inspectIndex(name: "idx:Person")
 
         // Assert expected indexes for schema
-        let expected: [(String, String)] = [
-            ("id", "TAG"),
-            ("name", "TAG"),
-            ("email", "TAG"),
-            ("createdAt", "NUMERIC"),
+        let expected: [(String, String, String)] = [
+            ("$.id", "id", "TAG"),
+            ("$.name", "name", "TAG"),
+            ("$.email", "email", "TAG"),
+            ("$.createdAt", "createdAt", "NUMERIC"),
+            ("$.address.id", "address__id", "TAG"),
+            ("$.address.city", "address__city", "TAG"),
+            ("$.address.postalCode", "address__postalCode", "TAG"),
+            ("$.address.note.id", "address__note__id", "TAG"),
+            ("$.address.note.description", "address__note__description", "TEXT"),
         ]
-        for (field, fieldType) in expected {
-            #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))
+        for (field, fieldAttr, fieldType) in expected {
+            #expect(
+                fields.contains(where: { $0.0 == field && $0.1 == fieldAttr && $0.2 == fieldType }))
         }
     }
 
-    @Test func testMigrateArrayNestedModelIndexes() async throws {
+    @Test func testMigrateArrayNestedArrayCollectionIndexes() async throws {
         try await self.migrator.migrate(models: [User.self])
 
         let listResponse = try await self.connectionPool.send(command: "FT._LIST").get()
@@ -86,24 +92,26 @@ final class MigratorTests {
         #expect(indexNames!.contains("idx:User"))
 
         // Get index details
-        let fields: [(String, String)] = try await inspectIndex(name: "idx:User")
+        let fields: [(String, String, String)] = try await inspectIndex(name: "idx:User")
 
         // Assert expected indexes for schema
-        let expected: [(String, String)] = [
-            ("id", "TAG"),
-            ("name", "TEXT"),
-            ("email", "TAG"),
-            ("age", "NUMERIC"),
-            ("notes.id", "TAG"),
-            ("address.id", "TAG"),
-            ("address.city", "TAG"),
-            ("address.postalCode", "TAG"),
-            ("address.note.id", "TAG"),
-            ("address.note.description", "TEXT"),
-            ("createdAt", "NUMERIC"),
+        let expected: [(String, String, String)] = [
+            ("$.id", "id", "TAG"),
+            ("$.name", "name", "TEXT"),
+            ("$.email", "email", "TAG"),
+            ("$.age", "age", "NUMERIC"),
+            ("$.createdAt", "createdAt", "NUMERIC"),
+            ("$.notes[*].id", "notes__id", "TAG"),
+            ("$.notes[*].description", "notes__description", "TEXT"),
+            ("$.address[*].id", "address__id", "TAG"),
+            ("$.address[*].city", "address__city", "TAG"),
+            ("$.address[*].postalCode", "address__postalCode", "TAG"),
+            ("$.address[*].note.id", "address__note__id", "TAG"),
+            ("$.address[*].note.description", "address__note__description", "TEXT"),
         ]
-        for (field, fieldType) in expected {
-            #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))
+        for (field, fieldAttr, fieldType) in expected {
+            #expect(
+                fields.contains(where: { $0.0 == field && $0.1 == fieldAttr && $0.2 == fieldType }))
         }
     }
 
@@ -116,39 +124,16 @@ final class MigratorTests {
         #expect(indexNames!.contains("idx:Node"))
 
         // Get index details
-        let fields: [(String, String)] = try await inspectIndex(name: "idx:Node")
+        let fields: [(String, String, String)] = try await inspectIndex(name: "idx:Node")
 
         // Assert expected indexes for schema
-        let expected: [(String, String)] = [
-            ("id", "TAG")
+        let expected: [(String, String, String)] = [
+            ("$.id", "id", "TAG")
 
         ]
-        for (field, fieldType) in expected {
-            #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))
-        }
-    }
-
-    @Test func testMigrateDictNestedModelIndexes() async throws {
-        try await self.migrator.migrate(models: [Author.self])
-
-        // Assert index exists
-        let listResponse = try await self.connectionPool.send(command: "FT._LIST").get()
-        let indexNames = listResponse.array?.compactMap({ $0.string })
-        #expect(indexNames!.contains("idx:Author"))
-
-        // Get index details
-        let fields: [(String, String)] = try await inspectIndex(name: "idx:Author")
-
-        // Assert expected indexes for schema
-        let expected: [(String, String)] = [
-            ("id", "TAG"),
-            ("name", "TAG"),
-            ("email", "TAG"),
-            ("notes.id", "TAG"),
-            ("notes.description", "TEXT"),
-        ]
-        for (field, fieldType) in expected {
-            #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))
+        for (field, fieldAttr, fieldType) in expected {
+            #expect(
+                fields.contains(where: { $0.0 == field && $0.1 == fieldAttr && $0.2 == fieldType }))
         }
     }
 
@@ -161,22 +146,23 @@ final class MigratorTests {
         #expect(indexNames!.contains("idx:Bike"))
 
         // Get index details
-        let fields: [(String, String)] = try await inspectIndex(name: "idx:Bike")
+        let fields: [(String, String, String)] = try await inspectIndex(name: "idx:Bike")
 
         // Assert expected indexes for schema
-        let expected: [(String, String)] = [
-            ("id", "TAG"),
-            ("model", "TAG"),
-            ("brand", "TAG"),
-            ("price", "NUMERIC"),
-            ("type", "TAG"),
-            ("description", "TEXT"),
-            ("helmetIncluded", "TAG"),
-            ("specs.material", "TAG"),
-            ("specs.weight", "NUMERIC"),
+        let expected: [(String, String, String)] = [
+            ("$.id", "id", "TAG"),
+            ("$.model", "model", "TAG"),
+            ("$.brand", "brand", "TAG"),
+            ("$.price", "price", "NUMERIC"),
+            ("$.type", "type", "TAG"),
+            ("$.description", "description", "TEXT"),
+            ("$.helmetIncluded", "helmetIncluded", "TAG"),
+            ("$.specs.material", "specs__material", "TAG"),
+            ("$.specs.weight", "specs__weight", "NUMERIC"),
         ]
-        for (field, fieldType) in expected {
-            #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))
+        for (field, fieldAttr, fieldType) in expected {
+            #expect(
+                fields.contains(where: { $0.0 == field && $0.1 == fieldAttr && $0.2 == fieldType }))
         }
     }
 
@@ -189,17 +175,18 @@ final class MigratorTests {
         #expect(indexNames!.contains("idx:Order"))
 
         // Get index details
-        let fields: [(String, String)] = try await inspectIndex(name: "idx:Order")
+        let fields: [(String, String, String)] = try await inspectIndex(name: "idx:Order")
 
         // Assert expected indexes for schema
-        let expected: [(String, String)] = [
-            ("id", "TAG"),
-            ("items.id", "TAG"),
-            ("items.price", "NUMERIC"),
-            ("items.name", "TAG"),
+        let expected: [(String, String, String)] = [
+            ("$.id", "id", "TAG"),
+            ("$.items[*].id", "items__id", "TAG"),
+            ("$.items[*].price", "items__price", "NUMERIC"),
+            ("$.items[*].name", "items__name", "TAG"),
         ]
-        for (field, fieldType) in expected {
-            #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))
+        for (field, fieldAttr, fieldType) in expected {
+            #expect(
+                fields.contains(where: { $0.0 == field && $0.1 == fieldAttr && $0.2 == fieldType }))
         }
     }
 
@@ -213,77 +200,93 @@ final class MigratorTests {
         #expect(indexNames!.contains("idx:User"))
 
         // Assert Person Index
-        var fields: [(String, String)] = try await inspectIndex(name: "idx:Person")
+        var fields: [(String, String, String)] = try await inspectIndex(name: "idx:Person")
 
         // Assert expected indexes for Person schema
-        var expected: [(String, String)] = [
-            ("id", "TAG"),
-            ("name", "TAG"),
-            ("email", "TAG"),
-            ("createdAt", "NUMERIC"),
+        var expected: [(String, String, String)] = [
+            ("$.id", "id", "TAG"),
+            ("$.name", "name", "TAG"),
+            ("$.email", "email", "TAG"),
+            ("$.createdAt", "createdAt", "NUMERIC"),
         ]
-        for (field, fieldType) in expected {
-            #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))
+        for (field, fieldAttr, fieldType) in expected {
+            #expect(
+                fields.contains(where: { $0.0 == field && $0.1 == fieldAttr && $0.2 == fieldType }))
         }
         // Assert User Index
         fields = try await inspectIndex(name: "idx:User")
 
         // Assert expected indexes for User schema
         expected = [
-            ("id", "TAG"),
-            ("name", "TEXT"),
-            ("email", "TAG"),
-            ("age", "NUMERIC"),
-            ("notes.id", "TAG"),
-            ("address.id", "TAG"),
-            ("address.city", "TAG"),
-            ("address.postalCode", "TAG"),
-            ("address.note.id", "TAG"),
-            ("address.note.description", "TEXT"),
+            ("$.id", "id", "TAG"),
+            ("$.name", "name", "TEXT"),
+            ("$.email", "email", "TAG"),
+            ("$.age", "age", "NUMERIC"),
+            ("$.notes[*].id", "notes__id", "TAG"),
+            ("$.address[*].id", "address__id", "TAG"),
+            ("$.address[*].city", "address__city", "TAG"),
+            ("$.address[*].postalCode", "address__postalCode", "TAG"),
+            ("$.address[*].note.id", "address__note__id", "TAG"),
+            ("$.address[*].note.description", "address__note__description", "TEXT"),
         ]
-        for (field, fieldType) in expected {
-            #expect(fields.contains(where: { $0.0 == field && $0.1 == fieldType }))
+        for (field, fieldAttr, fieldType) in expected {
+            #expect(
+                fields.contains(where: { $0.0 == field && $0.1 == fieldAttr && $0.2 == fieldType }))
         }
     }
 
     /// Helper to inspect Index by name
-    func inspectIndex(name: String) async throws -> [(String, String)] {
+    func inspectIndex(name: String) async throws -> [(String, String, String)] {
         let infoResponse = try await self.connectionPool.send(
             command: "FT.INFO", with: [.bulkString(ByteBuffer(string: name))]
         ).get()
 
         let infoArray = try #require(infoResponse.array)
 
-        //  ["index_name", "idx:Person", "attributes", [ [...], [...], ... ]]
+        // locate "attributes"
         var attributes: [RESPValue]?
         var i = 0
         while i < infoArray.count {
             if infoArray[i].string == "attributes" {
                 attributes = infoArray[i + 1].array
+                break
             }
             i += 2
         }
 
         let attrs = try #require(attributes)
 
-        // Each entry is [ "identifier", "$.name", "attribute", "name", "type", "TEXT", ... ]
-        let fields = attrs.compactMap({ $0.array }).compactMap({ entry -> (String, String)? in
-            var id: String?
+        // Each entry is"attributes", [
+        //    [ "identifier", "$.id", "attribute", "id", "type", "TAG" ],
+        //    [ "identifier", "$.name", "attribute", "name", "type", "TAG" ],
+        //    ...
+        let fields: [(String, String, String)] = attrs.compactMap { entryValue in
+            guard let entry = entryValue.array else { return nil }
+            var identifier: String?
+            var attribute: String?
             var type: String?
+
             var j = 0
             while j < entry.count {
-                if entry[j].string == "attribute" {
-                    id = entry[j + 1].string
-                } else if entry[j].string == "type" {
+                switch entry[j].string {
+                case "identifier":
+                    identifier = entry[j + 1].string
+                case "attribute":
+                    attribute = entry[j + 1].string
+                case "type":
                     type = entry[j + 1].string
+                default:
+                    break
                 }
-                j += 2
+                j += 2  // advance by pairs
             }
-            if let id = id, let type = type {
-                return (id, type)
+
+            if let id = identifier, let attr = attribute, let t = type {
+                return (id, attr, t)
             }
             return nil
-        })
+        }
+
         return fields
     }
 }
