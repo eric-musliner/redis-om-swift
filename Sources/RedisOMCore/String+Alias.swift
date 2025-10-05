@@ -1,3 +1,5 @@
+import Foundation
+
 /// Returns a Redis-safe alias for use in RediSearch schema definitions.
 ///
 /// Redis does not allow field names in `FT.SEARCH` queries to contain
@@ -15,7 +17,7 @@
 /// "notes[*].description".aliasred() // "notes__description"
 /// ```
 extension String {
-    func alias() -> String {
+    package func alias() -> String {
         // replace disallowed chars (dot, brackets) with underscores
         return
             self
