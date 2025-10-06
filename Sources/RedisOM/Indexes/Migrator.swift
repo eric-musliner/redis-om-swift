@@ -43,8 +43,8 @@ public struct Migrator {
             let indexName = model.indexName
 
             // Always drop index if it exists. Keep existing documents
-            let listResposne = try await client.send(command: "FT._LIST").get()
-            let indexNames = listResposne.array?.compactMap({ $0.string })
+            let listResponse = try await client.send(command: "FT._LIST").get()
+            let indexNames = listResponse.array?.compactMap({ $0.string })
 
             if indexNames!.contains(indexName) {
                 _ = try await client.send(
@@ -70,8 +70,8 @@ public struct Migrator {
             for field in model.schema {
                 args.append(.bulkString(ByteBuffer(string: "$.\(field.name)")))
                 args.append(.bulkString(ByteBuffer(string: "AS")))
-                args.append(.bulkString(ByteBuffer(string: field.name)))
-                args.append(.bulkString(ByteBuffer(string: field.indexType!.rawValue)))
+                args.append(.bulkString(ByteBuffer(string: field.name.alias())))
+                args.append(.bulkString(ByteBuffer(string: field.indexType.rawValue)))
             }
 
             _ = client.send(command: "FT.CREATE", with: args)
