@@ -1,6 +1,7 @@
 import Foundation
 import RedisOMCore
 import SwiftCompilerPlugin
+import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
@@ -181,8 +182,13 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
                 } else {
                     nestedSchemas.append(
                         """
-                        (((\(typeName).self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                            Field(name: "\(name).\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
+                        (((\(typeName).self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
+                            Field(
+                                name: "\(name).\\(f.name)",
+                                type: f.type,
+                                indexType: f.indexType,
+                                keyPath: f.keyPath
+                            )
                         } ?? [] )
                         """)
                 }
@@ -190,26 +196,36 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
                 // Array of nested models
                 nestedSchemas.append(
                     """
-                    \(typeName).schema.map { f in
-                        Field(name: "\(name).\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
-                    }
-                    """)
+                    (((\(typeName).self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
+                        Field(
+                            name: "\(name)[*].\\(f.name)",
+                            type: f.type,
+                            indexType: f.indexType,
+                            keyPath: f.keyPath
+                        )
+                    } ?? [])
+                    """
+                )
             case .Dictionary(key: _, value: .Other(let typeName)):
                 // Dictionary where value is a nested JsonModel
-                nestedSchemas.append(
-                    """
-                    (((\(typeName).self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "\(name).\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
-                    } ?? [
-                        Field(name: "\(name)", type: "[String: \(typeName)]", indexType: .tag, keyPath: \\Self.\(name))
-                    ])
-                    """)
+                context.diagnose(
+                    Diagnostic(
+                        node: declaration._syntaxNode,
+                        message: IndexingNotSupportedMessage(
+                            "Indexing dictionaries of embedded JsonModels (e.g. [String: \(typeName)]) is not supported. Use an array instead.",
+                            severity: .error
+                        )
+                    ))
             case .Dictionary(key: _, value: let valueType):
                 // Dictionary where value is a scalar or non-JsonModel
-                scalarFields.append(
-                    """
-                    Field(name: "\(name)", type: "[String: \(valueType)]", indexType: .tag, keyPath: \\Self.\(name))
-                    """)
+                context.diagnose(
+                    Diagnostic(
+                        node: declaration._syntaxNode,
+                        message: IndexingNotSupportedMessage(
+                            "Indexing dictionaries of scalar values (e.g. [String: \(valueType)]) is not supported. Use an array instead.",
+                            severity: .error
+                        )
+                    ))
             default:
                 // Normal scalar field
                 scalarFields.append(
@@ -630,4 +646,22 @@ func resolveType(_ type: TypeSyntax) -> ResolvedType {
     }
 
     return .Other(type.description)
+}
+
+/// A diagnostic message used during macro expansion to report unsupported indexing patterns.
+///
+/// `IndexingNotSupportedMessage` conforms to `DiagnosticMessage` and allows
+/// the macro system to surface clear compiler diagnostics when a user
+/// attempts to index a type that Redis/RediSearch cannot handle (such as
+/// dictionaries with arbitrary keys).
+struct IndexingNotSupportedMessage: DiagnosticMessage {
+    let message: String
+    let severity: DiagnosticSeverity
+    let diagnosticID: MessageID
+
+    init(_ message: String, severity: DiagnosticSeverity = .error) {
+        self.message = message
+        self.severity = severity
+        self.diagnosticID = MessageID(domain: "RedisOM", id: "InvalidDictionaryIndex")
+    }
 }

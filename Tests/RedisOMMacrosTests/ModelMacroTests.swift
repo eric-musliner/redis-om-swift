@@ -378,7 +378,7 @@ final class ModelMacroTests: XCTestCase {
         )
     }
 
-    func testSchemaExpansionDictOfStringIntIndex() {
+    func testSchemaExpansionUnindexedDictOfStringIntIndex() {
         assertMacroExpansion(
             """
             @Model
@@ -386,7 +386,7 @@ final class ModelMacroTests: XCTestCase {
                 @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
-                @Index var preferences: [String: Int]
+                var preferences: [String: Int]
 
                 static let keyPrefix: String = "user"
             }
@@ -396,7 +396,7 @@ final class ModelMacroTests: XCTestCase {
                     @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
-                    @Index var preferences: [String: Int]
+                    var preferences: [String: Int]
 
                     static let keyPrefix: String = "user"
 
@@ -409,7 +409,7 @@ final class ModelMacroTests: XCTestCase {
                         self._id = Id(wrappedValue: id)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._age = Index(wrappedValue: age, type: .numeric)
-                        self._preferences = Index(wrappedValue: preferences, type: .tag)
+                        self.preferences = preferences
                     }
 
                     enum CodingKeys: String, CodingKey {
@@ -429,7 +429,7 @@ final class ModelMacroTests: XCTestCase {
                         self._id = Id(wrappedValue: idDecoded)
                         self._email = Index(wrappedValue: emailDecoded, type: .tag)
                         self._age = Index(wrappedValue: ageDecoded, type: .numeric)
-                        self._preferences = Index(wrappedValue: preferencesDecoded, type: .tag)
+                        self.preferences = preferencesDecoded
                     }
 
                     public func encode(to encoder: Encoder) throws {
@@ -443,8 +443,7 @@ final class ModelMacroTests: XCTestCase {
                     public static let schema: [Field] = [
                         Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
                         Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
-                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age),
-                        Field(name: "preferences", type: "[String: Int]", indexType: .tag, keyPath: \\Self.preferences)
+                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
                     ]
                 }
 
@@ -689,9 +688,14 @@ final class ModelMacroTests: XCTestCase {
                         Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
                         Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
                     ]
-                    + Note.schema.map { f in
-                        Field(name: "notes.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
-                    }
+                    + (((Note.self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
+                        Field(
+                            name: "notes[*].\\(f.name)",
+                            type: f.type,
+                            indexType: f.indexType,
+                            keyPath: f.keyPath
+                        )
+                    } ?? [])
                 }
                 struct Note: JsonModel {
                     @Id var id: String?
@@ -736,145 +740,6 @@ final class ModelMacroTests: XCTestCase {
 
                     public static let schema: [Field] = [
                         Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id)
-                    ]
-                }
-
-                extension User: _SchemaProvider {
-                }
-
-                extension Note: _SchemaProvider {
-                }
-                """,
-            macros: ["Model": ModelMacro.self]
-        )
-    }
-
-    func testSchemaExpansionDictNestedModelIndex() {
-        assertMacroExpansion(
-            """
-            @Model
-            struct User: JsonModel {
-                @Id var id: String?
-                @Index var email: String
-                @Index(type: .numeric) var age: Int
-                @Index var notes: [String: Note]
-
-                static let keyPrefix: String = "user"
-            }
-
-            @Model
-            struct Note: JsonModel {
-                @Id var id: String?
-                @Index(type: .text) var description: String
-                var createdAt: Date?
-
-                static let keyPrefix: String = "note"
-            }
-            """,
-            expandedSource: """
-                struct User: JsonModel {
-                    @Id var id: String?
-                    @Index var email: String
-                    @Index(type: .numeric) var age: Int
-                    @Index var notes: [String: Note]
-
-                    static let keyPrefix: String = "user"
-
-                    public init(
-                        id: String? = nil,
-                        email: String,
-                        age: Int,
-                        notes: [String: Note]
-                    ) {
-                        self._id = Id(wrappedValue: id)
-                        self._email = Index(wrappedValue: email, type: .tag)
-                        self._age = Index(wrappedValue: age, type: .numeric)
-                        self._notes = Index(wrappedValue: notes, type: .tag)
-                    }
-
-                    enum CodingKeys: String, CodingKey {
-                        case id
-                        case email
-                        case age
-                        case notes
-                    }
-
-                    public init(from decoder: Decoder) throws {
-                        let c = try decoder.container(keyedBy: CodingKeys.self)
-                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
-                        let emailDecoded = try c.decode(String.self, forKey: .email)
-                        let ageDecoded = try c.decode(Int.self, forKey: .age)
-                        let notesDecoded = try c.decode([String: Note].self, forKey: .notes)
-
-                        self._id = Id(wrappedValue: idDecoded)
-                        self._email = Index(wrappedValue: emailDecoded, type: .tag)
-                        self._age = Index(wrappedValue: ageDecoded, type: .numeric)
-                        self._notes = Index(wrappedValue: notesDecoded, type: .tag)
-                    }
-
-                    public func encode(to encoder: Encoder) throws {
-                        var c = encoder.container(keyedBy: CodingKeys.self)
-                        try c.encodeIfPresent(id, forKey: .id)
-                        try c.encode(email, forKey: .email)
-                        try c.encode(age, forKey: .age)
-                        try c.encode(notes, forKey: .notes)
-                    }
-
-                    public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
-                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
-                    ]
-                    + (((Note.self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "notes.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
-                    } ?? [
-                        Field(name: "notes", type: "[String: Note]", indexType: .tag, keyPath: \\Self.notes)
-                    ])
-                }
-                struct Note: JsonModel {
-                    @Id var id: String?
-                    @Index(type: .text) var description: String
-                    var createdAt: Date?
-
-                    static let keyPrefix: String = "note"
-
-                    public init(
-                        id: String? = nil,
-                        description: String,
-                        createdAt: Date? = nil
-                    ) {
-                        self._id = Id(wrappedValue: id)
-                        self._description = Index(wrappedValue: description, type: .text)
-                        self.createdAt = createdAt
-                    }
-
-                    enum CodingKeys: String, CodingKey {
-                        case id
-                        case description
-                        case createdAt
-                    }
-
-                    public init(from decoder: Decoder) throws {
-                        let c = try decoder.container(keyedBy: CodingKeys.self)
-                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
-                        let descriptionDecoded = try c.decode(String.self, forKey: .description)
-                        let createdAtDecoded = try c.decodeIfPresent(Date.self, forKey: .createdAt)
-
-                        self._id = Id(wrappedValue: idDecoded)
-                        self._description = Index(wrappedValue: descriptionDecoded, type: .text)
-                        self.createdAt = createdAtDecoded
-                    }
-
-                    public func encode(to encoder: Encoder) throws {
-                        var c = encoder.container(keyedBy: CodingKeys.self)
-                        try c.encodeIfPresent(id, forKey: .id)
-                        try c.encode(description, forKey: .description)
-                        try c.encodeIfPresent(createdAt, forKey: .createdAt)
-                    }
-
-                    public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "description", type: "String", indexType: .text, keyPath: \\Self.description)
                     ]
                 }
 
@@ -1015,8 +880,13 @@ final class ModelMacroTests: XCTestCase {
                         Field(name: "description", type: "String", indexType: .tag, keyPath: \\Self.description),
                         Field(name: "helmetIncluded", type: "Bool", indexType: .tag, keyPath: \\Self.helmetIncluded)
                     ]
-                    + (((Spec.self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "specs.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
+                    + (((Spec.self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
+                        Field(
+                            name: "specs.\\(f.name)",
+                            type: f.type,
+                            indexType: f.indexType,
+                            keyPath: f.keyPath
+                        )
                     } ?? [] )
                 }
                 struct Spec: JsonModel {
@@ -1126,8 +996,13 @@ final class ModelMacroTests: XCTestCase {
                     public static let schema: [Field] = [
                         Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id)
                     ]
-                    + (((Spec.self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "specs.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
+                    + (((Spec.self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
+                        Field(
+                            name: "specs.\\(f.name)",
+                            type: f.type,
+                            indexType: f.indexType,
+                            keyPath: f.keyPath
+                        )
                     } ?? [] )
                 }
                 struct Spec: JsonModel {
@@ -1188,7 +1063,7 @@ final class ModelMacroTests: XCTestCase {
                 @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
-                @Index(type: .text) var notes: [String: Note]
+                @Index(type: .text) var notes: [Note]
                 @Index var address: Address
 
                 static let keyPrefix: String = "user"
@@ -1222,7 +1097,7 @@ final class ModelMacroTests: XCTestCase {
                     @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
-                    @Index(type: .text) var notes: [String: Note]
+                    @Index(type: .text) var notes: [Note]
                     @Index var address: Address
 
                     static let keyPrefix: String = "user"
@@ -1231,7 +1106,7 @@ final class ModelMacroTests: XCTestCase {
                         id: String? = nil,
                         email: String,
                         age: Int,
-                        notes: [String: Note],
+                        notes: [Note],
                         address: Address
                     ) {
                         self._id = Id(wrappedValue: id)
@@ -1254,7 +1129,7 @@ final class ModelMacroTests: XCTestCase {
                         let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
                         let emailDecoded = try c.decode(String.self, forKey: .email)
                         let ageDecoded = try c.decode(Int.self, forKey: .age)
-                        let notesDecoded = try c.decode([String: Note].self, forKey: .notes)
+                        let notesDecoded = try c.decode([Note].self, forKey: .notes)
                         let addressDecoded = try c.decode(Address.self, forKey: .address)
 
                         self._id = Id(wrappedValue: idDecoded)
@@ -1278,13 +1153,21 @@ final class ModelMacroTests: XCTestCase {
                         Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
                         Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
                     ]
-                    + (((Note.self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "notes.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
-                    } ?? [
-                        Field(name: "notes", type: "[String: Note]", indexType: .tag, keyPath: \\Self.notes)
-                    ])
-                    + (((Address.self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "address.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
+                    + (((Note.self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
+                        Field(
+                            name: "notes[*].\\(f.name)",
+                            type: f.type,
+                            indexType: f.indexType,
+                            keyPath: f.keyPath
+                        )
+                    } ?? [])
+                    + (((Address.self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
+                        Field(
+                            name: "address.\\(f.name)",
+                            type: f.type,
+                            indexType: f.indexType,
+                            keyPath: f.keyPath
+                        )
                     } ?? [] )
                 }
                 struct Address: JsonModel {
@@ -1437,7 +1320,7 @@ final class ModelMacroTests: XCTestCase {
                 @Id var id: String?
                 @Index var email: String
                 @Index(type: .numeric) var age: Int
-                @Index var notes: [String: Note]
+                @Index var notes: [Note]
                 @Index var address: Address
 
                 static let keyPrefix: String = "user"
@@ -1470,7 +1353,7 @@ final class ModelMacroTests: XCTestCase {
                     @Id var id: String?
                     @Index var email: String
                     @Index(type: .numeric) var age: Int
-                    @Index var notes: [String: Note]
+                    @Index var notes: [Note]
                     @Index var address: Address
 
                     static let keyPrefix: String = "user"
@@ -1479,7 +1362,7 @@ final class ModelMacroTests: XCTestCase {
                         id: String? = nil,
                         email: String,
                         age: Int,
-                        notes: [String: Note],
+                        notes: [Note],
                         address: Address
                     ) {
                         self._id = Id(wrappedValue: id)
@@ -1502,7 +1385,7 @@ final class ModelMacroTests: XCTestCase {
                         let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
                         let emailDecoded = try c.decode(String.self, forKey: .email)
                         let ageDecoded = try c.decode(Int.self, forKey: .age)
-                        let notesDecoded = try c.decode([String: Note].self, forKey: .notes)
+                        let notesDecoded = try c.decode([Note].self, forKey: .notes)
                         let addressDecoded = try c.decode(Address.self, forKey: .address)
 
                         self._id = Id(wrappedValue: idDecoded)
@@ -1526,13 +1409,21 @@ final class ModelMacroTests: XCTestCase {
                         Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
                         Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
                     ]
-                    + (((Note.self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "notes.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
-                    } ?? [
-                        Field(name: "notes", type: "[String: Note]", indexType: .tag, keyPath: \\Self.notes)
-                    ])
-                    + (((Address.self as Any.Type) as? _SchemaProvider.Type )?.schema.map { f in
-                        Field(name: "address.\\(f.name)", type: f.type, indexType: f.indexType, keyPath: f.keyPath)
+                    + (((Note.self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
+                        Field(
+                            name: "notes[*].\\(f.name)",
+                            type: f.type,
+                            indexType: f.indexType,
+                            keyPath: f.keyPath
+                        )
+                    } ?? [])
+                    + (((Address.self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
+                        Field(
+                            name: "address.\\(f.name)",
+                            type: f.type,
+                            indexType: f.indexType,
+                            keyPath: f.keyPath
+                        )
                     } ?? [] )
                 }
                 struct Address: JsonModel {
