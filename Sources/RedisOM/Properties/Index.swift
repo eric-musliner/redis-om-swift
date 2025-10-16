@@ -1,5 +1,21 @@
 import RedisOMCore
 
+/// A property wrapper that marks a model field as indexed in RedisSearch.
+///
+/// Use `@Index` to indicate that a property should be included in the
+/// RedisSearch schema and queryable through the model's fluent-style DSL.
+///
+/// The wrapper stores both the field's value and its `IndexType`
+/// (e.g. `.tag`, `.text`, `.numeric`, `.geo`, `.vector`), which determines
+/// how the field is indexed and how it can be queried.
+///
+/// The `Index` wrapper is used only for model metadata and automatic
+/// schema generation — it does not modify persistence or runtime behavior
+/// of the wrapped value itself.
+///
+/// - Note: If no `type` is specified, `.tag` is used by default.
+/// - Warning: Accessing the `wrappedValue` before initialization will
+///   trigger a runtime error.
 @propertyWrapper
 public struct Index<Value: Codable & Sendable>: Codable, Sendable {
     private var storage: Value?
