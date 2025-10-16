@@ -26,6 +26,15 @@ final class ModelMacroTests: XCTestCase {
 
                     static let keyPrefix: String = "user"
 
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $email = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["email"]
+                    )
+
                     public init(
                         id: String? = nil,
                         email: String,
@@ -61,8 +70,8 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag)
                     ]
                 }
 
@@ -92,6 +101,19 @@ final class ModelMacroTests: XCTestCase {
                     @Index(type: .numeric) var age: Int
 
                     static let keyPrefix: String = "user"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $email = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["email"]
+                    )
+                    public static let $age = FieldRef<Int>(
+                        indexType: .numeric,
+                        aliasPath: ["age"]
+                    )
 
                     public init(
                         id: String? = nil,
@@ -128,9 +150,9 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
-                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
+                        Field(name: "age", alias: "age", jsonPath: "$.age", indexType: .numeric)
                     ]
                 }
 
@@ -162,6 +184,23 @@ final class ModelMacroTests: XCTestCase {
                     @Index(type: .text) var notes: [String]
 
                     static let keyPrefix: String = "user"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $email = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["email"]
+                    )
+                    public static let $age = FieldRef<Int>(
+                        indexType: .numeric,
+                        aliasPath: ["age"]
+                    )
+                    public static let $notes = FieldRef<[String]>(
+                        indexType: .text,
+                        aliasPath: ["notes"]
+                    )
 
                     public init(
                         id: String? = nil,
@@ -204,10 +243,10 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
-                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age),
-                        Field(name: "notes", type: "[String]", indexType: .text, keyPath: \\Self.notes)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
+                        Field(name: "age", alias: "age", jsonPath: "$.age", indexType: .numeric),
+                        Field(name: "notes", alias: "notes", jsonPath: "$.notes", indexType: .text)
                     ]
                 }
 
@@ -245,6 +284,23 @@ final class ModelMacroTests: XCTestCase {
                     var scores: [Double]
 
                     static let keyPrefix: String = "user"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $email = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["email"]
+                    )
+                    public static let $age = FieldRef<Int>(
+                        indexType: .numeric,
+                        aliasPath: ["age"]
+                    )
+                    public static let $scores = FieldRef<[Double]>(
+                        indexType: .vector,
+                        aliasPath: ["scores"]
+                    )
 
                     public init(
                         id: String? = nil,
@@ -287,10 +343,10 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
-                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age),
-                        Field(name: "scores", type: "[Double]", indexType: .vector, keyPath: \\Self.scores)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
+                        Field(name: "age", alias: "age", jsonPath: "$.age", indexType: .numeric),
+                        Field(name: "scores", alias: "scores", jsonPath: "$.scores", indexType: .vector)
                     ]
                 }
 
@@ -322,6 +378,23 @@ final class ModelMacroTests: XCTestCase {
                     @Index(type: .vector) var scores: [Float]
 
                     static let keyPrefix: String = "user"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $email = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["email"]
+                    )
+                    public static let $age = FieldRef<Int>(
+                        indexType: .numeric,
+                        aliasPath: ["age"]
+                    )
+                    public static let $scores = FieldRef<[Float]>(
+                        indexType: .vector,
+                        aliasPath: ["scores"]
+                    )
 
                     public init(
                         id: String? = nil,
@@ -364,10 +437,10 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
-                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age),
-                        Field(name: "scores", type: "[Float]", indexType: .vector, keyPath: \\Self.scores)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
+                        Field(name: "age", alias: "age", jsonPath: "$.age", indexType: .numeric),
+                        Field(name: "scores", alias: "scores", jsonPath: "$.scores", indexType: .vector)
                     ]
                 }
 
@@ -399,6 +472,19 @@ final class ModelMacroTests: XCTestCase {
                     var preferences: [String: Int]
 
                     static let keyPrefix: String = "user"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $email = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["email"]
+                    )
+                    public static let $age = FieldRef<Int>(
+                        indexType: .numeric,
+                        aliasPath: ["age"]
+                    )
 
                     public init(
                         id: String? = nil,
@@ -441,9 +527,9 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
-                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
+                        Field(name: "age", alias: "age", jsonPath: "$.age", indexType: .numeric)
                     ]
                 }
 
@@ -476,6 +562,23 @@ final class ModelMacroTests: XCTestCase {
                     @Index(type: .geo) var location: Coordinate
 
                     static let keyPrefix: String = "user"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $email = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["email"]
+                    )
+                    public static let $age = FieldRef<Int>(
+                        indexType: .numeric,
+                        aliasPath: ["age"]
+                    )
+                    public static let $location = FieldRef<Coordinate>(
+                        indexType: .geo,
+                        aliasPath: ["location"]
+                    )
 
                     public init(
                         id: String? = nil,
@@ -518,10 +621,10 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
-                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age),
-                        Field(name: "location", type: "Coordinate", indexType: .geo, keyPath: \\Self.location)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
+                        Field(name: "age", alias: "age", jsonPath: "$.age", indexType: .numeric),
+                        Field(name: "location", alias: "location", jsonPath: "$.location", indexType: .geo)
                     ]
 
                 }
@@ -555,6 +658,23 @@ final class ModelMacroTests: XCTestCase {
                     @Index var birthdate: Date
 
                     static let keyPrefix: String = "user"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $email = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["email"]
+                    )
+                    public static let $age = FieldRef<Int>(
+                        indexType: .numeric,
+                        aliasPath: ["age"]
+                    )
+                    public static let $birthdate = FieldRef<Date>(
+                        indexType: .tag,
+                        aliasPath: ["birthdate"]
+                    )
 
                     public init(
                         id: String? = nil,
@@ -597,10 +717,10 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
-                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age),
-                        Field(name: "birthdate", type: "Date", indexType: .tag, keyPath: \\Self.birthdate)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
+                        Field(name: "age", alias: "age", jsonPath: "$.age", indexType: .numeric),
+                        Field(name: "birthdate", alias: "birthdate", jsonPath: "$.birthdate", indexType: .tag)
                     ]
 
                 }
@@ -643,6 +763,23 @@ final class ModelMacroTests: XCTestCase {
 
                     static let keyPrefix: String = "user"
 
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $email = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["email"]
+                    )
+                    public static let $age = FieldRef<Int>(
+                        indexType: .numeric,
+                        aliasPath: ["age"]
+                    )
+                    public static let $notes = FieldRef<[Note]>(
+                        indexType: .tag,
+                        aliasPath: ["notes"]
+                    )
+
                     public init(
                         id: String? = nil,
                         email: String,
@@ -684,18 +821,13 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
-                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
+                        Field(name: "age", alias: "age", jsonPath: "$.age", indexType: .numeric)
                     ]
-                    + (((Note.self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
-                        Field(
-                            name: "notes[*].\\(f.name)",
-                            type: f.type,
-                            indexType: f.indexType,
-                            keyPath: f.keyPath
-                        )
-                    } ?? [])
+                    + [
+                        Field(name: "notes", alias: "notes", jsonPath: "$.notes[*]", indexType: .tag, nestedSchema: (((Note.self as Any.Type) as? _SchemaProvider.Type)?.schema))
+                    ]
                 }
                 struct Note: JsonModel {
                     @Id var id: String?
@@ -703,6 +835,11 @@ final class ModelMacroTests: XCTestCase {
                     var createdAt: Date?
 
                     static let keyPrefix: String = "note"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
 
                     public init(
                         id: String? = nil,
@@ -739,7 +876,7 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag)
                     ]
                 }
 
@@ -794,6 +931,39 @@ final class ModelMacroTests: XCTestCase {
                     var createdAt: Date?
 
                     static let keyPrefix: String = "bike"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $model = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["model"]
+                    )
+                    public static let $brand = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["brand"]
+                    )
+                    public static let $price = FieldRef<Int>(
+                        indexType: .numeric,
+                        aliasPath: ["price"]
+                    )
+                    public static let $type = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["type"]
+                    )
+                    public static let $specs = FieldRef<Spec>(
+                        indexType: .tag,
+                        aliasPath: ["specs"]
+                    )
+                    public static let $description = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["description"]
+                    )
+                    public static let $helmetIncluded = FieldRef<Bool>(
+                        indexType: .tag,
+                        aliasPath: ["helmetIncluded"]
+                    )
 
                     public init(
                         id: String? = nil,
@@ -872,28 +1042,32 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "model", type: "String", indexType: .tag, keyPath: \\Self.model),
-                        Field(name: "brand", type: "String", indexType: .tag, keyPath: \\Self.brand),
-                        Field(name: "price", type: "Int", indexType: .numeric, keyPath: \\Self.price),
-                        Field(name: "type", type: "String", indexType: .tag, keyPath: \\Self.type),
-                        Field(name: "description", type: "String", indexType: .tag, keyPath: \\Self.description),
-                        Field(name: "helmetIncluded", type: "Bool", indexType: .tag, keyPath: \\Self.helmetIncluded)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "model", alias: "model", jsonPath: "$.model", indexType: .tag),
+                        Field(name: "brand", alias: "brand", jsonPath: "$.brand", indexType: .tag),
+                        Field(name: "price", alias: "price", jsonPath: "$.price", indexType: .numeric),
+                        Field(name: "type", alias: "type", jsonPath: "$.type", indexType: .tag),
+                        Field(name: "description", alias: "description", jsonPath: "$.description", indexType: .tag),
+                        Field(name: "helmetIncluded", alias: "helmetIncluded", jsonPath: "$.helmetIncluded", indexType: .tag)
                     ]
-                    + (((Spec.self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
-                        Field(
-                            name: "specs.\\(f.name)",
-                            type: f.type,
-                            indexType: f.indexType,
-                            keyPath: f.keyPath
-                        )
-                    } ?? [] )
+                    + [
+                        Field(name: "specs", alias: "specs", jsonPath: "$.specs",indexType: .tag, nestedSchema: (((Spec.self as Any.Type) as? _SchemaProvider.Type)?.schema))
+                    ]
                 }
                 struct Spec: JsonModel {
                     @Index var material: String
                     @Index(type: .numeric) var weight: Int
 
                     static let keyPrefix: String = "spec"
+
+                    public static let $material = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["material"]
+                    )
+                    public static let $weight = FieldRef<Int>(
+                        indexType: .numeric,
+                        aliasPath: ["weight"]
+                    )
 
                     public init(
                         material: String,
@@ -924,8 +1098,8 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "material", type: "String", indexType: .tag, keyPath: \\Self.material),
-                        Field(name: "weight", type: "Int", indexType: .numeric, keyPath: \\Self.weight)
+                        Field(name: "material", alias: "material", jsonPath: "$.material", indexType: .tag),
+                        Field(name: "weight", alias: "weight", jsonPath: "$.weight", indexType: .numeric)
                     ]
                 }
 
@@ -965,6 +1139,15 @@ final class ModelMacroTests: XCTestCase {
 
                     static let keyPrefix: String = "bike"
 
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $specs = FieldRef<Spec>(
+                        indexType: .tag,
+                        aliasPath: ["specs"]
+                    )
+
                     public init(
                         id: String? = nil,
                         specs: Spec
@@ -994,22 +1177,26 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag)
                     ]
-                    + (((Spec.self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
-                        Field(
-                            name: "specs.\\(f.name)",
-                            type: f.type,
-                            indexType: f.indexType,
-                            keyPath: f.keyPath
-                        )
-                    } ?? [] )
+                    + [
+                        Field(name: "specs", alias: "specs", jsonPath: "$.specs",indexType: .tag, nestedSchema: (((Spec.self as Any.Type) as? _SchemaProvider.Type)?.schema))
+                    ]
                 }
                 struct Spec: JsonModel {
                     @Index var material: String
                     @Index(type: .numeric) var weight: Int
 
                     static let keyPrefix: String = "spec"
+
+                    public static let $material = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["material"]
+                    )
+                    public static let $weight = FieldRef<Int>(
+                        indexType: .numeric,
+                        aliasPath: ["weight"]
+                    )
 
                     public init(
                         material: String,
@@ -1040,8 +1227,8 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "material", type: "String", indexType: .tag, keyPath: \\Self.material),
-                        Field(name: "weight", type: "Int", indexType: .numeric, keyPath: \\Self.weight)
+                        Field(name: "material", alias: "material", jsonPath: "$.material", indexType: .tag),
+                        Field(name: "weight", alias: "weight", jsonPath: "$.weight", indexType: .numeric)
                     ]
                 }
 
@@ -1102,6 +1289,27 @@ final class ModelMacroTests: XCTestCase {
 
                     static let keyPrefix: String = "user"
 
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $email = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["email"]
+                    )
+                    public static let $age = FieldRef<Int>(
+                        indexType: .numeric,
+                        aliasPath: ["age"]
+                    )
+                    public static let $notes = FieldRef<[Note]>(
+                        indexType: .text,
+                        aliasPath: ["notes"]
+                    )
+                    public static let $address = FieldRef<Address>(
+                        indexType: .tag,
+                        aliasPath: ["address"]
+                    )
+
                     public init(
                         id: String? = nil,
                         email: String,
@@ -1149,26 +1357,16 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
-                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
+                        Field(name: "age", alias: "age", jsonPath: "$.age", indexType: .numeric)
                     ]
-                    + (((Note.self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
-                        Field(
-                            name: "notes[*].\\(f.name)",
-                            type: f.type,
-                            indexType: f.indexType,
-                            keyPath: f.keyPath
-                        )
-                    } ?? [])
-                    + (((Address.self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
-                        Field(
-                            name: "address.\\(f.name)",
-                            type: f.type,
-                            indexType: f.indexType,
-                            keyPath: f.keyPath
-                        )
-                    } ?? [] )
+                    + [
+                        Field(name: "notes", alias: "notes", jsonPath: "$.notes[*]", indexType: .text, nestedSchema: (((Note.self as Any.Type) as? _SchemaProvider.Type)?.schema))
+                    ]
+                    + [
+                        Field(name: "address", alias: "address", jsonPath: "$.address",indexType: .tag, nestedSchema: (((Address.self as Any.Type) as? _SchemaProvider.Type)?.schema))
+                    ]
                 }
                 struct Address: JsonModel {
                     @Id var id: String?
@@ -1181,6 +1379,19 @@ final class ModelMacroTests: XCTestCase {
                     var note: Note? = nil
 
                     static let keyPrefix: String = "address"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $city = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["city"]
+                    )
+                    public static let $postalCode = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["postalCode"]
+                    )
 
                     public init(
                         id: String? = nil,
@@ -1247,9 +1458,9 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "city", type: "String", indexType: .tag, keyPath: \\Self.city),
-                        Field(name: "postalCode", type: "String", indexType: .tag, keyPath: \\Self.postalCode)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "city", alias: "city", jsonPath: "$.city", indexType: .tag),
+                        Field(name: "postalCode", alias: "postalCode", jsonPath: "$.postalCode", indexType: .tag)
                     ]
                 }
                 struct Note: JsonModel {
@@ -1258,6 +1469,15 @@ final class ModelMacroTests: XCTestCase {
                     var createdAt: Date?
 
                     static let keyPrefix: String = "note"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $description = FieldRef<String>(
+                        indexType: .text,
+                        aliasPath: ["description"]
+                    )
 
                     public init(
                         id: String? = nil,
@@ -1294,8 +1514,8 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "description", type: "String", indexType: .text, keyPath: \\Self.description)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "description", alias: "description", jsonPath: "$.description", indexType: .text)
                     ]
                 }
 
@@ -1358,6 +1578,27 @@ final class ModelMacroTests: XCTestCase {
 
                     static let keyPrefix: String = "user"
 
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $email = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["email"]
+                    )
+                    public static let $age = FieldRef<Int>(
+                        indexType: .numeric,
+                        aliasPath: ["age"]
+                    )
+                    public static let $notes = FieldRef<[Note]>(
+                        indexType: .tag,
+                        aliasPath: ["notes"]
+                    )
+                    public static let $address = FieldRef<Address>(
+                        indexType: .tag,
+                        aliasPath: ["address"]
+                    )
+
                     public init(
                         id: String? = nil,
                         email: String,
@@ -1405,26 +1646,16 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "email", type: "String", indexType: .tag, keyPath: \\Self.email),
-                        Field(name: "age", type: "Int", indexType: .numeric, keyPath: \\Self.age)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
+                        Field(name: "age", alias: "age", jsonPath: "$.age", indexType: .numeric)
                     ]
-                    + (((Note.self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
-                        Field(
-                            name: "notes[*].\\(f.name)",
-                            type: f.type,
-                            indexType: f.indexType,
-                            keyPath: f.keyPath
-                        )
-                    } ?? [])
-                    + (((Address.self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
-                        Field(
-                            name: "address.\\(f.name)",
-                            type: f.type,
-                            indexType: f.indexType,
-                            keyPath: f.keyPath
-                        )
-                    } ?? [] )
+                    + [
+                        Field(name: "notes", alias: "notes", jsonPath: "$.notes[*]", indexType: .tag, nestedSchema: (((Note.self as Any.Type) as? _SchemaProvider.Type)?.schema))
+                    ]
+                    + [
+                        Field(name: "address", alias: "address", jsonPath: "$.address",indexType: .tag, nestedSchema: (((Address.self as Any.Type) as? _SchemaProvider.Type)?.schema))
+                    ]
                 }
                 struct Address: JsonModel {
                     @Id var id: String?
@@ -1437,6 +1668,19 @@ final class ModelMacroTests: XCTestCase {
                     var note: Note? = nil
 
                     static let keyPrefix: String = "address"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $city = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["city"]
+                    )
+                    public static let $postalCode = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["postalCode"]
+                    )
 
                     public init(
                         id: String? = nil,
@@ -1503,9 +1747,9 @@ final class ModelMacroTests: XCTestCase {
                     }
 
                     public static let schema: [Field] = [
-                        Field(name: "id", type: "String", indexType: .tag, keyPath: \\Self.id),
-                        Field(name: "city", type: "String", indexType: .tag, keyPath: \\Self.city),
-                        Field(name: "postalCode", type: "String", indexType: .tag, keyPath: \\Self.postalCode)
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "city", alias: "city", jsonPath: "$.city", indexType: .tag),
+                        Field(name: "postalCode", alias: "postalCode", jsonPath: "$.postalCode", indexType: .tag)
                     ]
                 }
 
@@ -1521,6 +1765,503 @@ final class ModelMacroTests: XCTestCase {
                 }
 
                 extension Address: _SchemaProvider {
+                }
+                """,
+            macros: ["Model": ModelMacro.self]
+        )
+    }
+
+    func testSchemaExpansionPersonNestedAddressModel() {
+        assertMacroExpansion(
+            """
+            @Model
+            struct Person: JsonModel {
+                @Id var id: String?
+                @Index var name: String
+                @Index var email: String
+                @Index var address: Address
+                var aliases: [String]?
+                var age: Int?
+                var notes: [Note]?
+                @Index(type: .numeric) var createdAt: Date?
+
+                static let keyPrefix: String = "person"
+            }
+
+            @Model
+            struct Address: JsonModel {
+                @Id var id: String?
+                var addressLine1: String
+                var addressLine2: String? = nil
+                @Index var city: String
+                var state: String
+                var country: String
+                @Index var postalCode: String
+                @Index var note: Note? = nil
+
+                static let keyPrefix: String = "address"
+            }
+
+            struct Note: JsonModel {
+                @Id var id: String?
+                var description: String
+                var createdAt: Date?
+
+                static let keyPrefix: String = "note"
+            }
+            """,
+            expandedSource: """
+                struct Person: JsonModel {
+                    @Id var id: String?
+                    @Index var name: String
+                    @Index var email: String
+                    @Index var address: Address
+                    var aliases: [String]?
+                    var age: Int?
+                    var notes: [Note]?
+                    @Index(type: .numeric) var createdAt: Date?
+
+                    static let keyPrefix: String = "person"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $name = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["name"]
+                    )
+                    public static let $email = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["email"]
+                    )
+                    public static let $address = FieldRef<Address>(
+                        indexType: .tag,
+                        aliasPath: ["address"]
+                    )
+                    public static let $createdAt = FieldRef<Date?>(
+                        indexType: .numeric,
+                        aliasPath: ["createdAt"]
+                    )
+
+                    public init(
+                        id: String? = nil,
+                        name: String,
+                        email: String,
+                        address: Address,
+                        aliases: [String]? = nil,
+                        age: Int? = nil,
+                        notes: [Note]? = nil,
+                        createdAt: Date? = nil
+                    ) {
+                        self._id = Id(wrappedValue: id)
+                        self._name = Index(wrappedValue: name, type: .tag)
+                        self._email = Index(wrappedValue: email, type: .tag)
+                        self._address = Index(wrappedValue: address, type: .tag)
+                        self.aliases = aliases
+                        self.age = age
+                        self.notes = notes
+                        self._createdAt = Index(wrappedValue: createdAt, type: .numeric)
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case name
+                        case email
+                        case address
+                        case aliases
+                        case age
+                        case notes
+                        case createdAt
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let nameDecoded = try c.decode(String.self, forKey: .name)
+                        let emailDecoded = try c.decode(String.self, forKey: .email)
+                        let addressDecoded = try c.decode(Address.self, forKey: .address)
+                        let aliasesDecoded = try c.decodeIfPresent([String].self, forKey: .aliases)
+                        let ageDecoded = try c.decodeIfPresent(Int.self, forKey: .age)
+                        let notesDecoded = try c.decodeIfPresent([Note].self, forKey: .notes)
+                        let createdAtDecoded = try c.decodeIfPresent(Date.self, forKey: .createdAt)
+
+                        self._id = Id(wrappedValue: idDecoded)
+                        self._name = Index(wrappedValue: nameDecoded, type: .tag)
+                        self._email = Index(wrappedValue: emailDecoded, type: .tag)
+                        self._address = Index(wrappedValue: addressDecoded, type: .tag)
+                        self.aliases = aliasesDecoded
+                        self.age = ageDecoded
+                        self.notes = notesDecoded
+                        self._createdAt = Index(wrappedValue: createdAtDecoded, type: .numeric)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(name, forKey: .name)
+                        try c.encode(email, forKey: .email)
+                        try c.encode(address, forKey: .address)
+                        try c.encodeIfPresent(aliases, forKey: .aliases)
+                        try c.encodeIfPresent(age, forKey: .age)
+                        try c.encodeIfPresent(notes, forKey: .notes)
+                        try c.encodeIfPresent(createdAt, forKey: .createdAt)
+                    }
+
+                    public static let schema: [Field] = [
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "name", alias: "name", jsonPath: "$.name", indexType: .tag),
+                        Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
+                        Field(name: "createdAt", alias: "createdAt", jsonPath: "$.createdAt", indexType: .numeric)
+                    ]
+                    + [
+                        Field(name: "address", alias: "address", jsonPath: "$.address",indexType: .tag, nestedSchema: (((Address.self as Any.Type) as? _SchemaProvider.Type)?.schema))
+                    ]
+                }
+                struct Address: JsonModel {
+                    @Id var id: String?
+                    var addressLine1: String
+                    var addressLine2: String? = nil
+                    @Index var city: String
+                    var state: String
+                    var country: String
+                    @Index var postalCode: String
+                    @Index var note: Note? = nil
+
+                    static let keyPrefix: String = "address"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $city = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["city"]
+                    )
+                    public static let $postalCode = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["postalCode"]
+                    )
+                    public static let $note = FieldRef<Note?>(
+                        indexType: .tag,
+                        aliasPath: ["note"]
+                    )
+
+                    public init(
+                        id: String? = nil,
+                        addressLine1: String,
+                        addressLine2: String? = nil,
+                        city: String,
+                        state: String,
+                        country: String,
+                        postalCode: String,
+                        note: Note? = nil
+                    ) {
+                        self._id = Id(wrappedValue: id)
+                        self.addressLine1 = addressLine1
+                        self.addressLine2 = addressLine2
+                        self._city = Index(wrappedValue: city, type: .tag)
+                        self.state = state
+                        self.country = country
+                        self._postalCode = Index(wrappedValue: postalCode, type: .tag)
+                        self._note = Index(wrappedValue: note, type: .tag)
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case addressLine1
+                        case addressLine2
+                        case city
+                        case state
+                        case country
+                        case postalCode
+                        case note
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let addressLine1Decoded = try c.decode(String.self, forKey: .addressLine1)
+                        let addressLine2Decoded = try c.decode(String? .self, forKey: .addressLine2)
+                        let cityDecoded = try c.decode(String.self, forKey: .city)
+                        let stateDecoded = try c.decode(String.self, forKey: .state)
+                        let countryDecoded = try c.decode(String.self, forKey: .country)
+                        let postalCodeDecoded = try c.decode(String.self, forKey: .postalCode)
+                        let noteDecoded = try c.decode(Note? .self, forKey: .note)
+
+                        self._id = Id(wrappedValue: idDecoded)
+                        self.addressLine1 = addressLine1Decoded
+                        self.addressLine2 = addressLine2Decoded
+                        self._city = Index(wrappedValue: cityDecoded, type: .tag)
+                        self.state = stateDecoded
+                        self.country = countryDecoded
+                        self._postalCode = Index(wrappedValue: postalCodeDecoded, type: .tag)
+                        self._note = Index(wrappedValue: noteDecoded, type: .tag)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(addressLine1, forKey: .addressLine1)
+                        try c.encode(addressLine2, forKey: .addressLine2)
+                        try c.encode(city, forKey: .city)
+                        try c.encode(state, forKey: .state)
+                        try c.encode(country, forKey: .country)
+                        try c.encode(postalCode, forKey: .postalCode)
+                        try c.encode(note, forKey: .note)
+                    }
+
+                    public static let schema: [Field] = [
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "city", alias: "city", jsonPath: "$.city", indexType: .tag),
+                        Field(name: "postalCode", alias: "postalCode", jsonPath: "$.postalCode", indexType: .tag)
+                    ]
+                    + [
+                        Field(name: "note", alias: "note", jsonPath: "$.note",indexType: .tag, nestedSchema: (((Note.self as Any.Type) as? _SchemaProvider.Type)?.schema))
+                    ]
+                }
+
+                struct Note: JsonModel {
+                    @Id var id: String?
+                    var description: String
+                    var createdAt: Date?
+
+                    static let keyPrefix: String = "note"
+                }
+
+                extension Person: _SchemaProvider {
+                }
+
+                extension Address: _SchemaProvider {
+                }
+                """,
+            macros: ["Model": ModelMacro.self]
+        )
+    }
+
+    func testSchemaExpansionDeepSimpleNesting() {
+        assertMacroExpansion(
+            """
+            @Model
+            struct Parent: JsonModel {
+                @Id var id: String?
+                @Index var name: String
+                @Index var child: Child
+
+                static let keyPrefix: String = "parent"
+            }
+
+            @Model
+            struct Child: JsonModel {
+                @Id var id: String?
+                @Index var name: String
+                @Index var pet: Pet
+
+                static let keyPrefix: String = "child"
+            }
+
+            @Model
+            struct Pet: JsonModel {
+                @Id var id: String?
+                @Index var species: String
+                @Index var name: String
+
+                static let keyPrefix: String = "pet"
+            }
+            """,
+            expandedSource: """
+                struct Parent: JsonModel {
+                    @Id var id: String?
+                    @Index var name: String
+                    @Index var child: Child
+
+                    static let keyPrefix: String = "parent"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $name = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["name"]
+                    )
+                    public static let $child = FieldRef<Child>(
+                        indexType: .tag,
+                        aliasPath: ["child"]
+                    )
+
+                    public init(
+                        id: String? = nil,
+                        name: String,
+                        child: Child
+                    ) {
+                        self._id = Id(wrappedValue: id)
+                        self._name = Index(wrappedValue: name, type: .tag)
+                        self._child = Index(wrappedValue: child, type: .tag)
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case name
+                        case child
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let nameDecoded = try c.decode(String.self, forKey: .name)
+                        let childDecoded = try c.decode(Child.self, forKey: .child)
+
+                        self._id = Id(wrappedValue: idDecoded)
+                        self._name = Index(wrappedValue: nameDecoded, type: .tag)
+                        self._child = Index(wrappedValue: childDecoded, type: .tag)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(name, forKey: .name)
+                        try c.encode(child, forKey: .child)
+                    }
+
+                    public static let schema: [Field] = [
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "name", alias: "name", jsonPath: "$.name", indexType: .tag)
+                    ]
+                    + [
+                        Field(name: "child", alias: "child", jsonPath: "$.child",indexType: .tag, nestedSchema: (((Child.self as Any.Type) as? _SchemaProvider.Type)?.schema))
+                    ]
+                }
+                struct Child: JsonModel {
+                    @Id var id: String?
+                    @Index var name: String
+                    @Index var pet: Pet
+
+                    static let keyPrefix: String = "child"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $name = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["name"]
+                    )
+                    public static let $pet = FieldRef<Pet>(
+                        indexType: .tag,
+                        aliasPath: ["pet"]
+                    )
+
+                    public init(
+                        id: String? = nil,
+                        name: String,
+                        pet: Pet
+                    ) {
+                        self._id = Id(wrappedValue: id)
+                        self._name = Index(wrappedValue: name, type: .tag)
+                        self._pet = Index(wrappedValue: pet, type: .tag)
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case name
+                        case pet
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let nameDecoded = try c.decode(String.self, forKey: .name)
+                        let petDecoded = try c.decode(Pet.self, forKey: .pet)
+
+                        self._id = Id(wrappedValue: idDecoded)
+                        self._name = Index(wrappedValue: nameDecoded, type: .tag)
+                        self._pet = Index(wrappedValue: petDecoded, type: .tag)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(name, forKey: .name)
+                        try c.encode(pet, forKey: .pet)
+                    }
+
+                    public static let schema: [Field] = [
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "name", alias: "name", jsonPath: "$.name", indexType: .tag)
+                    ]
+                    + [
+                        Field(name: "pet", alias: "pet", jsonPath: "$.pet",indexType: .tag, nestedSchema: (((Pet.self as Any.Type) as? _SchemaProvider.Type)?.schema))
+                    ]
+                }
+                struct Pet: JsonModel {
+                    @Id var id: String?
+                    @Index var species: String
+                    @Index var name: String
+
+                    static let keyPrefix: String = "pet"
+
+                    public static let $id = FieldRef<String?>(
+                        indexType: .tag,
+                        aliasPath: ["id"]
+                    )
+                    public static let $species = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["species"]
+                    )
+                    public static let $name = FieldRef<String>(
+                        indexType: .tag,
+                        aliasPath: ["name"]
+                    )
+
+                    public init(
+                        id: String? = nil,
+                        species: String,
+                        name: String
+                    ) {
+                        self._id = Id(wrappedValue: id)
+                        self._species = Index(wrappedValue: species, type: .tag)
+                        self._name = Index(wrappedValue: name, type: .tag)
+                    }
+
+                    enum CodingKeys: String, CodingKey {
+                        case id
+                        case species
+                        case name
+                    }
+
+                    public init(from decoder: Decoder) throws {
+                        let c = try decoder.container(keyedBy: CodingKeys.self)
+                        let idDecoded = try c.decodeIfPresent(String.self, forKey: .id)
+                        let speciesDecoded = try c.decode(String.self, forKey: .species)
+                        let nameDecoded = try c.decode(String.self, forKey: .name)
+
+                        self._id = Id(wrappedValue: idDecoded)
+                        self._species = Index(wrappedValue: speciesDecoded, type: .tag)
+                        self._name = Index(wrappedValue: nameDecoded, type: .tag)
+                    }
+
+                    public func encode(to encoder: Encoder) throws {
+                        var c = encoder.container(keyedBy: CodingKeys.self)
+                        try c.encodeIfPresent(id, forKey: .id)
+                        try c.encode(species, forKey: .species)
+                        try c.encode(name, forKey: .name)
+                    }
+
+                    public static let schema: [Field] = [
+                        Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
+                        Field(name: "species", alias: "species", jsonPath: "$.species", indexType: .tag),
+                        Field(name: "name", alias: "name", jsonPath: "$.name", indexType: .tag)
+                    ]
+                }
+
+                extension Parent: _SchemaProvider {
+                }
+
+                extension Child: _SchemaProvider {
+                }
+
+                extension Pet: _SchemaProvider {
                 }
                 """,
             macros: ["Model": ModelMacro.self]
