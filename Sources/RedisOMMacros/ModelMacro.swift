@@ -44,6 +44,19 @@ import SwiftSyntaxMacros
 ///
 ///     static let keyPrefix: String = "user"
 ///
+///     public static let $id = FieldRef<String?>(
+///        indexType: .tag,
+///        aliasPath: ["id"]
+///     )
+///     public static let $email = FieldRef<String>(
+///        indexType: .tag,
+///        aliasPath: ["email"]
+///     )
+///     public static let $age = FieldRef<Int>(
+///        indexType: .numeric,
+///        aliasPath: ["age"]
+///     )
+///
 ///     init(
 ///         id: String,
 ///         email: String,
@@ -100,6 +113,7 @@ import SwiftSyntaxMacros
 /// - Note: Only stored properties annotated with ``Index`` or ``Id``
 ///   are included in the schema. Other properties are ignored.
 public struct ModelMacro: MemberMacro, ExtensionMacro {
+
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf decl: some DeclGroupSyntax,
@@ -125,6 +139,18 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
 
         var scalarFields: [String] = []
         var nestedSchemas: [String] = []
+        var staticFieldRefs: [String] = []
+
+        func makeStaticRefDecl(pathComponent name: String, typeName: String, indexType: String)
+            -> String
+        {
+            return """
+                public static let $\((name)) = FieldRef<\(typeName)>(
+                    indexType: \(indexType),
+                    aliasPath: ["\(name)"]
+                )
+                """
+        }
 
         for member in declaration.memberBlock.members {
             guard let varDecl = member.decl.as(VariableDeclSyntax.self),
@@ -147,10 +173,11 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
                 }
                 return false
             }
+            var indexType = ".tag"
+
             guard hasIndexAttr, let typeSyntax = binding.typeAnnotation?.type else { continue }
 
             let resolved = resolveType(typeSyntax)
-            var indexType = ".tag"
 
             // Resolve Index type from argument to @Index(...) default to .tag
             let attrs = varDecl.attributes
@@ -171,40 +198,42 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
                     .trimmingCharacters(in: .whitespaces) ?? ".tag"
             }
 
-            // MARK: Schema Fields
+            // MARK: Schema + Proxy Generation
             switch resolved {
-            case .Other(let typeName):
+            case .Other(let typeName),
+                .Optional(of: .Other(let typeName)):
                 if typeName == "Date" {
                     scalarFields.append(
                         """
-                        Field(name: "\(name)", type: "\(resolved)", indexType: \(indexType), keyPath: \\Self.\(name))
+                        Field(name: "\(name)", alias: "\(name.alias())", jsonPath: "$.\(name)", indexType: \(indexType))
                         """)
+                    staticFieldRefs.append(
+                        makeStaticRefDecl(
+                            pathComponent: name, typeName: "\(resolved)", indexType: indexType))
                 } else {
                     nestedSchemas.append(
                         """
-                        (((\(typeName).self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
-                            Field(
-                                name: "\(name).\\(f.name)",
-                                type: f.type,
-                                indexType: f.indexType,
-                                keyPath: f.keyPath
-                            )
-                        } ?? [] )
-                        """)
+                        [
+                            Field(name: "\(name)", alias: "\(name.alias())", jsonPath: "$.\(name)",indexType: \(indexType), nestedSchema: (((\(typeName).self as Any.Type) as? _SchemaProvider.Type)?.schema))
+                        ]
+                        """
+                    )
+                    staticFieldRefs.append(
+                        makeStaticRefDecl(
+                            pathComponent: name, typeName: "\(resolved)", indexType: indexType))
                 }
-            case .Array(of: .Other(let typeName)):
-                // Array of nested models
+            case .Array(of: .Other(let typeName)),
+                .Optional(of: .Array(of: .Other(let typeName))):
                 nestedSchemas.append(
                     """
-                    (((\(typeName).self as Any.Type) as? _SchemaProvider.Type)?.schema.map { f in
-                        Field(
-                            name: "\(name)[*].\\(f.name)",
-                            type: f.type,
-                            indexType: f.indexType,
-                            keyPath: f.keyPath
-                        )
-                    } ?? [])
+                    [
+                        Field(name: "\(name)", alias: "\(name.alias())", jsonPath: "$.\(name)[*]", indexType: \(indexType), nestedSchema: (((\(typeName).self as Any.Type) as? _SchemaProvider.Type)?.schema))
+                    ]
                     """
+                )
+                staticFieldRefs.append(
+                    makeStaticRefDecl(
+                        pathComponent: name, typeName: "\(resolved)", indexType: indexType)
                 )
             case .Dictionary(key: _, value: .Other(let typeName)):
                 // Dictionary where value is a nested JsonModel
@@ -230,12 +259,17 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
                 // Normal scalar field
                 scalarFields.append(
                     """
-                    Field(name: "\(name)", type: "\(resolved)", indexType: \(indexType), keyPath: \\Self.\(name))
-                    """)
+                    Field(name: "\(name)", alias: "\(name.alias())", jsonPath: "$.\(name)", indexType: \(indexType))
+                    """
+                )
+                staticFieldRefs.append(
+                    makeStaticRefDecl(
+                        pathComponent: name, typeName: "\(resolved)", indexType: indexType))
             }
 
         }
 
+        // MARK: Memberwise Init + Codable Conformance
         let memberwiseInit = createMemberwiseInit(structDecl)
 
         // Collect stored properties
@@ -255,7 +289,6 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
             return (ident.identifier.text, type)
         }
 
-        // MARK: Codable Conformance
         // CodingKeys
         let codingKeys = storedProps.map { (name, _) in
             "case \(name)"
@@ -273,7 +306,10 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
             }
         }.joined(separator: "\n    ")
 
+        // MARK: Declaration Assebmly
         let codableAndSchemaDecl: DeclSyntax = """
+            \(raw: staticFieldRefs.joined(separator: "\n"))
+
             \(raw: memberwiseInit)
 
             enum CodingKeys: String, CodingKey {
@@ -580,6 +616,7 @@ indirect enum ResolvedType {
     case Array(of: ResolvedType)
     case Dictionary(key: ResolvedType, value: ResolvedType)
     case Coordinate
+    case Optional(of: ResolvedType)
     case Other(String)
 }
 
@@ -594,6 +631,7 @@ extension ResolvedType: CustomStringConvertible {
         case .Array(let element): return "[\(element)]"
         case .Dictionary(let key, let value): return "[\(key): \(value)]"
         case .Coordinate: return "Coordinate"
+        case .Optional(let wrapped): return "\(wrapped)?"
         case .Other(let name): return name
         }
     }
@@ -617,7 +655,8 @@ func resolveType(_ type: TypeSyntax) -> ResolvedType {
     }
 
     if let opt = type.as(OptionalTypeSyntax.self) {
-        return resolveType(opt.wrappedType)
+        // return resolveType(opt.wrappedType)
+        return .Optional(of: resolveType(opt.wrappedType))
     }
 
     if let arr = type.as(ArrayTypeSyntax.self) {
