@@ -48,7 +48,7 @@ final class QueryBuilderTests {
         try await user.save()
 
         // FT.SEARCH 'idx:User' '@name:(Alice)'
-        let users: [User] = try await User.find().where(\.name == "Alice").execute()
+        let users: [User] = try await User.find().where(\.$name == "Alice").execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
         #expect(users[0].name == "Alice")
@@ -71,7 +71,7 @@ final class QueryBuilderTests {
         try await user.save()
 
         // FT.SEARCH 'idx:User' '-@name:(Alice)'
-        let users: [User] = try await User.find().where(\.name != "Bill").execute()
+        let users: [User] = try await User.find().where(\.$name != "Bill").execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
         #expect(users[0].name == "Alice")
@@ -94,7 +94,7 @@ final class QueryBuilderTests {
         try await user.save()
 
         // FT.SEARCH 'idx:User' '@name:(Alice)'
-        let users: [User] = try await User.find().where(\.name == "Alice").execute()
+        let users: [User] = try await User.find().where(\.$name == "Alice").execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
         #expect(users[0].name == "Alice Smith")
@@ -126,8 +126,8 @@ final class QueryBuilderTests {
         try await user2.save()
 
         // FT.SEARCH idx:User '(@email:{alice\@example\.com}) (@name:{Alice})'
-        let users: [User] = try await User.find().where(\.name == "Alice").and(
-            \.email == "alice@example.com"
+        let users: [User] = try await User.find().where(\.$name == "Alice").and(
+            \.$email == "alice@example.com"
         ).execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
@@ -160,8 +160,8 @@ final class QueryBuilderTests {
         try await user2.save()
 
         // FT.SEARCH idx:User '(@email:{alice\@example\.com}) (@name:{Alice})'
-        let users: [User] = try await User.find().where(\.name == "Alice").and(
-            \.email != "alice@example.com"
+        let users: [User] = try await User.find().where(\.$name == "Alice").and(
+            \.$email != "alice@example.com"
         ).execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
@@ -194,8 +194,8 @@ final class QueryBuilderTests {
         try await user2.save()
 
         // FT.SEARCH idx:User '(@email:{alice\@example\.com}) (@name:{Alice})'
-        let users: [User] = try await User.find().where(\.name == "Alice").and(
-            \.email == "alice@example.com"
+        let users: [User] = try await User.find().where(\.$name == "Alice").and(
+            \.$email == "alice@example.com"
         ).execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
@@ -228,8 +228,8 @@ final class QueryBuilderTests {
         try await user2.save()
 
         // FT.SEARCH idx:User '(@email:{alice\@example\.com}) (@age:[45 45])'
-        let users: [User] = try await User.find().where(\.name == "Alice").and(
-            \.age == 45
+        let users: [User] = try await User.find().where(\.$name == "Alice").and(
+            \.$age == 45
         ).execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
@@ -250,8 +250,8 @@ final class QueryBuilderTests {
         try await item.save()
 
         // FT.SEARCH idx:Item '(@name:{Winter Parka}) @price:[24.99 24.99]'
-        let items: [Item] = try await Item.find().where(\.name == "Winter Parka").and(
-            \.price == 24.99
+        let items: [Item] = try await Item.find().where(\.$name == "Winter Parka").and(
+            \.$price == 24.99
         ).execute()
         try #require(!items.isEmpty)
         #expect(items.count == 1)
@@ -273,7 +273,7 @@ final class QueryBuilderTests {
         )
         try await user.save()
         // FT.SEARCH 'idx:User' '(@createdAt:[1758570669.819691 1758570669.819691])'
-        let users: [User] = try await User.find().where(\.createdAt == now).execute()
+        let users: [User] = try await User.find().where(\.$createdAt == now).execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
         #expect(users[0].name == "Alice")
@@ -305,7 +305,7 @@ final class QueryBuilderTests {
         )
         try await user2.save()
         // FT.SEARCH 'idx:User' '(@createdAt:[1758570669.819691 1758570669.819691])'
-        let users: [User] = try await User.find().where(\.age > 50).execute()
+        let users: [User] = try await User.find().where(\.$age > 50).execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
         #expect(users[0].name == "Bill")
@@ -337,7 +337,7 @@ final class QueryBuilderTests {
         )
         try await user2.save()
         // FT.SEARCH 'idx:User' '(@createdAt:[1758570669.819691 1758570669.819691])'
-        let users: [User] = try await User.find().where(\.age < 50).execute()
+        let users: [User] = try await User.find().where(\.$age < 50).execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
         #expect(users[0].name == "Alice")
@@ -369,7 +369,8 @@ final class QueryBuilderTests {
         )
         try await user2.save()
         // FT.SEARCH 'idx:User' '(@createdAt:[1758570669.819691 1758570669.819691])'
-        let users: [User] = try await User.find().where(\.name == "Bill").and(\.age < 60).execute()
+        let users: [User] = try await User.find().where(\.$name == "Bill").and(\.$age < 60)
+            .execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
         #expect(users[0].name == "Bill")
@@ -401,7 +402,7 @@ final class QueryBuilderTests {
         )
         try await user2.save()
         // FT.SEARCH 'idx:User' '@age:[-inf 33]'
-        let users: [User] = try await User.find().where(\.age <= 33).execute()
+        let users: [User] = try await User.find().where(\.$age <= 33).execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
         #expect(users[0].name == "Alice")
@@ -433,7 +434,7 @@ final class QueryBuilderTests {
         )
         try await user2.save()
         // FT.SEARCH 'idx:User' '(@age:[-inf 55] @name:(Alice))'
-        let users: [User] = try await User.find().where(\.age <= 55).and(\.name == "Alice")
+        let users: [User] = try await User.find().where(\.$age <= 55).and(\.$name == "Alice")
             .execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
@@ -466,7 +467,7 @@ final class QueryBuilderTests {
         )
         try await user2.save()
         // FT.SEARCH 'idx:User' '@age:[33 +inf]'
-        let users: [User] = try await User.find().where(\.age >= 33).execute()
+        let users: [User] = try await User.find().where(\.$age >= 33).execute()
         try #require(!users.isEmpty)
         #expect(users.count == 2)
         for user in users {
@@ -507,7 +508,7 @@ final class QueryBuilderTests {
         )
         try await user2.save()
         // FT.SEARCH 'idx:User' '(@age:[10 +inf] @name:(Alice))'
-        let users: [User] = try await User.find().where(\.age >= 10).and(\.name == "Alice")
+        let users: [User] = try await User.find().where(\.$age >= 10).and(\.$name == "Alice")
             .execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
@@ -515,6 +516,150 @@ final class QueryBuilderTests {
         #expect(users[0].email == "alice@example.com")
         #expect(users[0].aliases == ["Alicia", "alice"])
         #expect(users[0].age == 33)
+    }
+
+    @Test
+    func testFindAndWherePredicateDoubleGte() async throws {
+        try await self.migrator.migrate(models: [Item.self])
+
+        var item: Item = Item(
+            price: 24.99,
+            name: "Gloves"
+        )
+        try await item.save()
+
+        var item2: Item = Item(
+            price: 50.99,
+            name: "Helmet"
+        )
+        try await item2.save()
+
+        var item3: Item = Item(
+            price: 65.99,
+            name: "Helmet NIPS"
+        )
+        try await item3.save()
+
+        // FT.SEARCH 'idx:Item' '@price:[65.99 +inf]'
+        let items: [Item] = try await Item.find().where(\.$price >= 65.99).execute()
+        try #require(!items.isEmpty)
+        #expect(items.count == 1)
+        #expect(items[0].name == "Helmet NIPS")
+        #expect(items[0].price == 65.99)
+    }
+
+    @Test
+    func testFindAndWherePredicateDoubleGtEdge() async throws {
+        try await self.migrator.migrate(models: [Item.self])
+
+        var item: Item = Item(
+            price: 24.99,
+            name: "Gloves"
+        )
+        try await item.save()
+
+        var item2: Item = Item(
+            price: 50.99,
+            name: "Helmet"
+        )
+        try await item2.save()
+
+        var item3: Item = Item(
+            price: 65.99,
+            name: "Helmet NIPS"
+        )
+        try await item3.save()
+
+        // FT.SEARCH 'idx:Item' '@price:[33.0 60.0]'
+        let items: [Item] = try await Item.find().where(\.$price > 24.99).execute()
+        try #require(!items.isEmpty)
+        #expect(items.count == 2)
+        for item in items {
+            if item.name == "Helmet" {
+                #expect(item.name == "Helmet")
+                #expect(item.price == 50.99)
+            } else if item.name == "Helmet NIPS" {
+                #expect(item.name == "Helmet NIPS")
+                #expect(item.price == 65.99)
+            }
+        }
+    }
+
+    @Test
+    func testFindAndWherePredicateDoubleLtEdge() async throws {
+        try await self.migrator.migrate(models: [Item.self])
+
+        var item: Item = Item(
+            price: 24.99,
+            name: "Gloves"
+        )
+        try await item.save()
+
+        var item2: Item = Item(
+            price: 50.99,
+            name: "Helmet"
+        )
+        try await item2.save()
+
+        var item3: Item = Item(
+            price: 65.99,
+            name: "Helmet NIPS"
+        )
+        try await item3.save()
+
+        // FT.SEARCH 'idx:Item' '@price:[-inf (65.99]'
+        let items: [Item] = try await Item.find().where(\.$price < 65.99).execute()
+        try #require(!items.isEmpty)
+        #expect(items.count == 2)
+        for item in items {
+            if item.name == "Helmet" {
+                #expect(item.name == "Helmet")
+                #expect(item.price == 50.99)
+            } else if item.name == "Gloves" {
+                #expect(item.name == "Gloves")
+                #expect(item.price == 24.99)
+            }
+        }
+    }
+
+    @Test
+    func testFindAndWherePredicateDoubleLteEdge() async throws {
+        try await self.migrator.migrate(models: [Item.self])
+
+        var item: Item = Item(
+            price: 24.99,
+            name: "Gloves"
+        )
+        try await item.save()
+
+        var item2: Item = Item(
+            price: 50.99,
+            name: "Helmet"
+        )
+        try await item2.save()
+
+        var item3: Item = Item(
+            price: 65.99,
+            name: "Helmet NIPS"
+        )
+        try await item3.save()
+
+        // FT.SEARCH 'idx:Item' '@price:[-inf 65.99]'
+        let items: [Item] = try await Item.find().where(\.$price <= 65.99).execute()
+        try #require(!items.isEmpty)
+        #expect(items.count == 3)
+        for item in items {
+            if item.name == "Helmet" {
+                #expect(item.name == "Helmet")
+                #expect(item.price == 50.99)
+            } else if item.name == "Helmet NIPS" {
+                #expect(item.name == "Helmet NIPS")
+                #expect(item.price == 65.99)
+            } else if item.name == "Gloves" {
+                #expect(item.name == "Gloves")
+                #expect(item.price == 24.99)
+            }
+        }
     }
 
     @Test
@@ -549,7 +694,7 @@ final class QueryBuilderTests {
         )
         try await user3.save()
         // FT.SEARCH 'idx:User' '(@age:[34 60] @name:(Bill))'
-        let users: [User] = try await User.find().where(\.age...(34, 60)).and(\.name == "Bill")
+        let users: [User] = try await User.find().where(\.$age...(34, 60)).and(\.$name == "Bill")
             .execute()
         try #require(!users.isEmpty)
         #expect(users.count == 1)
@@ -560,7 +705,7 @@ final class QueryBuilderTests {
     }
 
     @Test
-    func testFindAndWherePredicateNumericBetweenDouble() async throws {
+    func testFindAndWherePredicateNumericBetweenDoubleInclusiveEdge() async throws {
         try await self.migrator.migrate(models: [Item.self])
 
         var item: Item = Item(
@@ -582,7 +727,7 @@ final class QueryBuilderTests {
         try await item3.save()
 
         // FT.SEARCH 'idx:Item' '@price:[33.0 60.0]'
-        let items: [Item] = try await Item.find().where(\.price...(33.0, 60.0)).execute()
+        let items: [Item] = try await Item.find().where(\.$price...(24.99, 60.0)).execute()
         try #require(!items.isEmpty)
         #expect(items.count == 1)
         #expect(items[0].name == "Helmet")
@@ -612,7 +757,7 @@ final class QueryBuilderTests {
         try await item3.save()
 
         // FT.SEARCH 'idx:Item' '(@price:[24.99 24.99] | @price:[50.99 50.99])'
-        let items: [Item] = try await Item.find().where(\.price ~= [24.99, 50.99]).execute()
+        let items: [Item] = try await Item.find().where(\.$price ~= [24.99, 50.99]).execute()
         try #require(!items.isEmpty)
         #expect(items.count == 2)
         for item in items {
@@ -649,7 +794,7 @@ final class QueryBuilderTests {
         try await item3.save()
 
         // FT.SEARCH 'idx:Item' '@name:{Gloves|Helmet}'
-        let items: [Item] = try await Item.find().where(\.name ~= ["Gloves", "Helmet"]).execute()
+        let items: [Item] = try await Item.find().where(\.$name ~= ["Gloves", "Helmet"]).execute()
         try #require(!items.isEmpty)
         #expect(items.count == 2)
         for item in items {
@@ -660,67 +805,6 @@ final class QueryBuilderTests {
                 #expect(item.name == "Helmet")
                 #expect(item.price == 50.99)
             }
-        }
-
-    }
-
-    //    @Test
-    //    func testFindAndPredicateNested() async throws {
-    //        try await self.migrator.migrate(models: [User.self])
-    //
-    //        var user: User = User(
-    //            name: "Alice",
-    //            email: "alice@example.com",
-    //            aliases: ["Alicia", "alice"],
-    //            age: 45,
-    //            address: [
-    //                Address(
-    //                    addressLine1: "123 South Main St", city: "Pittsburg", state: "PA",
-    //                    country: "US", postalCode: "15120"
-    //                )
-    //            ],
-    //            createdAt: Date(),
-    //        )
-    //        try await user.save()
-    //
-    //        var user2: User = User(
-    //            name: "Alice",
-    //            email: "alice.wonder@example.com",
-    //            aliases: ["Alicia", "alice"],
-    //            age: 33,
-    //            createdAt: Date(),
-    //        )
-    //        try await user2.save()
-    //
-    //        // FT.SEARCH idx:User '(@email:{alice\@example\.com}) (@age:[45 45])'
-    //        let users: [User] = try await User.find().where(\.name == "Alice").and(
-    //            \.address.city == "Pittsburg"
-    //        ).execute()
-    //        try #require(!users.isEmpty)
-    //        #expect(users.count == 1)
-    //        #expect(users[0].name == "Alice")
-    //        #expect(users[0].email == "alice@example.com")
-    //        #expect(users[0].aliases == ["Alicia", "alice"])
-    //        #expect(users[0].age == 45)
-    //    }
-
-    @Test
-    func testExpectThrowsOnNonIndexedField() async throws {
-        try await self.migrator.migrate(models: [Author.self])
-
-        var author: Author = Author(
-            name: "Alice",
-            email: "alice@example.com",
-            aliases: ["Alicia", "alice"],
-            age: 45,
-            notes: [:],
-            createdAt: Date()
-        )
-        try await author.save()
-
-        await #expect(throws: QueryBuilderError.self) {
-            let _: [Author] = try await Author.find().where(\.name == "Alice").and(\.age == 45)
-                .execute()
         }
     }
 
@@ -740,7 +824,7 @@ final class QueryBuilderTests {
         try await author.save()
 
         await #expect(throws: QueryBuilderError.self) {
-            let _: [Author] = try await Author.find().where(\.createdAt == now).execute()
+            let _: [Author] = try await Author.find().where(\.$createdAt == now).execute()
         }
     }
 
@@ -767,7 +851,8 @@ final class QueryBuilderTests {
         try await user2.save()
 
         // FT.SEARCH idx:User '(@name:(Alice) @age:[41 +inf])'
-        let users: [User] = try await User.find().where(\.name == "Alice").and(\.age > 40).execute()
+        let users: [User] = try await User.find().where(\.$name == "Alice").and(\.$age > 40)
+            .execute()
         #expect(users.count == 1)
         #expect(users[0].name == "Alice")
         #expect(users[0].email == "alice@example.com")
@@ -808,7 +893,7 @@ final class QueryBuilderTests {
         try await user3.save()
 
         // FT.SEARCH idx:User '(@email:{alice\@example\.com}) (@name:{Alice})'
-        let users: [User] = try await User.find().where(\.name == "Alice").or(\.name == "Bob")
+        let users: [User] = try await User.find().where(\.$name == "Alice").or(\.$name == "Bob")
             .execute()
 
         try #require(!users.isEmpty)
@@ -860,8 +945,8 @@ final class QueryBuilderTests {
         try await user3.save()
 
         // FT.SEARCH idx:User '(@email:{alice\@example\.com}) (@name:{Alice})'
-        let users: [User] = try await User.find().where(\.name == "Alice").or(\.name == "Bob").or(
-            \.name != "Charlie"
+        let users: [User] = try await User.find().where(\.$name == "Alice").or(\.$name == "Bob").or(
+            \.$name != "Charlie"
         )
         .execute()
 
@@ -919,8 +1004,8 @@ final class QueryBuilderTests {
         try await user3.save()
 
         // FT.SEARCH idx:User '(@email:{alice\@example\.com}) (@name:{Alice})'
-        let users: [User] = try await User.find().where(\.name == "Alice").or(\.name == "Bob").or(
-            \.name == "Sally"
+        let users: [User] = try await User.find().where(\.$name == "Alice").or(\.$name == "Bob").or(
+            \.$name == "Sally"
         )
         .execute()
 
@@ -978,7 +1063,7 @@ final class QueryBuilderTests {
         try await user3.save()
 
         // FT.SEARCH idx:User '(@email:{alice\@example\.com}) (@name:{Alice})'
-        let users: [User] = try await User.find().where(\.name == "Alice").or(\.age == 22)
+        let users: [User] = try await User.find().where(\.$name == "Alice").or(\.$age == 22)
             .execute()
         try #require(!users.isEmpty)
         #expect(users.count == 2)
@@ -1039,8 +1124,8 @@ final class QueryBuilderTests {
         try await user4.save()
 
         // FT.SEARCH idx:User '((@name:(Alice) | @name:(Sandra)) @age:[33 33])'
-        let users: [User] = try await User.find().where(\.name == "Alice").or(\.name == "Sandra")
-            .and(\.age == 33)
+        let users: [User] = try await User.find().where(\.$name == "Alice").or(\.$name == "Sandra")
+            .and(\.$age == 33)
             .execute()
         try #require(!users.isEmpty)
         #expect(users.count == 2)
@@ -1058,4 +1143,125 @@ final class QueryBuilderTests {
             }
         }
     }
+
+    // MARK: Nested
+
+    @Test
+    func testFindAndPredicateNested() async throws {
+        try await self.migrator.migrate(models: [Person.self])
+
+        var person: Person = Person(
+            name: "Alice",
+            email: "alice@example.com",
+            address: Address(
+                addressLine1: "123 South Main St", city: "Pittsburg", state: "PA",
+                country: "US", postalCode: "15120"
+            ),
+            age: 45,
+            createdAt: Date()
+        )
+        try await person.save()
+
+        var person2: Person = Person(
+            name: "Alice",
+            email: "alice.wonder@example.com",
+            address: Address(
+                addressLine1: "123 Winding Hill", city: "Scottsdale", state: "AZ",
+                country: "US", postalCode: "85250"
+            ),
+            age: 33,
+            createdAt: Date()
+        )
+        try await person2.save()
+
+        // FT.SEARCH idx:Person "@name:{Alice} @address__city:{Pittsburg}"
+        let persons: [Person] = try await Person.find().where(\.$name == "Alice").and(
+            \.$address.$city == "Pittsburg"
+        ).execute()
+        try #require(!persons.isEmpty)
+        #expect(persons.count == 1)
+        #expect(persons[0].name == "Alice")
+        #expect(persons[0].email == "alice@example.com")
+        #expect(persons[0].age == 45)
+    }
+
+    @Test
+    func testFindAndPredicateDeepNested() async throws {
+        try await self.migrator.migrate(models: [Person.self])
+
+        var person: Person = Person(
+            name: "Alice",
+            email: "alice@example.com",
+            address: Address(
+                addressLine1: "123 South Main St", city: "Pittsburg", state: "PA",
+                country: "US", postalCode: "15120"
+            ),
+            age: 45,
+            createdAt: Date()
+        )
+        try await person.save()
+
+        var person2: Person = Person(
+            name: "Alice",
+            email: "alice.wonder@example.com",
+            address: Address(
+                addressLine1: "123 Winding Hill", city: "Scottsdale", state: "AZ",
+                country: "US", postalCode: "85250", note: Note(description: "mailing address")
+            ),
+            age: 33,
+            createdAt: Date()
+        )
+        try await person2.save()
+
+        // FT.SEARCH idx:Person "((@name:{Alice}) @address__note__description:(mailing address))
+        let persons: [Person] = try await Person.find().where(\.$name == "Alice").and(
+            \.$address.$note.$description == "mailing address"
+        ).execute()
+        try #require(!persons.isEmpty)
+        #expect(persons.count == 1)
+        #expect(persons[0].name == "Alice")
+        #expect(persons[0].email == "alice.wonder@example.com")
+        #expect(persons[0].age == 33)
+    }
+
+    @Test
+    func testFindAndPredicateNestedCollection() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 45,
+            address: [
+                Address(
+                    addressLine1: "123 South Main St", city: "Pittsburg", state: "PA",
+                    country: "US", postalCode: "15120"
+                )
+            ],
+            createdAt: Date()
+        )
+        try await user.save()
+
+        var user2: User = User(
+            name: "Alice",
+            email: "alice.wonder@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: Date()
+        )
+        try await user2.save()
+
+        // FT.SEARCH 'idx:User' '(@name:(Alice) (@address__city:{Pittsburg}))''
+        let users: [User] = try await User.find().where(\.$name == "Alice").and(
+            \.$address[\.$city] == "Pittsburg"
+        ).execute()
+        try #require(!users.isEmpty)
+        #expect(users.count == 1)
+        #expect(users[0].name == "Alice")
+        #expect(users[0].email == "alice@example.com")
+        #expect(users[0].aliases == ["Alicia", "alice"])
+        #expect(users[0].age == 45)
+    }
+    // \.$addresses[\.$note.$description]
 }
