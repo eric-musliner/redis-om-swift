@@ -13,17 +13,14 @@ import Foundation
 /// - Returns: A `Predicate<Model>` that can be combined into a query.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed,
 ///           or an error if the value cannot be converted for the index type.
-public func == <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T>,
-    rhs: T
+public func == <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value>>,
+    rhs: Value
 ) -> Predicate<Model> {
     Predicate {
-        let field = Model.key(for: lhs)
-        let indexType = Model.indexType(for: lhs)
-
-        guard let indexType else {
-            throw QueryBuilderError.fieldNotIndexed(field: field)
-        }
+        let fieldRef = Model.self[keyPath: lhs]
+        let field = fieldRef.alias
+        let indexType = fieldRef.indexType
 
         let rendered = try rhs.asRedisSearchValue(for: indexType)
 
@@ -51,17 +48,14 @@ public func == <Model, T: RedisSearchRepresentable>(
 /// - Returns: A `Predicate<Model>` that can be combined into a query.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed,
 ///           or an error if the value cannot be converted for the index type.
-public func == <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T?>,
-    rhs: T
+public func == <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value?>>,
+    rhs: Value
 ) -> Predicate<Model> {
     Predicate {
-        let field = Model.key(for: lhs)
-        let indexType = Model.indexType(for: lhs)
-
-        guard let indexType else {
-            throw QueryBuilderError.fieldNotIndexed(field: field)
-        }
+        let fieldRef = Model.self[field: lhs]
+        let field = fieldRef.alias
+        let indexType = fieldRef.indexType
 
         let rendered = try rhs.asRedisSearchValue(for: indexType)
 
@@ -89,17 +83,14 @@ public func == <Model, T: RedisSearchRepresentable>(
 /// - Returns: A `Predicate<Model>` that can be combined into a query.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed,
 ///           or an error if the value cannot be converted for the index type.
-public func != <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T>,
-    rhs: T
+public func != <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value>>,
+    rhs: Value
 ) -> Predicate<Model> {
     Predicate {
-        let field = Model.key(for: lhs)
-        let indexType = Model.indexType(for: lhs)
-
-        guard let indexType else {
-            throw QueryBuilderError.fieldNotIndexed(field: field)
-        }
+        let fieldRef = Model.self[field: lhs]
+        let field = fieldRef.alias
+        let indexType = fieldRef.indexType
 
         let rendered = try rhs.asRedisSearchValue(for: indexType)
 
@@ -127,17 +118,14 @@ public func != <Model, T: RedisSearchRepresentable>(
 /// - Returns: A `Predicate<Model>` that can be combined into a query.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed,
 ///           or an error if the value cannot be converted for the index type.
-public func != <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T?>,
-    rhs: T
+public func != <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value?>>,
+    rhs: Value
 ) -> Predicate<Model> {
     Predicate {
-        let field = Model.key(for: lhs)
-        let indexType = Model.indexType(for: lhs)
-
-        guard let indexType else {
-            throw QueryBuilderError.fieldNotIndexed(field: field)
-        }
+        let fieldRef = Model.self[field: lhs]
+        let field = fieldRef.alias
+        let indexType = fieldRef.indexType
 
         let rendered = try rhs.asRedisSearchValue(for: indexType)
 
@@ -156,19 +144,17 @@ public func != <Model, T: RedisSearchRepresentable>(
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
-public func >= <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T>,
-    rhs: Int
+public func >= <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value>>,
+    rhs: Value
 ) -> Predicate<Model> {
     Predicate {
-        let field = Model.key(for: lhs)
-        let indexType = Model.indexType(for: lhs)
+        let fieldRef = Model.self[field: lhs]
+        let field = fieldRef.alias
 
-        guard indexType != nil else {
-            throw QueryBuilderError.fieldNotIndexed(field: field)
-        }
+        let rendered = try rhs.asRedisSearchValue(for: .numeric)
 
-        return "@\(field):[\(rhs) +inf]"
+        return "@\(field):[\(rendered) +inf]"
     }
 }
 
@@ -179,19 +165,17 @@ public func >= <Model, T: RedisSearchRepresentable>(
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
-public func >= <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T?>,
-    rhs: Int
+public func >= <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value?>>,
+    rhs: Value
 ) -> Predicate<Model> {
     Predicate {
-        let field = Model.key(for: lhs)
-        let indexType = Model.indexType(for: lhs)
+        let fieldRef = Model.self[field: lhs]
+        let field = fieldRef.alias
 
-        guard indexType != nil else {
-            throw QueryBuilderError.fieldNotIndexed(field: field)
-        }
+        let rendered = try rhs.asRedisSearchValue(for: .numeric)
 
-        return "@\(field):[\(rhs) +inf]"
+        return "@\(field):[\(rendered) +inf]"
     }
 }
 
@@ -202,19 +186,17 @@ public func >= <Model, T: RedisSearchRepresentable>(
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
-public func > <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T>,
-    rhs: Int
+public func > <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value>>,
+    rhs: Value
 ) -> Predicate<Model> {
     Predicate {
-        let field = Model.key(for: lhs)
-        let indexType = Model.indexType(for: lhs)
+        let fieldRef = Model.self[field: lhs]
+        let field = fieldRef.alias
 
-        guard indexType != nil else {
-            throw QueryBuilderError.fieldNotIndexed(field: field)
-        }
+        let rendered = try rhs.asRedisSearchValue(for: .numeric)
 
-        return "@\(field):[\(rhs + 1) +inf]"
+        return "@\(field):[(\(rendered) +inf]"
     }
 }
 
@@ -225,19 +207,17 @@ public func > <Model, T: RedisSearchRepresentable>(
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
-public func > <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T?>,
-    rhs: Int
+public func > <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value?>>,
+    rhs: Value
 ) -> Predicate<Model> {
     Predicate {
-        let field = Model.key(for: lhs)
-        let indexType = Model.indexType(for: lhs)
+        let fieldRef = Model.self[field: lhs]
+        let field: String = fieldRef.alias
 
-        guard indexType != nil else {
-            throw QueryBuilderError.fieldNotIndexed(field: field)
-        }
+        let rendered = try rhs.asRedisSearchValue(for: .numeric)
 
-        return "@\(field):[\(rhs + 1) +inf]"
+        return "@\(field):[(\(rendered) +inf]"
     }
 }
 
@@ -248,19 +228,17 @@ public func > <Model, T: RedisSearchRepresentable>(
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
-public func <= <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T>,
-    rhs: Int
+public func <= <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value>>,
+    rhs: Value
 ) -> Predicate<Model> {
     Predicate {
-        let field = Model.key(for: lhs)
-        let indexType = Model.indexType(for: lhs)
+        let fieldRef = Model.self[field: lhs]
+        let field: String = fieldRef.alias
 
-        guard indexType != nil else {
-            throw QueryBuilderError.fieldNotIndexed(field: field)
-        }
+        let rendered = try rhs.asRedisSearchValue(for: .numeric)
 
-        return "@\(field):[-inf \(rhs)]"
+        return "@\(field):[-inf \(rendered)]"
     }
 }
 
@@ -271,19 +249,17 @@ public func <= <Model, T: RedisSearchRepresentable>(
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
-public func <= <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T?>,
-    rhs: Int
+public func <= <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value?>>,
+    rhs: Value
 ) -> Predicate<Model> {
     Predicate {
-        let field = Model.key(for: lhs)
-        let indexType = Model.indexType(for: lhs)
+        let fieldRef = Model.self[field: lhs]
+        let field: String = fieldRef.alias
 
-        guard indexType != nil else {
-            throw QueryBuilderError.fieldNotIndexed(field: field)
-        }
+        let rendered = try rhs.asRedisSearchValue(for: .numeric)
 
-        return "@\(field):[-inf \(rhs)]"
+        return "@\(field):[-inf \(rendered)]"
     }
 }
 
@@ -294,19 +270,17 @@ public func <= <Model, T: RedisSearchRepresentable>(
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
-public func < <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T>,
-    rhs: Int
+public func < <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value>>,
+    rhs: Value
 ) -> Predicate<Model> {
     Predicate {
-        let field = Model.key(for: lhs)
-        let indexType = Model.indexType(for: lhs)
+        let fieldRef = Model.self[field: lhs]
+        let field: String = fieldRef.alias
 
-        guard indexType != nil else {
-            throw QueryBuilderError.fieldNotIndexed(field: field)
-        }
+        let rendered = try rhs.asRedisSearchValue(for: .numeric)
 
-        return "@\(field):[-inf \(rhs - 1)]"
+        return "@\(field):[-inf (\(rendered)]"
     }
 }
 
@@ -317,19 +291,18 @@ public func < <Model, T: RedisSearchRepresentable>(
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
-public func < <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T?>,
-    rhs: Int
+public func < <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value?>>,
+    rhs: Value
 ) -> Predicate<Model> {
     Predicate {
-        let fieldName = Model.key(for: lhs)
-        let indexType = Model.indexType(for: lhs)
+        let fieldRef = Model.self[field: lhs]
+        let field: String = fieldRef.alias
 
-        guard indexType != nil else {
-            throw QueryBuilderError.fieldNotIndexed(field: fieldName)
-        }
+        let rendered = try rhs.asRedisSearchValue(for: .numeric)
 
-        return "@\(fieldName):[-inf \(rhs - 1)]"
+        return "@\(field):[-inf (\(rendered)]"
+
     }
 }
 
@@ -341,19 +314,18 @@ public func < <Model, T: RedisSearchRepresentable>(
 ///   - rhs: A tuple `(lower, upper)` specifying the inclusive range bounds.
 /// - Returns: A `Predicate<Model>` representing the `BETWEEN` condition.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
-public func ... <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T>,
-    rhs: (T, T)
+public func ... <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value>>,
+    rhs: (Value, Value)
 ) -> Predicate<Model> {
     Predicate {
-        let fieldName = Model.key(for: lhs)
-        guard let indexType = Model.indexType(for: lhs) else {
-            throw QueryBuilderError.fieldNotIndexed(field: fieldName)
-        }
+        let fieldRef = Model.self[field: lhs]
+        let indexType = fieldRef.indexType
+        let field = fieldRef.alias
 
         let lower = try rhs.0.asRedisSearchValue(for: indexType)
         let upper = try rhs.1.asRedisSearchValue(for: indexType)
-        return "@\(fieldName):[\(lower) \(upper)]"
+        return "@\(field):[(\(lower) (\(upper)]"
     }
 }
 
@@ -365,19 +337,18 @@ public func ... <Model, T: RedisSearchRepresentable>(
 ///   - rhs: A tuple `(lower, upper)` specifying the inclusive range bounds.
 /// - Returns: A `Predicate<Model>` representing the `BETWEEN` condition.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
-public func ... <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T?>,
-    rhs: (T, T)
+public func ... <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value?>>,
+    rhs: (Value, Value)
 ) -> Predicate<Model> {
     Predicate {
-        let fieldName = Model.key(for: lhs)
-        guard let indexType = Model.indexType(for: lhs) else {
-            throw QueryBuilderError.fieldNotIndexed(field: fieldName)
-        }
+        let fieldRef = Model.self[field: lhs]
+        let indexType = fieldRef.indexType
+        let field = fieldRef.alias
 
         let lower = try rhs.0.asRedisSearchValue(for: indexType)
         let upper = try rhs.1.asRedisSearchValue(for: indexType)
-        return "@\(fieldName):[\(lower) \(upper)]"
+        return "@\(field):[(\(lower) (\(upper)]"
     }
 }
 
@@ -389,29 +360,28 @@ public func ... <Model, T: RedisSearchRepresentable>(
 ///   - rhs: An array of values to match against.
 /// - Returns: A `Predicate<Model>` representing the `IN` condition.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
-public func ~= <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T>,
-    rhs: [T]
+public func ~= <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value>>,
+    rhs: [Value]
 ) -> Predicate<Model> {
     Predicate {
-        let fieldName = Model.key(for: lhs)
-        guard let indexType = Model.indexType(for: lhs) else {
-            throw QueryBuilderError.fieldNotIndexed(field: fieldName)
-        }
+        let fieldRef = Model.self[field: lhs]
+        let indexType = fieldRef.indexType
+        let field = fieldRef.alias
 
         let renderedValues = try rhs.map { try $0.asRedisSearchValue(for: indexType) }
 
         switch indexType {
         case .tag:
             // Tag index supports `{val1|val2|val3}`
-            return "@\(fieldName):{\(renderedValues.joined(separator: "|"))}"
+            return "@\(field):{\(renderedValues.joined(separator: "|"))}"
         case .numeric:
             // RedisSearch has no native multi-match numeric syntax, so OR together exact ranges
-            let clauses = renderedValues.map { "@\(fieldName):[\($0) \($0)]" }
+            let clauses = renderedValues.map { "@\(field):[\($0) \($0)]" }
             return "(\(clauses.joined(separator: " | ")))"
         case .text, .geo, .vector:
             // match text terms
-            let clauses = renderedValues.map { "@\(fieldName):(\($0))" }
+            let clauses = renderedValues.map { "@\(field):(\($0))" }
             return "(\(clauses.joined(separator: " | ")))"
         }
     }
@@ -425,29 +395,28 @@ public func ~= <Model, T: RedisSearchRepresentable>(
 ///   - rhs: An array of values to match against.
 /// - Returns: A `Predicate<Model>` representing the `IN` condition.
 /// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
-public func ~= <Model, T: RedisSearchRepresentable>(
-    lhs: KeyPath<Model, T?>,
-    rhs: [T]
+public func ~= <Model, Value: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<Value?>>,
+    rhs: [Value]
 ) -> Predicate<Model> {
     Predicate {
-        let fieldName = Model.key(for: lhs)
-        guard let indexType = Model.indexType(for: lhs) else {
-            throw QueryBuilderError.fieldNotIndexed(field: fieldName)
-        }
+        let fieldRef = Model.self[field: lhs]
+        let indexType = fieldRef.indexType
+        let field = fieldRef.alias
 
         let renderedValues = try rhs.map { try $0.asRedisSearchValue(for: indexType) }
 
         switch indexType {
         case .tag:
             // Tag index supports `{val1|val2|val3}`
-            return "@\(fieldName):{\(renderedValues.joined(separator: "|"))}"
+            return "@\(field):{\(renderedValues.joined(separator: "|"))}"
         case .numeric:
             // RedisSearch has no native multi-match numeric syntax, so OR exact ranges
-            let clauses = renderedValues.map { "@\(fieldName):[\($0) \($0)]" }
+            let clauses = renderedValues.map { "@\(field):[\($0) \($0)]" }
             return "(\(clauses.joined(separator: " | ")))"
         case .text, .geo, .vector:
             // OR match text terms
-            let clauses = renderedValues.map { "@\(fieldName):(\($0))" }
+            let clauses = renderedValues.map { "@\(field):(\($0))" }
             return "(\(clauses.joined(separator: " | ")))"
         }
     }
