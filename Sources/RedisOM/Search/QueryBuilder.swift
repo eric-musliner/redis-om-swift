@@ -102,6 +102,14 @@ public struct QueryBuilder<Model: JsonModel> {
         return copy
     }
 
+    /// Run and execute query and get all results as list of Model type
+    ///
+    /// - Returns: All results as [Model] from executing query
+    /// - Throws: Rethrows any error from executing the query.
+    public func all() async throws -> [Model] {
+        try await execute()
+    }
+
     func buildQuery() throws -> String {
         guard let predicate else { return "*" }  // match all
         return try predicate.render()
@@ -116,7 +124,7 @@ public struct QueryBuilder<Model: JsonModel> {
     ///   "user:123",             # the document key
     ///   [ "id", "123", "name", "Alice", "age", "30" ]   # flat array of fields
     ///  ]
-    public func execute() async throws -> [Model] {
+    func execute() async throws -> [Model] {
         let query: String
         query = try buildQuery()
 
