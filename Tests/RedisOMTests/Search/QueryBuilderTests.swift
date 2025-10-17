@@ -1507,4 +1507,90 @@ final class QueryBuilderTests {
         let exists = try await Item.find().where(\.$price > 65.99).exists()
         #expect(exists == false)
     }
+
+    // MARK: NOT
+    @Test
+    func testFindNotMultipleOrPredicateStrIntEq() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: Date(),
+        )
+        try await user.save()
+
+        var user2: User = User(
+            name: "Sally",
+            email: "sally@example.com",
+            aliases: [],
+            age: 60,
+            createdAt: Date(),
+        )
+        try await user2.save()
+
+        var user3: User = User(
+            name: "Bob",
+            email: "bob.smith@example.com",
+            aliases: ["Bill", "Robert"],
+            age: 22,
+            createdAt: Date(),
+        )
+        try await user3.save()
+
+        // FT.SEARCH idx:User '["FT.SEARCH", "idx:User", "(-@name:(Alice))"]'
+        let users: [User] = try await User.find().where(\.$name == "Alice").not()
+            .all()
+        try #require(!users.isEmpty)
+        #expect(users.count == 2)
+        for user in users {
+            if user.name == "Sally" {
+                #expect(user.name == "Sally")
+                #expect(user.email == "sally@example.com")
+                #expect(user.aliases == [])
+                #expect(user.age == 60)
+            } else if user.name == "Bob" {
+                #expect(user.name == "Bob")
+                #expect(user.email == "bob.smith@example.com")
+                #expect(user.aliases == ["Bill", "Robert"])
+                #expect(user.age == 22)
+            }
+        }
+    }
+
+    @Test
+    func testFindNotAndWherePredicateNumericLte() async throws {
+        try await self.migrator.migrate(models: [User.self])
+
+        let now = Date()
+        var user: User = User(
+            name: "Alice",
+            email: "alice@example.com",
+            aliases: ["Alicia", "alice"],
+            age: 33,
+            createdAt: now,
+        )
+        try await user.save()
+
+        var user2: User = User(
+            name: "Bill",
+            email: "bill@example.com",
+            aliases: ["Robert", "Billy"],
+            age: 55,
+            createdAt: now,
+        )
+        try await user2.save()
+        // FT.SEARCH 'idx:User' '(@age:[-inf 55] @name:(Alice))'
+        let users: [User] = try await User.find().where(\.$age <= 33).and(\.$name == "Alice")
+            .not().all()
+        try #require(!users.isEmpty)
+        #expect(users.count == 1)
+        #expect(users[0].name == "Bill")
+        #expect(users[0].email == "bill@example.com")
+        #expect(users[0].aliases == ["Robert", "Billy"])
+        #expect(users[0].age == 55)
+    }
+
 }
