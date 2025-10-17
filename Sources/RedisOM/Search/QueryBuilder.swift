@@ -94,13 +94,25 @@ public struct QueryBuilder<Model: JsonModel> {
         return copy
     }
 
+    /// Restricts how many results RedisSearch should return.
+    /// - Parameter range: An integer range to limit the result set
+    /// - Returns: A new `QueryBuilder` instance with the combined `Limit` condition.
+    /// - Throws: Rethrows any error from building the predicate.
     ///
-    ///
+    /// Example:
+    /// ```swift
+    /// let users = try await User.find()
+    ///     .where(\.$age >= 18)
+    ///     .limit(0..<10)
+    ///     .all()
+    /// ```
     public func limit(_ range: Range<Int>) -> Self {
         var copy = self
         copy.range = range
         return copy
     }
+
+    // MARK: Execute variants
 
     /// Run and execute query and get all results as list of Model type
     ///
@@ -110,6 +122,24 @@ public struct QueryBuilder<Model: JsonModel> {
         try await execute()
     }
 
+    /// Executes the query and returns only the **first matching model**.
+    ///
+    /// Equivalent to `limit(0..<1).all().first`.
+    public func first() async throws -> Model? {
+        try await limit(0..<1).all().first
+    }
+
+    /// Executes the query and checks whether any result exists.
+    ///
+    /// Equivalent to `limit(0..<1).all().isEmpty == false`.
+    public func exists() async throws -> Bool {
+        let result = try await limit(0..<1).all()
+        return !result.isEmpty
+    }
+
+    /// Build query by rendering all predicates
+    ///
+    /// - Returns rendered query string
     func buildQuery() throws -> String {
         guard let predicate else { return "*" }  // match all
         return try predicate.render()
@@ -128,9 +158,14 @@ public struct QueryBuilder<Model: JsonModel> {
         let query: String
         query = try buildQuery()
 
-        let limitClause = range.map { "LIMIT \($0.lowerBound) \($0.count)" } ?? ""
-        let cmd = ["FT.SEARCH", Model.indexName, query, limitClause].filter { !$0.isEmpty }
+        var cmd: [String] = ["FT.SEARCH", Model.indexName, query]
+        if let range = range {
+            cmd.append("LIMIT")
+            cmd.append(String(range.lowerBound))
+            cmd.append(String(range.count))
+        }
 
+        print(cmd)
         print(query)
         print(Array(query.utf8))
         let resp = try await SharedPoolHelper.shared().send(

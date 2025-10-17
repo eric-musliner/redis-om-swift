@@ -1394,4 +1394,117 @@ final class QueryBuilderTests {
         #expect(users[0].aliases == ["Alicia", "alice"])
         #expect(users[0].age == 45)
     }
+
+    // MARK: Execute Variants
+    @Test
+    func testFindFirst() async throws {
+        try await self.migrator.migrate(models: [Item.self])
+
+        var item: Item = Item(
+            price: 24.99,
+            name: "Gloves"
+        )
+        try await item.save()
+
+        var item2: Item = Item(
+            price: 50.99,
+            name: "Helmet"
+        )
+        try await item2.save()
+
+        var item3: Item = Item(
+            price: 65.99,
+            name: "Helmet NIPS"
+        )
+        try await item3.save()
+
+        // ["FT.SEARCH", "idx:Item", "@price:[(24.0 (70.0]", "LIMIT", "0", "1"]
+        let result: Item? = try await Item.find().where(\.$price...(24.00, 70.0)).first()
+
+        let resultItem: Item = try #require(result)
+        #expect(resultItem.name == "Gloves")
+        #expect(resultItem.price == 24.99)
+    }
+
+    @Test
+    func testFindwithLimit() async throws {
+        try await self.migrator.migrate(models: [Item.self])
+
+        var item: Item = Item(
+            price: 24.99,
+            name: "Gloves"
+        )
+        try await item.save()
+
+        var item2: Item = Item(
+            price: 50.99,
+            name: "Helmet"
+        )
+        try await item2.save()
+
+        var item3: Item = Item(
+            price: 65.99,
+            name: "Helmet NIPS"
+        )
+        try await item3.save()
+
+        // ["FT.SEARCH", "idx:Item", "@price:[(24.0 (70.0]", "LIMIT", "0", "2"]
+        let items = try await Item.find().where(\.$price...(24.00, 70.0)).limit(0..<2).all()
+        try #require(!items.isEmpty)
+        #expect(items.count == 2)
+    }
+
+    @Test
+    func testExistsTrue() async throws {
+        try await self.migrator.migrate(models: [Item.self])
+
+        var item: Item = Item(
+            price: 24.99,
+            name: "Gloves"
+        )
+        try await item.save()
+
+        var item2: Item = Item(
+            price: 50.99,
+            name: "Helmet"
+        )
+        try await item2.save()
+
+        var item3: Item = Item(
+            price: 65.99,
+            name: "Helmet NIPS"
+        )
+        try await item3.save()
+
+        // ["FT.SEARCH", "idx:Item", "@price:[-inf 65.99]", "LIMIT", "0", "1"]
+        let exists = try await Item.find().where(\.$price <= 65.99).exists()
+        #expect(exists == true)
+    }
+
+    @Test
+    func testExistsFalse() async throws {
+        try await self.migrator.migrate(models: [Item.self])
+
+        var item: Item = Item(
+            price: 24.99,
+            name: "Gloves"
+        )
+        try await item.save()
+
+        var item2: Item = Item(
+            price: 50.99,
+            name: "Helmet"
+        )
+        try await item2.save()
+
+        var item3: Item = Item(
+            price: 65.99,
+            name: "Helmet NIPS"
+        )
+        try await item3.save()
+
+        // ["FT.SEARCH", "idx:Item", "@price:[(65.99 +inf]", "LIMIT", "0", "1"]
+        let exists = try await Item.find().where(\.$price > 65.99).exists()
+        #expect(exists == false)
+    }
 }

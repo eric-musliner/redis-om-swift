@@ -387,7 +387,7 @@ public func ~= <Model, Value: RedisSearchRepresentable>(
     }
 }
 
-/// Builds a RedisSearch query for an ptional field that matches documents where the field's value
+/// Builds a RedisSearch query for an optional field that matches documents where the field's value
 /// is contained in the provided set of options.
 ///
 /// - Parameters:
@@ -422,16 +422,19 @@ public func ~= <Model, Value: RedisSearchRepresentable>(
     }
 }
 
-/// Builds a RedisSearch “contains” predicate for an **array-of-scalar field**.
+/// Builds a RedisSearch `CONTAINS` / `IN` predicate.
 ///
-/// This operator checks whether any element in an indexed array field (e.g. `[String]`)
-/// matches the given value. It is equivalent to an `@field:{value}` tag match.
+/// The `~=` operator is used to match tag, text, or array fields where the field
+/// *contains* the provided value(s).
 ///
 /// Example:
 /// ```swift
-/// // Match users whose aliases array contains "Alicia"
-/// \.$aliases ~= "Alicia"
+/// \.$tags ~= ["swift", "redis"]   // tag field contains any of these values
+/// \.$aliases ~= "Alicia"          // array field contains "Alicia"
 /// ```
+///
+/// Internally renders RedisSearch queries like:
+/// `@tags:{swift|redis}` or `@aliases:{Alicia}`.
 ///
 /// - Parameters:
 ///   - lhs: A key path to an array-of-scalar indexed field on the model.
@@ -450,14 +453,21 @@ public func ~= <Model, Elem: RedisSearchRepresentable>(
     }
 }
 
-/// Builds a RedisSearch “contains” predicate for an **optional array-of-scalar field**.
+/// Builds a RedisSearch `CONTAINS` / `IN` predicate.
 ///
-/// This operator checks whether any element in an optional array field
-/// (e.g. `[String]?`) matches the given value. It behaves identically to the
-/// non-optional version if the field is present.
+/// The `~=` operator is used to match tag, text, or array fields where the field
+/// *contains* the provided value(s).
 ///
+/// Example:
+/// ```swift
+/// \.$tags ~= ["swift", "redis"]   // tag field contains any of these values
+/// \.$aliases ~= "Alicia"          // array field contains "Alicia"
+/// ```
+///
+/// Internally renders RedisSearch queries like:
+/// `@tags:{swift|redis}` or `@aliases:{Alicia}`.
 /// - Parameters:
-///   - lhs: A key path to an optional array-of-scalar indexed field on the model.
+///   - lhs: A key path to an array-of-scalar indexed field on the model.
 ///   - rhs: A single value to test for membership within the array field.
 /// - Returns: A `Predicate<Model>` that matches if the array contains the value.
 /// - Throws: An error if the value cannot be converted for the index type.
