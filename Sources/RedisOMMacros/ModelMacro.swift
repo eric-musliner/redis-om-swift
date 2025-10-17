@@ -209,7 +209,9 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
                         """)
                     staticFieldRefs.append(
                         makeStaticRefDecl(
-                            pathComponent: name, typeName: "\(resolved)", indexType: indexType))
+                            pathComponent: name, typeName: "\(resolved)", indexType: indexType
+                        )
+                    )
                 } else {
                     nestedSchemas.append(
                         """
@@ -220,21 +222,34 @@ public struct ModelMacro: MemberMacro, ExtensionMacro {
                     )
                     staticFieldRefs.append(
                         makeStaticRefDecl(
-                            pathComponent: name, typeName: "\(resolved)", indexType: indexType))
+                            pathComponent: name, typeName: "\(resolved)", indexType: indexType
+                        )
+                    )
                 }
-            case .Array(of: .Other(let typeName)),
-                .Optional(of: .Array(of: .Other(let typeName))):
-                nestedSchemas.append(
-                    """
-                    [
-                        Field(name: "\(name)", alias: "\(name.alias())", jsonPath: "$.\(name)[*]", indexType: \(indexType), nestedSchema: (((\(typeName).self as Any.Type) as? _SchemaProvider.Type)?.schema))
-                    ]
-                    """
-                )
-                staticFieldRefs.append(
-                    makeStaticRefDecl(
-                        pathComponent: name, typeName: "\(resolved)", indexType: indexType)
-                )
+            case .Array(let elementType),
+                .Optional(of: .Array(let elementType)):
+                if elementType.isScalar {
+                    scalarFields.append(
+                        """
+                        Field(name: "\(name)", alias: "\(name.alias())", jsonPath: "$.\(name)[*]", indexType: \(indexType))
+                        """)
+                    staticFieldRefs.append(
+                        makeStaticRefDecl(
+                            pathComponent: name, typeName: "\(resolved)", indexType: indexType)
+                    )
+                } else {
+                    nestedSchemas.append(
+                        """
+                        [
+                            Field(name: "\(name)", alias: "\(name.alias())", jsonPath: "$.\(name)[*]", indexType: \(indexType), nestedSchema: (((\(elementType).self as Any.Type) as? _SchemaProvider.Type)?.schema))
+                        ]
+                        """)
+                    staticFieldRefs.append(
+                        makeStaticRefDecl(
+                            pathComponent: name, typeName: "\(resolved)", indexType: indexType
+                        )
+                    )
+                }
             case .Dictionary(key: _, value: .Other(let typeName)):
                 // Dictionary where value is a nested JsonModel
                 context.diagnose(
@@ -637,6 +652,36 @@ extension ResolvedType: CustomStringConvertible {
     }
 }
 
+extension ResolvedType {
+    /// Returns true if the type represents a scalar value suitable for direct indexing.
+    var isScalar: Bool {
+        switch self {
+        case .String, .Int, .Double, .Float, .Bool:
+            return true
+        case .Optional(let wrapped):
+            return wrapped.isScalar
+        case .Array(let element):
+            return element.isScalar
+        default:
+            return false
+        }
+    }
+
+    /// Returns the scalar's name for use in macro emission, if applicable.
+    var scalarName: String? {
+        switch self {
+        case .String: return "String"
+        case .Int: return "Int"
+        case .Double: return "Double"
+        case .Float: return "Float"
+        case .Bool: return "Bool"
+        case .Optional(let wrapped): return wrapped.scalarName
+        case .Array(let element): return element.scalarName
+        default: return nil
+        }
+    }
+}
+
 /// Walk the `TypeSyntax` tree to normalize it
 /// - Parameters:
 ///    - type: type to resolve SimpleType from
@@ -655,7 +700,6 @@ func resolveType(_ type: TypeSyntax) -> ResolvedType {
     }
 
     if let opt = type.as(OptionalTypeSyntax.self) {
-        // return resolveType(opt.wrappedType)
         return .Optional(of: resolveType(opt.wrappedType))
     }
 

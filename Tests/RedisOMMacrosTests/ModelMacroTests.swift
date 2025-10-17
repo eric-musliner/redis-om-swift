@@ -246,7 +246,7 @@ final class ModelMacroTests: XCTestCase {
                         Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
                         Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
                         Field(name: "age", alias: "age", jsonPath: "$.age", indexType: .numeric),
-                        Field(name: "notes", alias: "notes", jsonPath: "$.notes", indexType: .text)
+                        Field(name: "notes", alias: "notes", jsonPath: "$.notes[*]", indexType: .text)
                     ]
                 }
 
@@ -346,7 +346,7 @@ final class ModelMacroTests: XCTestCase {
                         Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
                         Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
                         Field(name: "age", alias: "age", jsonPath: "$.age", indexType: .numeric),
-                        Field(name: "scores", alias: "scores", jsonPath: "$.scores", indexType: .vector)
+                        Field(name: "scores", alias: "scores", jsonPath: "$.scores[*]", indexType: .vector)
                     ]
                 }
 
@@ -440,7 +440,7 @@ final class ModelMacroTests: XCTestCase {
                         Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
                         Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
                         Field(name: "age", alias: "age", jsonPath: "$.age", indexType: .numeric),
-                        Field(name: "scores", alias: "scores", jsonPath: "$.scores", indexType: .vector)
+                        Field(name: "scores", alias: "scores", jsonPath: "$.scores[*]", indexType: .vector)
                     ]
                 }
 
@@ -1780,7 +1780,7 @@ final class ModelMacroTests: XCTestCase {
                 @Index var name: String
                 @Index var email: String
                 @Index var address: Address
-                var aliases: [String]?
+                @Index var aliases: [String]?
                 var age: Int?
                 var notes: [Note]?
                 @Index(type: .numeric) var createdAt: Date?
@@ -1816,7 +1816,7 @@ final class ModelMacroTests: XCTestCase {
                     @Index var name: String
                     @Index var email: String
                     @Index var address: Address
-                    var aliases: [String]?
+                    @Index var aliases: [String]?
                     var age: Int?
                     var notes: [Note]?
                     @Index(type: .numeric) var createdAt: Date?
@@ -1839,6 +1839,10 @@ final class ModelMacroTests: XCTestCase {
                         indexType: .tag,
                         aliasPath: ["address"]
                     )
+                    public static let $aliases = FieldRef<[String]?>(
+                        indexType: .tag,
+                        aliasPath: ["aliases"]
+                    )
                     public static let $createdAt = FieldRef<Date?>(
                         indexType: .numeric,
                         aliasPath: ["createdAt"]
@@ -1858,7 +1862,7 @@ final class ModelMacroTests: XCTestCase {
                         self._name = Index(wrappedValue: name, type: .tag)
                         self._email = Index(wrappedValue: email, type: .tag)
                         self._address = Index(wrappedValue: address, type: .tag)
-                        self.aliases = aliases
+                        self._aliases = Index(wrappedValue: aliases, type: .tag)
                         self.age = age
                         self.notes = notes
                         self._createdAt = Index(wrappedValue: createdAt, type: .numeric)
@@ -1890,7 +1894,7 @@ final class ModelMacroTests: XCTestCase {
                         self._name = Index(wrappedValue: nameDecoded, type: .tag)
                         self._email = Index(wrappedValue: emailDecoded, type: .tag)
                         self._address = Index(wrappedValue: addressDecoded, type: .tag)
-                        self.aliases = aliasesDecoded
+                        self._aliases = Index(wrappedValue: aliasesDecoded, type: .tag)
                         self.age = ageDecoded
                         self.notes = notesDecoded
                         self._createdAt = Index(wrappedValue: createdAtDecoded, type: .numeric)
@@ -1912,6 +1916,7 @@ final class ModelMacroTests: XCTestCase {
                         Field(name: "id", alias: "id", jsonPath: "$.id", indexType: .tag),
                         Field(name: "name", alias: "name", jsonPath: "$.name", indexType: .tag),
                         Field(name: "email", alias: "email", jsonPath: "$.email", indexType: .tag),
+                        Field(name: "aliases", alias: "aliases", jsonPath: "$.aliases[*]", indexType: .tag),
                         Field(name: "createdAt", alias: "createdAt", jsonPath: "$.createdAt", indexType: .numeric)
                     ]
                     + [
