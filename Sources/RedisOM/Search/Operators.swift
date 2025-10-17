@@ -11,8 +11,6 @@ import Foundation
 ///   - lhs: A key path to the indexed field on the model.
 ///   - rhs: The value to compare against, convertible to a RedisSearch representation.
 /// - Returns: A `Predicate<Model>` that can be combined into a query.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed,
-///           or an error if the value cannot be converted for the index type.
 public func == <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value>>,
     rhs: Value
@@ -46,8 +44,6 @@ public func == <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the optional indexed field on the model.
 ///   - rhs: The value to compare against, convertible to a RedisSearch representation.
 /// - Returns: A `Predicate<Model>` that can be combined into a query.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed,
-///           or an error if the value cannot be converted for the index type.
 public func == <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value?>>,
     rhs: Value
@@ -81,8 +77,6 @@ public func == <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the non-optional indexed field on the model.
 ///   - rhs: The value to compare against, convertible to a RedisSearch representation.
 /// - Returns: A `Predicate<Model>` that can be combined into a query.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed,
-///           or an error if the value cannot be converted for the index type.
 public func != <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value>>,
     rhs: Value
@@ -116,8 +110,6 @@ public func != <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the optional indexed field on the model.
 ///   - rhs: The value to compare against, convertible to a RedisSearch representation.
 /// - Returns: A `Predicate<Model>` that can be combined into a query.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed,
-///           or an error if the value cannot be converted for the index type.
 public func != <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value?>>,
     rhs: Value
@@ -143,7 +135,6 @@ public func != <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the non-optional indexed field on the model.
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
 public func >= <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value>>,
     rhs: Value
@@ -164,7 +155,6 @@ public func >= <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the optional indexed field on the model.
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
 public func >= <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value?>>,
     rhs: Value
@@ -185,7 +175,6 @@ public func >= <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the non-optional indexed field on the model.
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
 public func > <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value>>,
     rhs: Value
@@ -206,7 +195,6 @@ public func > <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the optional indexed field on the model.
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
 public func > <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value?>>,
     rhs: Value
@@ -227,7 +215,6 @@ public func > <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the non-optional indexed field on the model.
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
 public func <= <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value>>,
     rhs: Value
@@ -248,7 +235,6 @@ public func <= <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the optional indexed field on the model.
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
 public func <= <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value?>>,
     rhs: Value
@@ -269,7 +255,6 @@ public func <= <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the non-optional indexed field on the model.
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
 public func < <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value>>,
     rhs: Value
@@ -290,7 +275,6 @@ public func < <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the optional indexed field on the model.
 ///   - rhs: The lower bound (inclusive) value to compare against.
 /// - Returns: A `Predicate<Model>` representing the `>=` condition.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
 public func < <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value?>>,
     rhs: Value
@@ -313,7 +297,6 @@ public func < <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the non-optional field on the model to compare.
 ///   - rhs: A tuple `(lower, upper)` specifying the inclusive range bounds.
 /// - Returns: A `Predicate<Model>` representing the `BETWEEN` condition.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
 public func ... <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value>>,
     rhs: (Value, Value)
@@ -336,7 +319,6 @@ public func ... <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the optional field on the model to compare.
 ///   - rhs: A tuple `(lower, upper)` specifying the inclusive range bounds.
 /// - Returns: A `Predicate<Model>` representing the `BETWEEN` condition.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
 public func ... <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value?>>,
     rhs: (Value, Value)
@@ -359,7 +341,6 @@ public func ... <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the non-optional field on the model to compare.
 ///   - rhs: An array of values to match against.
 /// - Returns: A `Predicate<Model>` representing the `IN` condition.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
 public func ~= <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value>>,
     rhs: [Value]
@@ -394,7 +375,6 @@ public func ~= <Model, Value: RedisSearchRepresentable>(
 ///   - lhs: A key path to the optional field on the model to compare.
 ///   - rhs: An array of values to match against.
 /// - Returns: A `Predicate<Model>` representing the `IN` condition.
-/// - Throws: `QueryBuilderError.fieldNotIndexed` if the field is not indexed for search.
 public func ~= <Model, Value: RedisSearchRepresentable>(
     lhs: KeyPath<Model.Type, FieldRef<Value?>>,
     rhs: [Value]
