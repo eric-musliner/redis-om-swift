@@ -422,6 +422,57 @@ public func ~= <Model, Value: RedisSearchRepresentable>(
     }
 }
 
+/// Builds a RedisSearch “contains” predicate for an **array-of-scalar field**.
+///
+/// This operator checks whether any element in an indexed array field (e.g. `[String]`)
+/// matches the given value. It is equivalent to an `@field:{value}` tag match.
+///
+/// Example:
+/// ```swift
+/// // Match users whose aliases array contains "Alicia"
+/// \.$aliases ~= "Alicia"
+/// ```
+///
+/// - Parameters:
+///   - lhs: A key path to an array-of-scalar indexed field on the model.
+///   - rhs: A single value to test for membership within the array field.
+/// - Returns: A `Predicate<Model>` that matches if the array contains the value.
+/// - Throws: An error if the value cannot be converted for the index type.
+public func ~= <Model, Elem: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<[Elem]>>,
+    rhs: Elem
+) -> Predicate<Model> {
+    Predicate {
+        let fieldRef = Model.self[field: lhs]
+        let field = fieldRef.alias
+        let rendered = try rhs.asRedisSearchValue(for: .tag)  // or fieldRef.indexType
+        return "(@\(field):{\(rendered)})"
+    }
+}
+
+/// Builds a RedisSearch “contains” predicate for an **optional array-of-scalar field**.
+///
+/// This operator checks whether any element in an optional array field
+/// (e.g. `[String]?`) matches the given value. It behaves identically to the
+/// non-optional version if the field is present.
+///
+/// - Parameters:
+///   - lhs: A key path to an optional array-of-scalar indexed field on the model.
+///   - rhs: A single value to test for membership within the array field.
+/// - Returns: A `Predicate<Model>` that matches if the array contains the value.
+/// - Throws: An error if the value cannot be converted for the index type.
+public func ~= <Model, Elem: RedisSearchRepresentable>(
+    lhs: KeyPath<Model.Type, FieldRef<[Elem]?>>,
+    rhs: Elem
+) -> Predicate<Model> {
+    Predicate {
+        let fieldRef = Model.self[field: lhs]
+        let field = fieldRef.alias
+        let rendered = try rhs.asRedisSearchValue(for: .tag)
+        return "(@\(field):{\(rendered)})"
+    }
+}
+
 /// Escape special characters in tag based querry string values
 /// Ex:
 /// alice\@example\.com
