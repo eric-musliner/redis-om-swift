@@ -94,6 +94,50 @@ public struct QueryBuilder<Model: JsonModel> {
         return copy
     }
 
+    /// Applies a logical `NOT` to the current predicate or a provided one.
+    ///
+    /// This inverts the condition, matching documents that **do not**
+    /// satisfy the predicate.
+    ///
+    /// Example:
+    /// ```swift
+    /// let users = try await User.find()
+    ///     .where((\.$isActive == true).not())
+    ///     .all()
+    /// ```
+    ///
+    /// or equivalently:
+    /// ```swift
+    /// let users = try await User.find()
+    ///     .where(\.$isActive == true)
+    ///     .not()
+    ///     .and(\.$age > 30)
+    ///     .all()
+    /// ```
+    ///
+    /// - Parameter predicate: Optionally, a predicate to negate. If omitted,
+    ///   negates the existing builder predicate.
+    /// - Returns: A new builder with the negated predicate applied.
+    /// - Throws: Rethrows any error thrown while rendering the predicate.
+    public func not(_ predicate: Predicate<Model>? = nil) throws -> Self {
+        var copy = self
+
+        if let predicate {
+            // Explicit NOT(predicate)
+            let negated = predicate.not()
+            if let existing = copy.predicate {
+                copy.predicate = existing.and(negated)
+            } else {
+                copy.predicate = negated
+            }
+        } else if let existing = copy.predicate {
+            // NOT current predicate
+            copy.predicate = existing.not()
+        }
+
+        return copy
+    }
+
     /// Restricts how many results RedisSearch should return.
     /// - Parameter range: An integer range to limit the result set
     /// - Returns: A new `QueryBuilder` instance with the combined `Limit` condition.
