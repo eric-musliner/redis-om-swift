@@ -8,7 +8,7 @@ struct User: JsonModel {
     @Id var id: String?
     @Index(type: .text) var name: String
     @Index var email: String
-    var aliases: [String]?
+    @Index var aliases: [String]?
     @Index(type: .numeric) var age: Int?
     @Index var notes: [Note]?
     @Index var address: [Address]?
