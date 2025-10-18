@@ -94,14 +94,96 @@ public struct QueryBuilder<Model: JsonModel> {
         return copy
     }
 
+    /// Applies a logical `NOT` to the current predicate or a provided one.
     ///
+    /// This inverts the condition, matching documents that **do not**
+    /// satisfy the predicate.
     ///
+    /// Example:
+    /// ```swift
+    /// let users = try await User.find()
+    ///     .where((\.$isActive == true).not())
+    ///     .all()
+    /// ```
+    ///
+    /// or equivalently:
+    /// ```swift
+    /// let users = try await User.find()
+    ///     .where(\.$isActive == true)
+    ///     .not()
+    ///     .and(\.$age > 30)
+    ///     .all()
+    /// ```
+    ///
+    /// - Parameter predicate: Optionally, a predicate to negate. If omitted,
+    ///   negates the existing builder predicate.
+    /// - Returns: A new builder with the negated predicate applied.
+    /// - Throws: Rethrows any error thrown while rendering the predicate.
+    public func not(_ predicate: Predicate<Model>? = nil) throws -> Self {
+        var copy = self
+
+        if let predicate {
+            // Explicit NOT(predicate)
+            let negated = predicate.not()
+            if let existing = copy.predicate {
+                copy.predicate = existing.and(negated)
+            } else {
+                copy.predicate = negated
+            }
+        } else if let existing = copy.predicate {
+            // NOT current predicate
+            copy.predicate = existing.not()
+        }
+
+        return copy
+    }
+
+    /// Restricts how many results RedisSearch should return.
+    /// - Parameter range: An integer range to limit the result set
+    /// - Returns: A new `QueryBuilder` instance with the combined `Limit` condition.
+    /// - Throws: Rethrows any error from building the predicate.
+    ///
+    /// Example:
+    /// ```swift
+    /// let users = try await User.find()
+    ///     .where(\.$age >= 18)
+    ///     .limit(0..<10)
+    ///     .all()
+    /// ```
     public func limit(_ range: Range<Int>) -> Self {
         var copy = self
         copy.range = range
         return copy
     }
 
+    // MARK: Execute variants
+
+    /// Run and execute query and get all results as list of Model type
+    ///
+    /// - Returns: All results as [Model] from executing query
+    /// - Throws: Rethrows any error from executing the query.
+    public func all() async throws -> [Model] {
+        try await execute()
+    }
+
+    /// Executes the query and returns only the **first matching model**.
+    ///
+    /// Equivalent to `limit(0..<1).all().first`.
+    public func first() async throws -> Model? {
+        try await limit(0..<1).all().first
+    }
+
+    /// Executes the query and checks whether any result exists.
+    ///
+    /// Equivalent to `limit(0..<1).all().isEmpty == false`.
+    public func exists() async throws -> Bool {
+        let result = try await limit(0..<1).all()
+        return !result.isEmpty
+    }
+
+    /// Build query by rendering all predicates
+    ///
+    /// - Returns rendered query string
     func buildQuery() throws -> String {
         guard let predicate else { return "*" }  // match all
         return try predicate.render()
@@ -116,13 +198,18 @@ public struct QueryBuilder<Model: JsonModel> {
     ///   "user:123",             # the document key
     ///   [ "id", "123", "name", "Alice", "age", "30" ]   # flat array of fields
     ///  ]
-    public func execute() async throws -> [Model] {
+    func execute() async throws -> [Model] {
         let query: String
         query = try buildQuery()
 
-        let limitClause = range.map { "LIMIT \($0.lowerBound) \($0.count)" } ?? ""
-        let cmd = ["FT.SEARCH", Model.indexName, query, limitClause].filter { !$0.isEmpty }
+        var cmd: [String] = ["FT.SEARCH", Model.indexName, query]
+        if let range = range {
+            cmd.append("LIMIT")
+            cmd.append(String(range.lowerBound))
+            cmd.append(String(range.count))
+        }
 
+        print(cmd)
         print(query)
         print(Array(query.utf8))
         let resp = try await SharedPoolHelper.shared().send(

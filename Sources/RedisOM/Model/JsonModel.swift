@@ -3,7 +3,7 @@ import NIOCore
 @preconcurrency import RediStack
 import RedisOMCore
 
-public protocol JsonModel: RedisModel {}
+public protocol JsonModel: RedisModel, StaticFieldAccessible {}
 
 // MARK: - JsonModel
 
@@ -31,31 +31,6 @@ extension JsonModel {
     /// ```
     public static func find() -> QueryBuilder<Self> {
         QueryBuilder<Self>()
-    }
-
-    /// Returns the schema field name associated with the given key path.
-    ///
-    /// This function maps a Swift `KeyPath` of the model to the
-    /// corresponding field name in the Redis schema. If the key path
-    /// does not exist in the schema, it returns `"unknown"`.
-    ///
-    /// - Parameter kp: A key path to a property on the model.
-    /// - Returns: The name of the field in the Redis schema as a `String`.
-    static func key<T>(for kp: KeyPath<Self, T>) -> String {
-        // Walk schema to find the field name
-        schema.first { $0.keyPath == kp }?.name ?? "unknown"
-    }
-
-    /// Returns the index type for the given key path, if any.
-    ///
-    /// This function looks up the index type configured for a
-    /// specific model property in the Redis schema. It returns
-    /// `nil` if the property is not indexed.
-    ///
-    /// - Parameter kp: A key path to a property on the model.
-    /// - Returns: An optional `IndexType` describing how the field is indexed.
-    static func indexType<T>(for kp: KeyPath<Self, T>) -> IndexType? {
-        schema.first { $0.keyPath == kp }?.indexType
     }
 
     /// Persists the current model instance to Redis as JSON.

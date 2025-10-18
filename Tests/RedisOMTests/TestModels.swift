@@ -8,7 +8,7 @@ struct User: JsonModel {
     @Id var id: String?
     @Index(type: .text) var name: String
     @Index var email: String
-    var aliases: [String]?
+    @Index var aliases: [String]?
     @Index(type: .numeric) var age: Int?
     @Index var notes: [Note]?
     @Index var address: [Address]?
@@ -49,6 +49,7 @@ struct Node: JsonModel {
     static let keyPrefix: String = "misc"
 }
 
+@Model
 struct Edge: JsonModel {
     @Id var id: String?
     var from: String
@@ -126,4 +127,31 @@ struct Order: JsonModel {
     var createdOn: Date
 
     static let keyPrefix: String = "order"
+}
+
+@Model
+struct Parent: JsonModel {
+    @Id var id: String?
+    @Index var name: String
+    @Index var child: Child
+
+    static let keyPrefix: String = "parent"
+}
+
+@Model
+struct Child: JsonModel {
+    @Id var id: String?
+    @Index var name: String
+    @Index var pet: Pet
+
+    static let keyPrefix: String = "child"
+}
+
+@Model
+struct Pet: JsonModel {
+    @Id var id: String?
+    @Index var species: String
+    @Index var name: String
+
+    static let keyPrefix: String = "pet"
 }
