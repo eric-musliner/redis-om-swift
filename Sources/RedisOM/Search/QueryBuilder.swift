@@ -209,13 +209,13 @@ public struct QueryBuilder<Model: JsonModel> {
             cmd.append(String(range.count))
         }
 
-        print(cmd)
-        print(query)
-        print(Array(query.utf8))
-        let resp = try await SharedPoolHelper.shared().send(
-            command: cmd[0],
-            with: cmd.dropFirst().map { RESPValue.bulkString(ByteBuffer(string: $0)) }
-        ).get()
+        let poolService = await SharedPoolHelper.shared()
+        let resp = try await poolService.leaseConnection { connection in
+            connection.send(
+                command: cmd[0],
+                with: cmd.dropFirst().map { RESPValue.bulkString(ByteBuffer(string: $0)) }
+            )
+        }.get()
 
         guard case .array(let items) = resp else {
             throw RedisError(reason: "Unexpected RESP type from FT.SEARCH")

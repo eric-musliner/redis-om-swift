@@ -60,15 +60,18 @@ extension JsonModel {
                 reason: "Unable to serialize data to JSON object."
             )
         }
-        let client = await SharedPoolHelper.shared()
-        _ = try await client.send(
-            command: "JSON.SET",
-            with: [
-                .bulkString(ByteBuffer(string: redisKey)),
-                .bulkString(ByteBuffer(string: "$")),
-                .bulkString(ByteBuffer(string: jsonString)),
-            ],
-        ).get()
+        let key = redisKey
+        let poolService = await SharedPoolHelper.shared()
+        _ = try await poolService.leaseConnection { connection in
+            connection.send(
+                command: "JSON.SET",
+                with: [
+                    .bulkString(ByteBuffer(string: key)),
+                    .bulkString(ByteBuffer(string: "$")),
+                    .bulkString(ByteBuffer(string: jsonString)),
+                ]
+            )
+        }.get()
     }
 
     //// Returns a list of all primary keys for this model in Redis.
@@ -81,21 +84,23 @@ extension JsonModel {
     /// - Throws: `RedisError` if the SCAN command fails or returns an unexpected structure.
     @inlinable
     public static func allKeys() async throws -> [IDType] {
-        let client = await SharedPoolHelper.shared()
+        let poolService = await SharedPoolHelper.shared()
         var cursor = "0"
         var allKeys: [IDType] = []
 
         repeat {
-            let response = try await client.send(
-                command: "SCAN",
-                with: [
-                    .bulkString(ByteBuffer(string: cursor)),
-                    .bulkString(ByteBuffer(string: "MATCH")),
-                    .bulkString(ByteBuffer(string: "\(keyPrefix):*")),
-                    .bulkString(ByteBuffer(string: "COUNT")),
-                    .bulkString(ByteBuffer(string: "100")),
-                ]
-            ).get()
+            let response = try await poolService.leaseConnection { connection in
+                connection.send(
+                    command: "SCAN",
+                    with: [
+                        .bulkString(ByteBuffer(string: cursor)),
+                        .bulkString(ByteBuffer(string: "MATCH")),
+                        .bulkString(ByteBuffer(string: "\(keyPrefix):*")),
+                        .bulkString(ByteBuffer(string: "COUNT")),
+                        .bulkString(ByteBuffer(string: "100")),
+                    ]
+                )
+            }.get()
 
             guard
                 let array = response.array,
@@ -128,11 +133,13 @@ extension JsonModel {
     public static func get(id: IDType) async throws -> Self? {
         let key = "\(keyPrefix):\(id)"
 
-        let client = await SharedPoolHelper.shared()
-        let response = try await client.send(
-            command: "JSON.GET",
-            with: [.bulkString(ByteBuffer(string: key))]
-        ).get()
+        let poolService = await SharedPoolHelper.shared()
+        let response = try await poolService.leaseConnection { connection in
+            connection.send(
+                command: "JSON.GET",
+                with: [.bulkString(ByteBuffer(string: key))]
+            )
+        }.get()
 
         guard let string = response.string else {
             return nil
@@ -163,11 +170,13 @@ extension JsonModel {
     {
         let key = "\(keyPrefix):\(id)"
 
-        let client = await SharedPoolHelper.shared()
-        _ = try await client.send(
-            command: "JSON.DEL",
-            with: [.bulkString(ByteBuffer(string: key))]
-        ).get()
+        let poolService = await SharedPoolHelper.shared()
+        _ = try await poolService.leaseConnection { connection in
+            connection.send(
+                command: "JSON.DEL",
+                with: [.bulkString(ByteBuffer(string: key))]
+            )
+        }.get()
     }
 
 }

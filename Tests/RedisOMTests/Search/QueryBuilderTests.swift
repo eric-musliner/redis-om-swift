@@ -8,7 +8,7 @@ import Testing
 @Suite("QueryBuilderTests")
 final class QueryBuilderTests {
 
-    let connectionPool: RedisConnectionPool
+    let poolService: RedisConnectionPoolService
     let redisOM: RedisOM
     let migrator: Migrator
 
@@ -18,18 +18,19 @@ final class QueryBuilderTests {
 
         self.redisOM = try RedisOM()
         await SharedPoolHelper.set(
-            pool: self.redisOM.poolService.connectionPool
+            poolService: self.redisOM.poolService
         )
-        self.connectionPool = await SharedPoolHelper.shared()
+        self.poolService = await SharedPoolHelper.shared()
         self.migrator = Migrator(
-            client: self.connectionPool, logger: .init(label: "QueryBuilderTests"))
+            client: self.poolService, logger: .init(label: "QueryBuilderTests"))
     }
 
     deinit {
         Task {
-            let client = await SharedPoolHelper.shared()
-            _ = try await client.send(command: "FLUSHALL").get()
-
+            let poolService = await SharedPoolHelper.shared()
+            _ = try await poolService.leaseConnection { connection in
+                connection.send(command: "FLUSHALL")
+            }.get()
         }
     }
 

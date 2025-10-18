@@ -9,7 +9,7 @@ import Testing
 @Suite("MigratorTests")
 final class MigratorTests {
 
-    let connectionPool: RedisConnectionPool
+    let poolService: RedisConnectionPoolService
     let redisOM: RedisOM
     let migrator: Migrator
 
@@ -19,24 +19,27 @@ final class MigratorTests {
 
         self.redisOM = try RedisOM()
         await SharedPoolHelper.set(
-            pool: self.redisOM.poolService.connectionPool
+            poolService: self.redisOM.poolService
         )
-        self.connectionPool = await SharedPoolHelper.shared()
-        self.migrator = Migrator(client: self.connectionPool, logger: .init(label: "MigratorTests"))
+        self.poolService = await SharedPoolHelper.shared()
+        self.migrator = Migrator(client: self.poolService, logger: .init(label: "MigratorTests"))
     }
 
     deinit {
         Task {
-            let client = await SharedPoolHelper.shared()
-            _ = try await client.send(command: "FLUSHALL").get()
-
+            let poolService = await SharedPoolHelper.shared()
+            _ = try await poolService.leaseConnection { connection in
+                connection.send(command: "FLUSHALL")
+            }.get()
         }
     }
 
     @Test func testMigrateNoModelsProvided() async throws {
         try await self.migrator.migrate(models: [])
 
-        let listResponse = try await self.connectionPool.send(command: "FT._LIST").get()
+        let listResponse = try await self.poolService.leaseConnection { connection in
+            connection.send(command: "FT._LIST")
+        }.get()
         let indexNames = listResponse.array?.compactMap({ $0.string })
         #expect(indexNames!.isEmpty)
     }
@@ -50,7 +53,9 @@ final class MigratorTests {
 
         try await self.migrator.migrate(models: [InvalidModel.self])
 
-        let listResponse = try await self.connectionPool.send(command: "FT._LIST").get()
+        let listResponse = try await self.poolService.leaseConnection { connection in
+            connection.send(command: "FT._LIST")
+        }.get()
         let indexNames = listResponse.array?.compactMap({ $0.string })
         #expect(indexNames!.isEmpty)
     }
@@ -59,7 +64,9 @@ final class MigratorTests {
         try await self.migrator.migrate(models: [Person.self])
 
         // Assert index exists (FT.INFO idx:Person)
-        let listResponse = try await self.connectionPool.send(command: "FT._LIST").get()
+        let listResponse = try await self.poolService.leaseConnection { connection in
+            connection.send(command: "FT._LIST")
+        }.get()
         let indexNames = listResponse.array?.compactMap({ $0.string })
         #expect(indexNames!.contains("idx:Person"))
 
@@ -87,7 +94,9 @@ final class MigratorTests {
     @Test func testMigrateArrayNestedArrayCollectionIndexes() async throws {
         try await self.migrator.migrate(models: [User.self])
 
-        let listResponse = try await self.connectionPool.send(command: "FT._LIST").get()
+        let listResponse = try await self.poolService.leaseConnection { connection in
+            connection.send(command: "FT._LIST")
+        }.get()
         let indexNames = listResponse.array?.compactMap({ $0.string })
         #expect(indexNames!.contains("idx:User"))
 
@@ -120,7 +129,9 @@ final class MigratorTests {
         try await self.migrator.migrate(models: [Node.self])
 
         // Assert index exists
-        let listResponse = try await self.connectionPool.send(command: "FT._LIST").get()
+        let listResponse = try await self.poolService.leaseConnection { connection in
+            connection.send(command: "FT._LIST")
+        }.get()
         let indexNames = listResponse.array?.compactMap({ $0.string })
         #expect(indexNames!.contains("idx:Node"))
 
@@ -142,7 +153,9 @@ final class MigratorTests {
         try await self.migrator.migrate(models: [Bike.self])
 
         // Assert index exists (FT.INFO idx:Bike)
-        let listResponse = try await self.connectionPool.send(command: "FT._LIST").get()
+        let listResponse = try await self.poolService.leaseConnection { connection in
+            connection.send(command: "FT._LIST")
+        }.get()
         let indexNames = listResponse.array?.compactMap({ $0.string })
         #expect(indexNames!.contains("idx:Bike"))
 
@@ -171,7 +184,9 @@ final class MigratorTests {
         try await self.migrator.migrate(models: [Order.self])
 
         // Assert index exists
-        let listResponse = try await self.connectionPool.send(command: "FT._LIST").get()
+        let listResponse = try await self.poolService.leaseConnection { connection in
+            connection.send(command: "FT._LIST")
+        }.get()
         let indexNames = listResponse.array?.compactMap({ $0.string })
         #expect(indexNames!.contains("idx:Order"))
 
@@ -195,7 +210,9 @@ final class MigratorTests {
         try await self.migrator.migrate(models: [Person.self, User.self])
 
         // Assert index exists
-        let listResponse = try await self.connectionPool.send(command: "FT._LIST").get()
+        let listResponse = try await self.poolService.leaseConnection { connection in
+            connection.send(command: "FT._LIST")
+        }.get()
         let indexNames = listResponse.array?.compactMap({ $0.string })
         #expect(indexNames!.contains("idx:Person"))
         #expect(indexNames!.contains("idx:User"))
@@ -239,9 +256,11 @@ final class MigratorTests {
 
     /// Helper to inspect Index by name
     func inspectIndex(name: String) async throws -> [(String, String, String)] {
-        let infoResponse = try await self.connectionPool.send(
-            command: "FT.INFO", with: [.bulkString(ByteBuffer(string: name))]
-        ).get()
+        let infoResponse = try await self.poolService.leaseConnection { connection in
+            connection.send(
+                command: "FT.INFO", with: [.bulkString(ByteBuffer(string: name))]
+            )
+        }.get()
 
         let infoArray = try #require(infoResponse.array)
 

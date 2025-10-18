@@ -157,7 +157,9 @@ extension RedisConnectionPoolService: RedisClient {
     public func send(command: String, with arguments: [RediStack.RESPValue])
         -> EventLoopFuture<RediStack.RESPValue>
     {
-        self.connectionPool.send(command: command, with: arguments)
+        self.connectionPool.leaseConnection { connection in
+            connection.send(command: command, with: arguments)
+        }
     }
 
     public func logging(to logger: Logging.Logger) -> RediStack.RedisClient {
