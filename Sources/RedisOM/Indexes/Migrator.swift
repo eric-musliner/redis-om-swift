@@ -67,11 +67,12 @@ public struct Migrator {
                 .bulkString(ByteBuffer(string: "SCHEMA")),
             ]
 
-            for field in model.schema {
-                args.append(.bulkString(ByteBuffer(string: "$.\(field.name)")))
+            // Build Redis FT.CREATE command wth flattened schema
+            for (jsonPath, alias, indexType) in model.schema.flattened() {
+                args.append(.bulkString(ByteBuffer(string: jsonPath)))
                 args.append(.bulkString(ByteBuffer(string: "AS")))
-                args.append(.bulkString(ByteBuffer(string: field.name.alias())))
-                args.append(.bulkString(ByteBuffer(string: field.indexType.rawValue)))
+                args.append(.bulkString(ByteBuffer(string: alias)))
+                args.append(.bulkString(ByteBuffer(string: indexType.rawValue)))
             }
 
             _ = client.send(command: "FT.CREATE", with: args)
