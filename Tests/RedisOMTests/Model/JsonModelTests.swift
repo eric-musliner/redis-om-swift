@@ -9,7 +9,7 @@ import Testing
 @Suite("JsonModelTests")
 final class JsonModelTests {
 
-    let connectionPool: RedisConnectionPool
+    let poolService: RedisConnectionPoolService
     let redisOM: RedisOM
 
     init() async throws {
@@ -18,16 +18,17 @@ final class JsonModelTests {
 
         self.redisOM = try RedisOM()
         await SharedPoolHelper.set(
-            pool: self.redisOM.poolService.connectionPool
+            poolService: self.redisOM.poolService
         )
-        self.connectionPool = await SharedPoolHelper.shared()
+        self.poolService = await SharedPoolHelper.shared()
     }
 
     deinit {
         Task {
-            let client = await SharedPoolHelper.shared()
-            _ = try await client.send(command: "FLUSHALL").get()
-
+            let poolService = await SharedPoolHelper.shared()
+            _ = try await poolService.leaseConnection { connection in
+                connection.send(command: "FLUSHALL")
+            }.get()
         }
     }
 
@@ -42,17 +43,18 @@ final class JsonModelTests {
         try await user.save()
 
         // Check the key exists
-        let exists = try await self.connectionPool.exists(
-            user.getRedisKey()
-        )
-        .get()
+        let exists = try await self.poolService.leaseConnection { connection in
+            connection.exists(user.getRedisKey())
+        }.get()
         #expect(exists == 1)
 
         // Fetch JSON from Redis
-        let response = try await self.connectionPool.send(
-            command: "JSON.GET",
-            with: [.bulkString(ByteBuffer(string: user.redisKey))]
-        ).get()
+        let response = try await self.poolService.leaseConnection { connection in
+            connection.send(
+                command: "JSON.GET",
+                with: [.bulkString(ByteBuffer(string: user.redisKey))]
+            )
+        }.get()
 
         let jsonString = try #require(response.string)
         let data = try #require(jsonString.data(using: .utf8))
@@ -89,17 +91,18 @@ final class JsonModelTests {
         try await user.save()
 
         // Check the key exists
-        let exists = try await self.connectionPool.exists(
-            user.getRedisKey()
-        )
-        .get()
+        let exists = try await self.poolService.leaseConnection { connection in
+            connection.exists(user.getRedisKey())
+        }.get()
         #expect(exists == 1)
 
         // Fetch JSON from Redis
-        let response = try await self.connectionPool.send(
-            command: "JSON.GET",
-            with: [.bulkString(ByteBuffer(string: user.redisKey))]
-        ).get()
+        let response = try await self.poolService.leaseConnection { connection in
+            connection.send(
+                command: "JSON.GET",
+                with: [.bulkString(ByteBuffer(string: user.redisKey))]
+            )
+        }.get()
 
         let jsonString = try #require(response.string)
         let data = try #require(jsonString.data(using: .utf8))
@@ -123,17 +126,18 @@ final class JsonModelTests {
         try await user.save()
 
         // Check the key exists
-        let exists = try await self.connectionPool.exists(
-            user.getRedisKey()
-        )
-        .get()
+        let exists = try await self.poolService.leaseConnection { connection in
+            connection.exists(user.getRedisKey())
+        }.get()
         #expect(exists == 1)
 
         // Fetch JSON from Redis
-        let response = try await self.connectionPool.send(
-            command: "JSON.GET",
-            with: [.bulkString(ByteBuffer(string: user.redisKey))]
-        ).get()
+        let response = try await self.poolService.leaseConnection { connection in
+            connection.send(
+                command: "JSON.GET",
+                with: [.bulkString(ByteBuffer(string: user.redisKey))]
+            )
+        }.get()
 
         let jsonString = try #require(response.string)
         let data = try #require(jsonString.data(using: .utf8))

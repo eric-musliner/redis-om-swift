@@ -32,7 +32,7 @@ import NIOCore
 /// can query Redis Search directly without worrying about JSONPath differences
 /// between arrays and dictionaries.
 public struct Migrator {
-    let client: RedisClient
+    let client: RedisConnectionPoolService
     let logger: Logger
 
     /// Apply indexes for models to Redis. Drops index if it already exists so the index reflects latest
@@ -43,14 +43,18 @@ public struct Migrator {
             let indexName = model.indexName
 
             // Always drop index if it exists. Keep existing documents
-            let listResponse = try await client.send(command: "FT._LIST").get()
+            let listResponse = try await client.leaseConnection { connection in
+                connection.send(command: "FT._LIST")
+            }.get()
             let indexNames = listResponse.array?.compactMap({ $0.string })
 
             if indexNames!.contains(indexName) {
-                _ = try await client.send(
-                    command: "FT.DROPINDEX",
-                    with: [.bulkString(ByteBuffer(string: indexName))]
-                ).get()
+                _ = try await client.leaseConnection { connection in
+                    connection.send(
+                        command: "FT.DROPINDEX",
+                        with: [.bulkString(ByteBuffer(string: indexName))]
+                    )
+                }.get()
                 logger.info("Dropped index \(indexName)")
             } else {
                 logger.info("Index \(indexName) does not exist yet — skipping drop")
@@ -75,7 +79,9 @@ public struct Migrator {
                 args.append(.bulkString(ByteBuffer(string: indexType.rawValue)))
             }
 
-            _ = client.send(command: "FT.CREATE", with: args)
+            _ = try await client.leaseConnection { connection in
+                connection.send(command: "FT.CREATE", with: args)
+            }.get()
             logger.info("Created index \(indexName) for model \(model)")
 
         }
