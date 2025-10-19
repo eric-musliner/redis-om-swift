@@ -16,11 +16,53 @@ import ServiceLifecycle
 /// ```
 extension RedisOM: Service {
 
-    /// Implements run to adhere to swift service lifecycle service
+     /// Implements run to conform to Swift Service Lifecycle
     public func run() async throws {
         await SharedPoolHelper.set(poolService: self.poolService)
-        try await startAndMigrate()
-        try? await gracefulShutdown()
-        try await self.poolService.close()
+        var attempts = 0
+        var connected = false
+
+        repeat {
+            do {
+                try await self.startAndMigrate()
+                self.markReady()
+                connected = true
+                logger.info("RedisOM ready.")
+            } catch {
+                attempts += 1
+                logger.warning(
+                    "Redis connection failed: \(error). Retrying in 1s… (attempt \(attempts))")
+
+                switch retryPolicy {
+                case .never:
+                    throw error
+                case .limited(let maxAttempts) where attempts >= maxAttempts:
+                    logger.error("Exceeded maximum retry attempts (\(maxAttempts)). Exiting.")
+                    throw error
+                case .infinite, .limited:
+                    try await Task.sleep(for: .seconds(1))
+                }
+            }
+        } while !connected && !Task.isCancelled
+
+        logger.info("Redis connection established, continuing normal operation.")
+
+        // Stay alive until cancelled
+        try await cancelWhenGracefulShutdown {
+            try await self.waitForCancellation()
+        }
+    }
+
+    private func waitForCancellation() async throws {
+        do {
+            try await Task.sleep(nanoseconds: .max)
+        } catch is CancellationError {
+            logger.info("RedisOM shutting down gracefully.")
+            do {
+                try await self.poolService.close()
+            } catch {
+                logger.warning("Failed to close Redis pool: \(error)")
+            }
+        }
     }
 }

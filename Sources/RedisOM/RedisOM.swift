@@ -28,6 +28,8 @@ public final class RedisOM: @unchecked Sendable {
     public var poolService: RedisConnectionPoolService
     internal let retryPolicy: RedisConnectionRetryPolicy
     internal var registeredModels: [any RedisModel.Type] = []
+    private var readyContinuation: CheckedContinuation<Void, Never>?
+    private(set) var isReady = false
 
     // MARK: Initializers
 
@@ -91,6 +93,54 @@ public final class RedisOM: @unchecked Sendable {
         self.logger = logger
         self.poolService = RedisConnectionPoolService(config)
         self.retryPolicy = retryPolicy
+    }
+
+    /// Marks the `RedisOM` client as ready for use.
+    ///
+    /// This method resumes any task that is currently waiting for the client
+    /// to become ready via ``waitUntilReady()``. It should be called once the
+    /// Redis connection pool has been initialized and migrations (if any)
+    /// have successfully completed.
+    ///
+    /// Typically, this is invoked internally by the lifecycle handler
+    /// after `startAndMigrate()` finishes executing.
+    func markReady() {
+        isReady = true
+        readyContinuation?.resume()
+        readyContinuation = nil
+    }
+
+    /// Marks the `RedisOM` client as ready for use.
+    ///
+    /// This method resumes any task that is currently waiting for the client
+    /// to become ready via ``waitUntilReady()``. It should be called once the
+    /// Redis connection pool has been initialized and migrations (if any)
+    /// have successfully completed.
+    ///
+    /// Typically, this is invoked internally by the lifecycle handler
+    /// after `startAndMigrate()` finishes executing.
+    func waitUntilReady() async {
+        if isReady { return }
+        await withCheckedContinuation { continuation in
+            readyContinuation = continuation
+        }
+    }
+
+    /// Gracefully shuts down the `RedisOM` client and closes its connection pool.
+    ///
+    /// This method terminates all active Redis connections and prevents
+    /// new commands from being issued. It should be called during service
+    /// or application shutdown to ensure clean resource cleanup.
+    ///
+    /// Example:
+    /// ```swift
+    /// let redis = try RedisOM()
+    /// defer { try await redis.shutdown() }
+    /// ```
+    ///
+    /// - Throws: Any error thrown during the pool’s shutdown process.
+    public func shutdown() async throws {
+        try await self.poolService.close()
     }
 
     // MARK: Model Registration
