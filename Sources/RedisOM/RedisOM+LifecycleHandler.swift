@@ -15,30 +15,46 @@ import Vapor
 /// ```
 extension RedisOM: LifecycleHandler {
 
-    public func willBoot(_ application: Application) throws {
-        // Kick of migrations to create indexes
+    public func willBoot(_ app: Application) throws {
         Task {
-            do {
-                try await startAndMigrate()
-            } catch {
-                logger.error("Migration failed during willBoot: \(error)")
-            }
+            await SharedPoolHelper.set(poolService: self.poolService)
+
+            var attempts = 0
+            var connected = false
+
+            repeat {
+                do {
+                    try await self.startAndMigrate()
+                    connected = true
+                    self.markReady()
+                    logger.info("RedisOM ready.")
+                } catch {
+                    attempts += 1
+                    logger.warning("Redis connection failed during willBoot: \(error). Retrying…")
+                    switch retryPolicy {
+                    case .never:
+                        connected = true
+                    case .limited(let max) where attempts >= max:
+                        connected = true
+                    default:
+                        try? await Task.sleep(for: .seconds(1))
+                    }
+                }
+            } while !connected && !Task.isCancelled
         }
     }
 
     public func didBoot(_ app: Application) throws {
-        // Start the service using the service-lifecycle run
-        Task {
-            try await run()
-        }
+        // Nothing to do — pool remains open and available for the lifetime of the app.
+        logger.debug("RedisOM didBoot: pool remains active.")
     }
 
     public func shutdownAsync(_ app: Application) async {
         do {
             try await poolService.close()
-            logger.info("RedisOM pool closed successfully.")
+            logger.info("RedisOM pool closed on shutdown.")
         } catch {
-            self.logger.warning("Failed to close Redis connection pool: \(error)")
+            logger.warning("RedisOM pool close failed: \(error)")
         }
     }
 }
