@@ -40,6 +40,13 @@ public struct Migrator {
     ///    - models: array of RedisModels
     func migrate(models: [any RedisModel.Type]) async throws {
         for model in models {
+            // Ensure this model provides schema information
+            guard model is any _SchemaProvider.Type else {
+                logger.warning(
+                    "Skipping \(model): does not conform to _SchemaProvider (no schema).")
+                continue
+            }
+
             let indexName = model.indexName
 
             // Always drop index if it exists. Keep existing documents
