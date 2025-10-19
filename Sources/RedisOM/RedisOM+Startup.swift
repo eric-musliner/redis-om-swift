@@ -6,8 +6,8 @@ extension RedisOM {
     ///
     /// - Throws: An error if migrations fail or the connection pool cannot be initialized.
     internal func startAndMigrate() async throws {
-        await SharedPoolHelper.set(pool: poolService.connectionPool)
-        let migrator = Migrator(client: poolService.connectionPool, logger: logger)
+        await SharedPoolHelper.set(poolService: poolService)
+        let migrator = Migrator(client: poolService, logger: logger)
         try await migrator.migrate(models: registeredModels)
         logger.info("RedisOM migrations completed for \(registeredModels.count) models.")
     }
