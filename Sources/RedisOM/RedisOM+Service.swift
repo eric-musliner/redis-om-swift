@@ -16,7 +16,7 @@ import ServiceLifecycle
 /// ```
 extension RedisOM: Service {
 
-     /// Implements run to conform to Swift Service Lifecycle
+    /// Implements run to conform to Swift Service Lifecycle
     public func run() async throws {
         await SharedPoolHelper.set(poolService: self.poolService)
         var attempts = 0
@@ -55,7 +55,8 @@ extension RedisOM: Service {
 
     private func waitForCancellation() async throws {
         do {
-            try await Task.sleep(nanoseconds: .max)
+            // nanoseconds: .max seems bugged in swift 6.1
+            try await Task.sleep(for: .seconds(1))
         } catch is CancellationError {
             logger.info("RedisOM shutting down gracefully.")
             do {
