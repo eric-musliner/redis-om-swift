@@ -48,17 +48,9 @@ extension RedisOM: Service {
         logger.info("Redis connection established, continuing normal operation.")
 
         // Stay alive until cancelled
-        try await cancelWhenGracefulShutdown {
-            try await self.waitForCancellation()
-        }
-    }
+        try? await gracefulShutdown()
 
-    private func waitForCancellation() async throws {
-        while !Task.isCancelled {
-            await Task.yield()
-        }
-
-        logger.info("RedisOM shutting down gracefully.")
+        // cleanup
         do { try await poolService.close() } catch {
             logger.warning("Failed to close Redis pool: \(error)")
         }
