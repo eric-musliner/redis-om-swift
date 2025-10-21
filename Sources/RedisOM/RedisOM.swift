@@ -26,7 +26,10 @@ public final class RedisOM: @unchecked Sendable {
     internal let logger: Logger
     private let config: RedisConfiguration
     public var poolService: RedisConnectionPoolService
+    internal let retryPolicy: RedisConnectionRetryPolicy
     internal var registeredModels: [any RedisModel.Type] = []
+    private var readyContinuation: CheckedContinuation<Void, Never>?
+    private(set) var isReady = false
 
     // MARK: Initializers
 
@@ -62,7 +65,8 @@ public final class RedisOM: @unchecked Sendable {
     /// - Throws: ``RedisError`` if the URL cannot be parsed.
     public init(
         url: String,
-        logger: Logger = .init(label: "redis-om-swift.client")
+        logger: Logger = .init(label: "redis-om-swift.client"),
+        retryPolicy: RedisConnectionRetryPolicy = .infinite
     ) throws {
         guard let redisURL = URL(string: url) else {
             throw RedisError(reason: "Invalid Redis URL: \(url)")
@@ -70,6 +74,7 @@ public final class RedisOM: @unchecked Sendable {
         self.config = try RedisConfiguration(url: redisURL)
         self.logger = logger
         self.poolService = RedisConnectionPoolService(config)
+        self.retryPolicy = retryPolicy
     }
 
     /// Creates a `RedisOM` client with an explicit Redis configuration.
@@ -81,11 +86,61 @@ public final class RedisOM: @unchecked Sendable {
     ///   - logger: An optional `Logger` instance for Redis client logs.
     public init(
         config: RedisConfiguration,
-        logger: Logger = .init(label: "redis-om-swift.client")
+        logger: Logger = .init(label: "redis-om-swift.client"),
+        retryPolicy: RedisConnectionRetryPolicy = .infinite
     ) throws {
         self.config = config
         self.logger = logger
         self.poolService = RedisConnectionPoolService(config)
+        self.retryPolicy = retryPolicy
+    }
+
+    /// Marks the `RedisOM` client as ready for use.
+    ///
+    /// This method resumes any task that is currently waiting for the client
+    /// to become ready via ``waitUntilReady()``. It should be called once the
+    /// Redis connection pool has been initialized and migrations (if any)
+    /// have successfully completed.
+    ///
+    /// Typically, this is invoked internally by the lifecycle handler
+    /// after `startAndMigrate()` finishes executing.
+    func markReady() {
+        isReady = true
+        readyContinuation?.resume()
+        readyContinuation = nil
+    }
+
+    /// Marks the `RedisOM` client as ready for use.
+    ///
+    /// This method resumes any task that is currently waiting for the client
+    /// to become ready via ``waitUntilReady()``. It should be called once the
+    /// Redis connection pool has been initialized and migrations (if any)
+    /// have successfully completed.
+    ///
+    /// Typically, this is invoked internally by the lifecycle handler
+    /// after `startAndMigrate()` finishes executing.
+    func waitUntilReady() async {
+        if isReady { return }
+        await withCheckedContinuation { continuation in
+            readyContinuation = continuation
+        }
+    }
+
+    /// Gracefully shuts down the `RedisOM` client and closes its connection pool.
+    ///
+    /// This method terminates all active Redis connections and prevents
+    /// new commands from being issued. It should be called during service
+    /// or application shutdown to ensure clean resource cleanup.
+    ///
+    /// Example:
+    /// ```swift
+    /// let redis = try RedisOM()
+    /// defer { try await redis.shutdown() }
+    /// ```
+    ///
+    /// - Throws: Any error thrown during the pool’s shutdown process.
+    public func shutdown() async throws {
+        try await self.poolService.close()
     }
 
     // MARK: Model Registration
