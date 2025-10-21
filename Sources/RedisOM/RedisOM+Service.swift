@@ -54,16 +54,13 @@ extension RedisOM: Service {
     }
 
     private func waitForCancellation() async throws {
-        do {
-            // nanoseconds: .max seems bugged in swift 6.1
-            try await Task.sleep(for: .seconds(1))
-        } catch is CancellationError {
-            logger.info("RedisOM shutting down gracefully.")
-            do {
-                try await self.poolService.close()
-            } catch {
-                logger.warning("Failed to close Redis pool: \(error)")
-            }
+        while !Task.isCancelled {
+            await Task.yield()
+        }
+
+        logger.info("RedisOM shutting down gracefully.")
+        do { try await poolService.close() } catch {
+            logger.warning("Failed to close Redis pool: \(error)")
         }
     }
 }

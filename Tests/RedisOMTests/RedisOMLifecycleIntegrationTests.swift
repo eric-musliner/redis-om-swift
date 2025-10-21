@@ -262,7 +262,17 @@ final class RedisOMLifecycleIntegrationTests {
         serviceRedisOM.register(User.self)
 
         let group = ServiceGroup(services: [serviceRedisOM], logger: logger)
-        let task = Task { try await group.run() }
+        // Start the service group in a detached task so it’s not cancelled by Swift Testing
+        let task = Task.detached(priority: .userInitiated) {
+            do {
+                try await group.run()
+            } catch is CancellationError {
+                // expected on graceful shutdown
+            } catch {
+                throw error
+            }
+        }
+        // let task = Task { try await group.run() }
         await serviceRedisOM.waitUntilReady()
 
         for i in 0..<iterationCount {
