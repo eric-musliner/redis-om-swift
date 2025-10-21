@@ -11,6 +11,10 @@ public enum SharedPoolHelper {
     public static func shared() async -> RedisConnectionPoolService {
         await sharedPool.get()
     }
+
+    public static func reset() async {
+        await sharedPool.reset()
+    }
 }
 
 actor SharedPool {
@@ -25,5 +29,9 @@ actor SharedPool {
             fatalError("RedisOM not configured.")
         }
         return poolService
+    }
+
+    func reset() {
+        self.poolService = nil
     }
 }
