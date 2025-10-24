@@ -19,7 +19,7 @@
 [![Build Status][ci-svg]][ci-url]
 
 ## Overview
-`RedisOM Swift` is a high-level Redis client and object mapper for swift inspired by `RedisOM Swift`. It provides a typed, declarative way to model, persist, and query JSON documents in Redis using Swift's key paths and macros.
+`RedisOM Swift` is a high-level Redis client and object mapper for Swift inspired by `redis-om-python` and the other official RedisOM libraries published under the Redis org. It provides a typed, declarative way to model, persist, and query JSON documents in Redis using Swift's key paths and macros.
 
 `RedisOM Swift` combines RedisJSON, RediSearch, and connection pooling into a unified API that feels native to Swift. It integrates with both Vapor's app lifecycle and the Swift Service Lifecycle framwork, making it ideal for server applications, background workers, or distributed systems.
 
