@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Check swift format
         run: swift format lint --recursive --strict .
@@ -48,7 +48,7 @@ jobs:
           apt-get install -y zstd
 
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Restore .build
         id: "restore-build-cache"
