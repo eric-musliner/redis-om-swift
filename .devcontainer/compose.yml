@@ -1,0 +1,20 @@
+services:
+
+  swift:
+    image: swift:6.2
+    network_mode: "host"
+    volumes:
+      - ..:/workspace
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined
+    command: sleep infinity
+    depends_on: 
+     - redis
+
+  redis:
+    image: redis:8.2
+    network_mode: "host"
+    ports:
+      - "6379:6379"
