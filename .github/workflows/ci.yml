@@ -52,7 +52,7 @@ jobs:
 
       - name: Restore .build
         id: "restore-build-cache"
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .build
           key: swiftpm-build-${{ matrix.image }}-${{ hashFiles('Package.swift', 'Package.resolved') }}
